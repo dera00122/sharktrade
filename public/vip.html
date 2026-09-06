@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shark Crypto VIP Membership</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        :root {
+            --champagne-gold: #c8a86a; 
+            --gold-hover: #dec491;     
+            --bg-charcoal: #1E2229;    
+            --bg-darker: #14171C;      
+            --text-pure: #FFFFFF;
+            --text-muted: #A0A5B1;     
+        }
+
+        body {
+            background-color: var(--bg-charcoal);
+            color: var(--text-pure);
+            overflow-x: hidden;
+            padding-bottom: 80px;
+        }
+
+        /* Navigation Header */
+        .top-navbar {
+            background-color: var(--bg-darker);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .top-navbar a {
+            text-decoration: none;
+            color: var(--text-pure);
+        }
+
+        .back-dash-link {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-dash-link:hover {
+            color: var(--champagne-gold);
+        }
+
+        /* --- PREMIUM HEADER --- */
+        .rich-header {
+            text-align: left;
+            padding: 40px 24px 20px 24px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .rich-header h1 {
+            font-size: 2.4rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+            color: var(--text-pure);
+            margin-bottom: 12px;
+        }
+
+        .rich-header h1 span {
+            color: var(--champagne-gold);
+            display: block;
+        }
+
+        .rich-header p {
+            color: var(--text-muted);
+            font-size: 1.02rem;
+            line-height: 1.6;
+        }
+
+        /* --- LIVE MARKET INSTRUMENT SUMMARY WIDGET --- */
+        .live-gauge-section {
+            max-width: 600px;
+            margin: 0 auto 20px auto;
+            padding: 0 24px;
+        }
+
+        .gauge-card-wrapper {
+            background-color: var(--bg-darker);
+            border: 1px solid rgba(200, 168, 106, 0.15);
+            border-radius: 16px;
+            height: 200px;
+            overflow: hidden;
+            padding: 12px 0;
+        }
+
+        /* --- CAROUSEL SLIDER CONTAINER --- */
+        .carousel-container {
+            padding: 10px 0 30px 0;
+            position: relative;
+            width: 100%;
+        }
+
+        .carousel-track {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            padding: 20px 24px;
+            gap: 20px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .carousel-track::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* --- 3D FLIP CARD DESIGN --- */
+        .card-wrapper {
+            flex: 0 0 85%; 
+            max-width: 340px;
+            height: 380px;
+            perspective: 1000px; 
+            scroll-snap-align: center;
+        }
+
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .flip-card-inner.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            background-color: var(--bg-darker);
+            border: 1px solid rgba(200, 168, 106, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            justify-content: flex-start;
+            gap: 15px;
+            overflow-y: auto;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            line-height: 1.3;
+            color: var(--text-pure);
+        }
+
+        .plus-icon {
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--champagne-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--champagne-gold);
+        }
+
+        .card-illustration {
+            align-self: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .wireframe-svg {
+            width: 80px;
+            height: 80px;
+            stroke: var(--champagne-gold);
+            fill: none;
+            stroke-width: 1;
+            opacity: 0.8;
+        }
+
+        .card-back ul {
+            list-style-type: none;
+            padding-left: 0;
+            width: 100%;
+        }
+
+        .card-back li {
+            margin-bottom: 14px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: var(--text-muted);
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .card-back li strong {
+            color: var(--text-pure);
+        }
+
+        /* Carousel Indicators */
+        .carousel-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.2);
+            transition: background-color 0.3s ease;
+        }
+
+        .dot.active {
+            background-color: var(--champagne-gold);
+        }
+
+        /* --- SUBSCRIPTION PLANS --- */
+        .plans-section {
+            padding: 20px 24px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .plans-section h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .section-desc {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 24px;
+        }
+
+        .plans-container {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .plan-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .plan-card {
+            background-color: var(--bg-darker);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 14px;
+            padding: 22px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .plan-link:hover .plan-card {
+            border-color: var(--champagne-gold);
+            transform: translateY(-2px);
+        }
+
+        .plan-name {
+            font-size: 1.05rem;
+            font-weight: 500;
+            color: var(--text-pure);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .plan-price {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--champagne-gold);
+        }
+
+        /* Responsive Desktop Formatting */
+        @media (min-width: 768px) {
+            .rich-header, .plans-section, .live-gauge-section {
+                padding-left: 0;
+                padding-right: 0;
+            }
+            .carousel-track {
+                justify-content: center;
+                padding: 20px 0;
+            }
+            .card-wrapper {
+                flex: 0 0 290px;
+            }
+            .carousel-dots {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation Bar -->
+    <header class="top-navbar">
+        <a href="dashboard.html" class="back-dash-link">
+            <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </header>
+
+    <!-- Composed Content Header -->
+    <section class="rich-header">
+        <h1>Level up with <span>SharkCrypto VIP</span></h1>
+        <p>Gain access to premium investment intelligence, advanced portfolio analytics, and exclusive wealth-building opportunities within the crypto market.</p>
+    </section>
+
+    <!-- Live Analytical Speedometer Segment -->
+    <!-- Live Analytical Speedometer Segment (Universal Zero-Error Fix) -->
+<div class="live-gauge-section">
+    <div class="gauge-card-wrapper">
+        <div class="tradingview-widget-container" id="tv-gauge-container" style="width:100%; height:100%;">
+            <div class="tradingview-widget-container__widget"></div>
+            <script>
+                (function() {
+                    const container = document.getElementById('tv-gauge-container');
+                    const script = document.createElement('script');
+                    script.type = 'text/javascript';
+                    script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js';
+                    script.async = true;
+                    
+                    
+                    const config = {
+                        "interval": "5m",
+                        "width": "100%",
+                        "isTransparent": true,
+                        "height": "100%",
+                        "symbol": "BINANCE:BTCUSD",
+                        "showIntervalTabs": false,
+                        "displayMode": "single",
+                        "locale": "en",
+                        "colorTheme": "dark"
+                    };
+                    
+                    script.text = JSON.stringify(config);
+                    container.appendChild(script);
+                })();
+            </script>
+        </div>
+    </div>
+</div>
+
+    <!-- Carousel Component Section -->
+    <div class="carousel-container">
+        <div class="carousel-track" id="carouselTrack">
+            
+            <!-- Slide 1: Market Intelligence -->
+            <div class="card-wrapper">
+                <div class="flip-card-inner" onclick="flipCard(this)">
+                    <div class="card-front">
+                        <div class="card-header">
+                            <span class="card-title">Market Analysis<br>& Updates</span>
+                            <span class="plus-icon">+</span>
+                        </div>
+                        <div class="card-illustration">
+                            <svg class="wireframe-svg" viewBox="0 0 100 100">
+                                <path d="M50,15 L80,32.5 L80,67.5 L50,85 L20,67.5 L20,32.5 Z M50,15 L50,85 M20,32.5 L80,67.5 M20,67.5 L80,32.5" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="card-back">
+                        <span class="card-title" style="font-size: 1.2rem; color: var(--champagne-gold); margin-bottom: 5px;">Market Intelligence</span>
+                        <ul>
+                            <li>
+                                <i class="fa-solid fa-chart-line" style="color: var(--champagne-gold); margin-right: 10px; margin-top: 3px; min-width: 20px;"></i>
+                                <span><strong>Technical Analysis:</strong> Daily insights on BTC, ETH, and altcoins to navigate volatility.</span>
+                            </li>
+                            <li>
+                                <i class="fa-solid fa-newspaper" style="color: var(--champagne-gold); margin-right: 10px; margin-top: 3px; min-width: 20px;"></i>
+                                <span><strong>Important News:</strong> Curated updates covering crucial breaking macro and market factors.</span>
+                            </li>
+                            <li>
+                                <i class="fa-solid fa-arrow-trend-up" style="color: var(--champagne-gold); margin-right: 10px; margin-top: 3px; min-width: 20px;"></i>
+                                <span><strong>Market Update:</strong> Macro trends and forecasts to significantly enhance your system rules.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 2: Trading Signals -->
+            <div class="card-wrapper">
+                <div class="flip-card-inner" onclick="flipCard(this)">
+                    <div class="card-front">
+                        <div class="card-header">
+                            <span class="card-title">Alpha VIP<br>Signals</span>
+                            <span class="plus-icon">+</span>
+                        </div>
+                        <div class="card-illustration">
+                            <svg class="wireframe-svg" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="35" />
+                                <circle cx="50" cy="50" r="20" />
+                                <circle cx="50" cy="50" r="8" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="card-back">
+                        <span class="card-title" style="font-size: 1.2rem; color: var(--champagne-gold); margin-bottom: 5px;">Signal Execution</span>
+                        <ul>
+                            <li>
+                                <i class="fa-solid fa-circle-check" style="color: var(--champagne-gold); margin-right: 10px; margin-top: 3px; min-width: 20px;"></i>
+                                <span><strong>VIP Signals:</strong> Proven structural strategies designed to directly increase your win rate.</span>
+                            </li>
+                            <li>
+                                <i class="fa-solid fa-bolt" style="color: var(--champagne-gold); margin-right: 10px; margin-top: 3px; min-width: 20px;"></i>
+                                <span><strong>Daily Scalping:</strong> 5-7 actionable trade executions daily across Spot & Futures configurations.</span>
+                            </li>
+                            <li>
+                                <i class="fa-solid fa-bullseye" style="color: var(--champagne-gold); margin-right: 10px; margin-top: 3px; min-width: 20px;"></i>
+                                <span><strong>High Performance:</strong> Systems optimized toward an impressive 98% milestone strategy.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 3: VIP Community -->
+            <div class="card-wrapper">
+                <div class="flip-card-inner" onclick="flipCard(this)">
+                    <div class="card-front">
+                        <div class="card-header">
+                            <span class="card-title">Exclusive Elite<br>VIP Chat</span>
+                            <span class="plus-icon">+</span>
+                        </div>
+                        <div class="card-illustration">
+                            <svg class="wireframe-svg" viewBox="0 0 100 100">
+                                <rect x="25" y="20" width="50" height="15" rx="7.5" />
+                                <rect x="25" y="42" width="50" height="15" rx="7.5" />
+                                <rect x="25" y="65" width="50" height="15" rx="7.5" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="card-back">
+                        <span class="card-title" style="font-size: 1.2rem; color: var(--champagne-gold); margin-bottom: 5px;">VIP Hub Network</span>
+                        <ul>
+                            <li>
+                                <i class="fa-solid fa-users" style="color: var(--champagne-gold); margin-right: 10px; margin-top: 3px; min-width: 20px;"></i>
+                                <span><strong>Elite Network:</strong> Network and collaborate alongside veteran crypto market professionals.</span>
+                            </li>
+                            <li>
+                                <i class="fa-solid fa-magnifying-glass-chart" style="color: var(--champagne-gold); margin-right: 10px; margin-top: 3px; min-width: 20px;"></i>
+                                <span><strong>Alpha Scouting:</strong> Discover early project opportunities and custom trade alpha ideation.</span>
+                            </li>
+                            <li>
+                                <i class="fa-solid fa-tower-broadcast" style="color: var(--champagne-gold); margin-right: 10px; margin-top: 3px; min-width: 20px;"></i>
+                                <span><strong>Live Stream:</strong> Share real-time structural data and call premium trading signals together.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="carousel-dots">
+            <div class="dot active"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+    </div>
+
+    <!-- Pricing Tiers Section -->
+    <section class="plans-section">
+        <h2>Exclusive VIP Plans</h2>
+        <p class="section-desc">Select an investment tier option below to register directly via Telegram.</p>
+        
+        <div class="plans-container">
+            
+            <!-- 1 Month -->
+            <a href="https://t.me/your_telegram_username?text=I%20want%20to%20join%20VIP%201%20Month%20Plan" target="_blank" class="plan-link">
+                <div class="plan-card">
+                    <span class="plan-name">
+                        <i class="fa-solid fa-calendar-days" style="color: var(--champagne-gold); min-width: 24px;"></i>
+                        1 Month Access
+                    </span>
+                    <span class="plan-price">$99</span>
+                </div>
+            </a>
+
+            <!-- 6 Months -->
+            <a href="https://t.me/your_telegram_username?text=I%20want%20to%20join%20VIP%206%20Months%20Plan" target="_blank" class="plan-link">
+                <div class="plan-card">
+                    <span class="plan-name">
+                        <i class="fa-solid fa-calendar-plus" style="color: var(--champagne-gold); min-width: 24px;"></i>
+                        6 Months Access
+                    </span>
+                    <span class="plan-price">$499</span>
+                </div>
+            </a>
+
+            <!-- Yearly -->
+            <a href="https://t.me/your_telegram_username?text=I%20want%20to%20join%20VIP%20Yearly%20Plan" target="_blank" class="plan-link">
+                <div class="plan-card">
+                    <span class="plan-name">
+                        <i class="fa-solid fa-crown" style="color: var(--champagne-gold); min-width: 24px;"></i>
+                        Yearly Pro Access
+                    </span>
+                    <span class="plan-price">$999</span>
+                </div>
+            </a>
+
+            <!-- Lifetime -->
+            <a href="https://t.me/your_telegram_username?text=I%20want%20to%20join%20VIP%20Lifetime%20Membership" target="_blank" class="plan-link">
+                <div class="plan-card" style="border-color: rgba(200, 168, 106, 0.4);">
+                    <span class="plan-name">
+                        <i class="fa-solid fa-gem" style="color: var(--champagne-gold); min-width: 24px;"></i>
+                        Lifetime Membership
+                    </span>
+                    <span class="plan-price">$1499</span>
+                </div>
+            </a>
+            
+        </div>
+    </section>
+
+    <!-- Script Layer -->
+    <script>
+        function flipCard(cardInner) {
+            cardInner.classList.toggle('flipped');
+        }
+
+        const track = document.getElementById('carouselTrack');
+        const dots = document.querySelectorAll('.dot');
+
+        track.addEventListener('scroll', () => {
+            const width = track.clientWidth;
+            const scrollPosition = track.scrollLeft;
+            const activeIndex = Math.round(scrollPosition / (width * 0.85));
+            
+            dots.forEach((dot, index) => {
+                if (index === activeIndex) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

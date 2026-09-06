@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Trading | SharkTrade</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #000000;
+            color: #FFFFFF;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* --- PREMIUM HERO BACKGROUND IMAGE LAYER --- */
+        .hero-cinematic-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 720px;
+            background-image: url('image/2d2e4717840fc72adee585c7ebf05849.jpg');
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            z-index: 1;
+            
+            
+            background-blend-mode: overlay;
+            background-color: rgba(0, 0, 0, 0.65);
+            -webkit-mask-image: linear-gradient(to bottom, black 65%, transparent 100%);
+            mask-image: linear-gradient(to bottom, black 65%, transparent 100%);
+        }
+
+        /* --- STICKY TRANSPARENT RESPONSIVE NAVIGATION --- */
+        .global-nav {
+            width: 100%;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            background-color: rgba(0, 0, 0, 0.4); 
+            backdrop-filter: blur(20px); 
+            -webkit-backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .nav-logo {
+            color: #FFFFFF;
+            font-size: 1.35rem;
+            font-weight: 800;
+            text-decoration: none;
+            letter-spacing: -0.5px;
+            flex-shrink: 0;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: #A0A5B1;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #FFFFFF;
+        }
+
+        .nav-cta {
+            background-color: #c8a86a; 
+            color: #000000;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 8px 20px;
+            border-radius: 999px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            transition: background-color 0.2s;
+            flex-shrink: 0;
+        }
+
+        .nav-cta:hover {
+            background-color: #dfbe81;
+        }
+
+        /* --- STANDALONE WRAPPER LAYER --- */
+        .crypto-viewport-section {
+            position: relative;
+            z-index: 10;
+            padding: 60px 24px;
+            width: 100%;
+        }
+
+        .crypto-wrapper {
+            width: 100%;
+            max-width: 540px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* --- HERO TEXT CONTENT BRANDING --- */
+        .crypto-meta-tag {
+            font-size: 0.85rem;
+            color: #c8a86a; 
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(200, 168, 106, 0.2);
+            padding: 6px 16px;
+            border-radius: 999px;
+            margin-bottom: 24px;
+            display: inline-block;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        .crypto-hero-title {
+            font-family: "Georgia", serif;
+            font-size: 2.8rem;
+            font-weight: 400;
+            text-align: center;
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+            margin-bottom: 20px;
+            text-shadow: 0 4px 24px rgba(0, 0, 0, 0.9);
+        }
+
+        .hero-viewport-spacer {
+            width: 100%;
+            height: 220px; 
+            pointer-events: none;
+        }
+
+        .crypto-hero-explanation {
+            font-size: 1.1rem;
+            line-height: 1.55;
+            text-align: center;
+            color: #FFFFFF;
+            margin-top: 40px;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+        }
+
+        .action-btn-row {
+            width: 100%;
+            margin-top: 40px;
+        }
+
+        .gold-action-btn {
+            display: block;
+            width: 100%;
+            text-align: center;
+            background-color: #c8a86a; 
+            color: #000000;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.05rem;
+            padding: 18px;
+            border-radius: 999px;
+            transition: background-color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 8px 24px rgba(200, 168, 106, 0.15);
+        }
+
+        .gold-action-btn:hover {
+            background-color: #dfbe81;
+            box-shadow: 0 8px 28px rgba(200, 168, 106, 0.25);
+        }
+
+        .section-divider-dash {
+            width: 1px;
+            height: 80px;
+            border-left: 1px dashed rgba(255, 255, 255, 0.2);
+            margin: 64px auto;
+        }
+
+        /* --- CENTRAL VALUE PROOF CALCULATOR MATRIX --- */
+        .calculator-block {
+            width: 100%;
+            text-align: center;
+        }
+
+        .matrix-headline {
+            font-size: 2.2rem;
+            font-weight: 500;
+            letter-spacing: -0.5px;
+            line-height: 1.25;
+            margin-bottom: 12px;
+        }
+
+        .matrix-subhead {
+            font-size: 1.05rem;
+            color: #6C727F;
+            margin-bottom: 40px;
+        }
+
+        .pill-toggle-track {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            background-color: #0b0c0e;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 999px;
+            padding: 4px;
+            margin-bottom: 16px;
+        }
+
+        .pill-node {
+            background: transparent;
+            border: none;
+            color: #A0A5B1;
+            padding: 14px 0;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 999px;
+            transition: all 0.2s;
+        }
+
+        .pill-node.active {
+            background-color: #c8a86a; 
+            color: #000000;
+        }
+
+        .matrix-board {
+            width: 100%;
+            margin-top: 36px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: left;
+        }
+
+        .matrix-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 22px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .matrix-row.prime-highlight {
+            color: #c8a86a; 
+            font-weight: 700;
+        }
+
+        .platform-identity {
+            font-size: 1.05rem;
+        }
+
+        .metrics-yield {
+            text-align: right;
+        }
+
+        .yield-crypto {
+            font-size: 1.05rem;
+            display: block;
+        }
+
+        .yield-percentage {
+            font-size: 0.85rem;
+            color: #FF453A;
+            margin-top: 2px;
+            display: block;
+        }
+
+        .prime-highlight .yield-percentage {
+            color: #c8a86a;
+        }
+
+        .disclaimer-text-block {
+            font-size: 0.78rem;
+            color: #6C727F;
+            text-align: center;
+            margin-top: 24px;
+            line-height: 1.4;
+        }
+
+        /* --- TRUST & SAFETY SEGMENT MATRIX --- */
+        .protection-grid-card {
+            width: 100%;
+            background-color: #0b0c0e;
+            border-radius: 24px;
+            padding: 40px 24px;
+            margin: 64px 0 32px 0;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            display: flex;
+            flex-direction: column;
+            gap: 36px;
+        }
+
+        .check-card-node {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            text-align: center;
+        }
+
+        .check-icon-circle {
+            width: 24px;
+            height: 24px;
+            background-color: #c8a86a; 
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 12px rgba(200, 168, 106, 0.2);
+        }
+
+        .check-svg {
+            width: 14px;
+            height: 14px;
+            stroke: #000000;
+            stroke-width: 3.5;
+            fill: none;
+        }
+
+        .check-statement {
+            font-size: 1.05rem;
+            color: #FFFFFF;
+            line-height: 1.45;
+        }
+
+        /* --- GLOBAL PLATFORM FOOTER --- */
+        .global-footer {
+            width: 100%;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            background-color: #050505;
+            padding: 40px 24px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #6C727F;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* --- MOBILE RESPONSIVE MEDIA QUERIES --- */
+        @media (max-width: 480px) {
+            .nav-container {
+                padding: 12px 16px;
+            }
+            
+            .nav-logo {
+                font-size: 1.15rem;
+            }
+
+            
+            .nav-menu {
+                display: none; 
+            }
+
+            .nav-cta {
+                padding: 6px 14px;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Cinematic Backdrop Image Frame -->
+    <div class="hero-cinematic-backdrop"></div>
+
+    <!-- Main Global Navigation Header -->
+    <nav class="global-nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">SharkTrade</a>
+            <div class="nav-menu">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="strategies.html" class="nav-link">Strategies</a>
+                <a href="crypto.html" class="nav-link active">Crypto</a>
+            </div>
+            <a href="register.html" class="nav-cta">Get Started</a>
+        </div>
+    </nav>
+
+    <!-- Page Main Content Viewport Layer -->
+    <main class="crypto-viewport-section">
+        <div class="crypto-wrapper">
+            
+            <div class="crypto-meta-tag">SharkTrade Crypto</div>
+            <h1 class="crypto-hero-title">Invest crypto at the <br>lowest cost on average.</h1>
+
+            <!-- Spatial workspace displaying the custom asset chain graphics -->
+            <div class="hero-viewport-spacer"></div>
+
+            <p class="crypto-hero-explanation">
+                Optimize execution protocols instantly. Reduce hidden spreads and retain up to 2.6% more capital across every macro transaction pipeline route.
+            </p>
+            
+            <div class="action-btn-row">
+                <a href="register.html" class="gold-action-btn">Get Started</a>
+            </div>
+
+            <div class="section-divider-dash"></div>
+
+            <!-- Fixed & Working Proof Calculator Engine -->
+            <section class="calculator-block">
+                <h2 class="matrix-headline">Lowest cost to trade crypto on average</h2>
+                <div class="matrix-subhead">We had experts check the execution math.</div>
+
+                <!-- Tier 1: Scaled High-Value Capital Selectors -->
+                <div class="pill-toggle-track">
+                    <button class="pill-node active" onclick="setAmount(this, 1000)">$1,000</button>
+                    <button class="pill-node" onclick="setAmount(this, 5000)">$5,000</button>
+                    <button class="pill-node" onclick="setAmount(this, 10000)">$10,000</button>
+                </div>
+
+                <!-- Tier 2: Core Volatility Asset Selectors -->
+                <div class="pill-toggle-track">
+                    <button class="pill-node active" onclick="setAsset(this, 'BTC')">BTC</button>
+                    <button class="pill-node" onclick="setAsset(this, 'ETH')">ETH</button>
+                    <button class="pill-node" onclick="setAsset(this, 'DOGE')">DOGE</button>
+                </div>
+
+                <!-- Dynamic Data Output Board Matrix -->
+                <div class="matrix-board">
+                    
+                    <div class="matrix-row prime-highlight">
+                        <span class="platform-identity">SharkTrade</span>
+                        <div class="metrics-yield">
+                            <span class="yield-crypto" id="yield-shark">—</span>
+                            <span class="yield-percentage">Best Execution</span>
+                        </div>
+                    </div>
+
+                    <div class="matrix-row">
+                        <span class="platform-identity">Crypto.com</span>
+                        <div class="metrics-yield">
+                            <span class="yield-crypto" id="yield-crypto-com">—</span>
+                            <span class="yield-percentage" id="pct-crypto-com">-3.92%</span>
+                        </div>
+                    </div>
+
+                    <div class="matrix-row">
+                        <span class="platform-identity">Coinbase</span>
+                        <div class="metrics-yield">
+                            <span class="yield-crypto" id="yield-coinbase">—</span>
+                            <span class="yield-percentage" id="pct-coinbase">-1.94%</span>
+                        </div>
+                    </div>
+
+                    <div class="matrix-row">
+                        <span class="platform-identity">Kraken</span>
+                        <div class="metrics-yield">
+                            <span class="yield-crypto" id="yield-kraken">—</span>
+                            <span class="yield-percentage" id="pct-kraken">-1.84%</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="disclaimer-text-block">
+                    *The statements above are based on independent research evaluating average order execution spreads and exchange retail structures. Simulated for illustrative value presentation.
+                </div>
+            </section>
+
+            <!-- Protection Structural Checklist Cards Block -->
+            <div class="protection-grid-card">
+                <h2 class="matrix-headline" style="font-size: 1.8rem; margin-bottom:0;">Protection for your coins.<br>Peace of mind for you.</h2>
+                
+                <div class="check-card-node">
+                    <div class="check-icon-circle">
+                        <svg class="check-svg" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+                    </div>
+                    <p class="check-statement">We don't lend your crypto or leverage against it</p>
+                </div>
+
+                <div class="check-card-node">
+                    <div class="check-icon-circle">
+                        <svg class="check-svg" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+                    </div>
+                    <p class="check-statement">24/7 dedicated customer oversight access</p>
+                </div>
+
+                <div class="check-card-node">
+                    <div class="check-icon-circle">
+                        <svg class="check-svg" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+                    </div>
+                    <p class="check-statement">Industry-leading cold storage security vaulting architecture</p>
+                </div>
+
+                <div class="check-card-node">
+                    <div class="check-icon-circle">
+                        <svg class="check-svg" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+                    </div>
+                    <p class="check-statement">Crime insurance mitigation parameters protecting systemic breaches</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Shared Foot Layout Panel -->
+    <footer class="global-footer">
+        &copy; 2026 SharkTrade. All engineering trade marks reserved.
+    </footer>
+
+    <!-- High-Impact Institutional Calculator Script Engine -->
+    <script>
+        let currentAmount = 1000;
+        let currentAsset = 'BTC';
+
+        // Base relative token calculation estimates mapping
+        const mockRates = {
+            'BTC': { baseYield: 0.01552, cryptoCom: -3.92, coinbase: -1.94, kraken: -1.84 },
+            'ETH': { baseYield: 0.40789, cryptoCom: -3.92, coinbase: -1.94, kraken: -1.84 },
+            'DOGE': { baseYield: 684.2105, cryptoCom: -3.51, coinbase: -2.10, kraken: -1.95 }
+        };
+
+        function setAmount(element, amt) {
+            element.parentNode.querySelector('.active').classList.remove('active');
+            element.classList.add('active');
+            currentAmount = amt;
+            calculateValues();
+        }
+
+        function setAsset(element, asset) {
+            element.parentNode.querySelector('.active').classList.remove('active');
+            element.classList.add('active');
+            currentAsset = asset;
+            calculateValues();
+        }
+
+        function calculateValues() {
+            const multiplier = currentAmount / 1000;
+            const data = mockRates[currentAsset];
+            
+            const sharkYield = (data.baseYield * multiplier).toFixed(currentAsset === 'DOGE' ? 2 : 5);
+            const ccYield = (data.baseYield * multiplier * (1 + data.cryptoCom/100)).toFixed(currentAsset === 'DOGE' ? 2 : 5);
+            const cbYield = (data.baseYield * multiplier * (1 + data.coinbase/100)).toFixed(currentAsset === 'DOGE' ? 2 : 5);
+            const krYield = (data.baseYield * multiplier * (1 + data.kraken/100)).toFixed(currentAsset === 'DOGE' ? 2 : 5);
+
+            document.getElementById('yield-shark').innerText = `${sharkYield} ${currentAsset}`;
+            document.getElementById('yield-crypto-com').innerText = `${ccYield} ${currentAsset}`;
+            document.getElementById('yield-coinbase').innerText = `${cbYield} ${currentAsset}`;
+            document.getElementById('yield-kraken').innerText = `${krYield} ${currentAsset}`;
+            
+            document.getElementById('pct-crypto-com').innerText = `${data.cryptoCom}%`;
+            document.getElementById('pct-coinbase').innerText = `${data.coinbase}%`;
+            document.getElementById('pct-kraken').innerText = `${data.kraken}%`;
+        }
+        
+        // Initial run to populate data on frame load
+        calculateValues();
+    </script>
+</body>
+</html>

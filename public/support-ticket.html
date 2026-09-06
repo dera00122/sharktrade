@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .card { background: #050709; border: 1px solid #333; border-radius: 12px; padding: 25px; margin-bottom: 20px; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; color: #888; font-size: 0.8rem; }
+        input, textarea, select { width: 100%; background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; box-sizing: border-box; }
+        .submit-btn { width: 100%; background: #c8a86a; color: #000; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { color: #888; font-size: 0.7rem; text-align: left; padding: 10px; }
+        td { padding: 10px; border-bottom: 1px solid #1a1a1a; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Help Center</h2>
+
+    <!-- Form Section -->
+    <div class="card">
+        <h3>Submit a New Ticket</h3>
+        <form>
+            <div class="input-group">
+                <label>Category</label>
+                <select>
+                    <option>Deposit/Withdrawal Issue</option>
+                    <option>VIP Subscription</option>
+                    <option>Account Verification</option>
+                    <option>Other</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Message</label>
+                <textarea rows="4" placeholder="Describe your issue in detail..."></textarea>
+            </div>
+            <button type="button" class="submit-btn" onclick="alert('Ticket Submitted!')">SUBMIT TICKET</button>
+        </form>
+    </div>
+
+    <!-- History Section -->
+    <div class="card">
+        <h3>Ticket History</h3>
+        <table>
+            <thead>
+                <tr><th>ID</th><th>Subject</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>#TK-4421</td><td>Deposit Delay</td><td style="color:#ffc107">Pending</td></tr>
+                <tr><td>#TK-3910</td><td>VIP Access</td><td style="color:#00e676">Resolved</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+    <script src="api.js"></script>
+    <script src="chat-widget.js"></script>
+</body>
+</html>

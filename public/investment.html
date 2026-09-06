@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Strategy | SharkTrade Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="api.js"></script>
+    <style>
+        body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; }
+        .container { max-width: 450px; margin: 0 auto; padding: 20px; }
+        
+        /* Desktop: Spread out cards horizontally */
+        @media (min-width: 900px) {
+            .container { max-width: 1000px; }
+            .grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        .grid { display: grid; gap: 15px; }
+
+        /* Slim, Straight Card Style */
+        .plan-card {
+            background: #050709;
+            border: 1px solid #1a1a1a;
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Side accent bar */
+        .plan-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+            background: #c8a86a;
+        }
+
+        .plan-name { font-size: 1.1rem; font-weight: 700; margin-bottom: 15px; color: #fff; }
+        .row { display: flex; justify-content: space-between; padding: 7px 0; font-size: 0.85rem; color: #888; }
+        .row strong { color: #fff; }
+        
+        .invest-btn {
+            width: 100%; padding: 12px; margin-top: 15px; background: #c8a86a;
+            border: none; border-radius: 6px; color: #000; font-weight: 800; cursor: pointer;
+            text-transform: uppercase; font-size: 0.8rem;
+        }
+        .invest-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .amount-input {
+            width: 100%; background: #1a1a1a; border: 1px solid #333; color: #fff;
+            padding: 10px; border-radius: 6px; box-sizing: border-box; margin-top: 12px; font-size: 0.9rem;
+        }
+        .balance-note { font-size: 0.75rem; color: #666; text-align: center; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="dashboard.html" style="color:#c8a86a; text-decoration:none; font-size: 0.8rem;"><i class="fa-solid fa-arrow-left"></i> BACK TO DASHBOARD</a>
+    <h2 style="text-align:center; margin: 25px 0 5px 0;">Investment Plans</h2>
+    <p class="balance-note" id="balanceNote">Loading main wallet balance...</p>
+
+    <div class="grid" id="plansGrid">
+        <p style="text-align:center; color:#666;">Loading plans...</p>
+    </div>
+</div>
+
+<script>
+    let mainBalance = 0;
+
+    function renderPlans(plans) {
+        const grid = document.getElementById('plansGrid');
+        if (plans.length === 0) {
+            grid.innerHTML = `<p style="text-align:center; color:#666;">No investment plans are currently available.</p>`;
+            return;
+        }
+        grid.innerHTML = plans.map(plan => `
+            <div class="plan-card">
+                <div class="plan-name">${plan.name}</div>
+                <div class="row"><span>Investment</span> <strong>$${formatMoney(plan.min_amount)} ${plan.max_amount ? '- $' + formatMoney(plan.max_amount) : '+'}</strong></div>
+                <div class="row"><span>Daily ROI</span> <strong>${plan.daily_roi}%</strong></div>
+                <div class="row"><span>Withdrawal</span> <strong>${plan.withdrawal_type === 'daily' ? 'Daily' : '48hr'}</strong></div>
+                <div class="row"><span>Support</span> <strong>24/7</strong></div>
+                <input type="number" class="amount-input" id="amount-${plan.id}" placeholder="Enter amount (min $${formatMoney(plan.min_amount)})">
+                <button class="invest-btn" onclick="invest(${plan.id})">Invest Now</button>
+            </div>
+        `).join('');
+    }
+
+    async function invest(planId) {
+        const input = document.getElementById(`amount-${planId}`);
+        const amount = parseFloat(input.value);
+
+        if (!amount || amount <= 0) {
+            alert('Please enter an amount.');
+            return;
+        }
+        if (amount > mainBalance) {
+            alert(`Insufficient main wallet balance. You have $${formatMoney(mainBalance)} available. Deposit funds first.`);
+            return;
+        }
+
+        try {
+            await apiRequest('/api/user/invest', { method: 'POST', body: { planId, amount } });
+            alert('Investment created successfully!');
+            window.location.href = 'invest-log.html';
+        } catch (err) {
+            alert(err.message || 'Failed to create investment.');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        if (!requireLogin()) return;
+        try {
+            const [{ plans }, summary] = await Promise.all([
+                apiRequest('/api/user/plans'),
+                apiRequest('/api/user/summary')
+            ]);
+            mainBalance = summary.mainBalance;
+            document.getElementById('balanceNote').textContent = `Main Wallet Balance: $${formatMoney(mainBalance)} USD`;
+            renderPlans(plans);
+        } catch (err) {
+            document.getElementById('plansGrid').innerHTML = `<p style="text-align:center; color:#ff5252;">Failed to load investment plans.</p>`;
+        }
+    });
+</script>
+
+    <script src="chat-widget.js"></script>
+</body>
+</html>

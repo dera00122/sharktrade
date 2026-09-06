@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel — SharkTrade Pro (Demo)</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="api.js"></script>
+<style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    body { background:#000; color:#fff; min-height:100vh; }
+
+    .top-bar {
+        background:#050709; border-bottom:1px solid rgba(255,255,255,0.06);
+        height:64px; display:flex; align-items:center; justify-content:space-between;
+        padding:0 20px; position:sticky; top:0; z-index:100;
+    }
+    .top-bar .logo { font-weight:800; font-size:1.1rem; }
+    .top-bar .logo span { color:#c8a86a; }
+    .demo-badge { font-size:0.65rem; background:rgba(200,168,106,0.12); color:#c8a86a; padding:3px 8px; border-radius:4px; margin-left:8px; letter-spacing:0.5px; }
+    .logout-btn { background:none; border:1px solid #333; color:#aaa; padding:8px 14px; border-radius:8px; cursor:pointer; font-size:0.8rem; }
+    .logout-btn:hover { border-color:#ff5252; color:#ff5252; }
+
+    .tabs-row {
+        display:flex; gap:4px; overflow-x:auto; padding:12px 16px; background:#050709;
+        border-bottom:1px solid rgba(255,255,255,0.06); position:sticky; top:64px; z-index:99;
+    }
+    .tab-btn {
+        background:transparent; border:1px solid #222; color:#999; padding:8px 16px;
+        border-radius:20px; font-size:0.8rem; cursor:pointer; white-space:nowrap;
+    }
+    .tab-btn.active { background:#c8a86a; color:#000; font-weight:700; border-color:#c8a86a; }
+
+    .content { max-width:1100px; margin:0 auto; padding:20px 16px 60px; }
+    .panel { display:none; }
+    .panel.active { display:block; }
+
+    .stat-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px,1fr)); gap:12px; margin-bottom:24px; }
+    .stat-card { background:#050709; border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:16px; }
+    .stat-card .label { font-size:0.7rem; color:#888; text-transform:uppercase; letter-spacing:0.5px; }
+    .stat-card .value { font-size:1.3rem; font-weight:800; margin-top:6px; color:#fff; }
+    .stat-card .value.gold { color:#c8a86a; }
+
+    table { width:100%; border-collapse:collapse; background:#050709; border-radius:10px; overflow:hidden; font-size:0.82rem; }
+    thead tr { background:#12161a; text-align:left; color:#888; }
+    th, td { padding:10px 12px; }
+    tbody tr { border-bottom:1px solid #16191d; }
+    tbody tr:last-child { border-bottom:none; }
+
+    .badge { padding:3px 8px; border-radius:5px; font-size:0.7rem; font-weight:700; display:inline-block; }
+    .badge.pending { background:rgba(255,193,7,0.12); color:#ffc107; }
+    .badge.approved, .badge.completed, .badge.paid { background:rgba(0,230,118,0.12); color:#00e676; }
+    .badge.rejected { background:rgba(255,82,82,0.12); color:#ff5252; }
+    .badge.active { background:rgba(0,230,118,0.12); color:#00e676; }
+    .badge.frozen { background:rgba(255,82,82,0.12); color:#ff5252; }
+    .badge.unverified { background:rgba(136,136,136,0.12); color:#888; }
+    .badge.verified { background:rgba(0,230,118,0.12); color:#00e676; }
+
+    .btn { border:none; border-radius:6px; padding:6px 12px; font-size:0.75rem; font-weight:700; cursor:pointer; margin-right:4px; }
+    .btn-approve { background:#00e67622; color:#00e676; border:1px solid #00e67655; }
+    .btn-reject { background:#ff525222; color:#ff5252; border:1px solid #ff525255; }
+    .btn-gold { background:#c8a86a; color:#000; }
+    .btn-outline { background:transparent; border:1px solid #444; color:#ccc; }
+
+    .section-title { font-size:1.05rem; font-weight:700; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; }
+    .search-input, .filter-select {
+        background:#1a1a1a; border:1px solid #333; color:#fff; padding:8px 12px;
+        border-radius:8px; font-size:0.8rem;
+    }
+    .toolbar { display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+
+    .card { background:#050709; border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:20px; margin-bottom:16px; }
+    .form-row { display:grid; grid-template-columns:repeat(auto-fit, minmax(140px,1fr)); gap:10px; margin-bottom:12px; }
+    .form-row input, .form-row select {
+        background:#1a1a1a; border:1px solid #333; color:#fff; padding:10px; border-radius:8px; font-size:0.85rem;
+    }
+    .form-row label { font-size:0.7rem; color:#888; display:block; margin-bottom:4px; }
+
+    .empty-state { text-align:center; color:#666; padding:40px 20px; font-size:0.85rem; }
+    .loading { text-align:center; color:#666; padding:30px; font-size:0.85rem; }
+
+    a { color:#c8a86a; }
+
+    @media (max-width: 640px) {
+        table, thead, tbody, th, td, tr { display:block; }
+        thead { display:none; }
+        tbody tr { border:1px solid #1a1a1a; border-radius:10px; margin-bottom:10px; padding:10px; }
+        td { border:none; padding:6px 4px; display:flex; justify-content:space-between; gap:10px; }
+        td::before { content: attr(data-label); color:#777; font-size:0.72rem; }
+    }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+    <div class="logo">SharkTrade <span>Pro</span> <span class="demo-badge">ADMIN · DEMO MODE</span></div>
+    <button class="logout-btn" onclick="adminLogout()">Logout</button>
+</div>
+
+<div class="tabs-row" id="tabsRow">
+    <button class="tab-btn active" data-panel="overview">Overview</button>
+    <button class="tab-btn" data-panel="users">Users</button>
+    <button class="tab-btn" data-panel="transactions">Transactions</button>
+    <button class="tab-btn" data-panel="plans">Investment Plans</button>
+    <button class="tab-btn" data-panel="investments">Active Investments</button>
+    <button class="tab-btn" data-panel="referrals">Referrals</button>
+    <button class="tab-btn" data-panel="payment-methods">Payment Methods</button>
+    <button class="tab-btn" data-panel="chat">Support Chat</button>
+</div>
+
+<div class="content">
+
+    <!-- OVERVIEW -->
+    <div class="panel active" id="panel-overview">
+        <div class="section-title">Overview</div>
+        <div class="stat-grid" id="overviewStats">
+            <div class="loading">Loading overview...</div>
+        </div>
+        <div class="card">
+            <div class="section-title" style="margin-bottom:6px;">Daily ROI Simulation</div>
+            <p style="color:#888; font-size:0.8rem; margin-bottom:14px;">
+                Profit also ticks in automatically on the server every 30 minutes. Use this button to force an extra full day's credit right now, for demoing the flow live.
+            </p>
+            <button class="btn btn-gold" onclick="runDailyRoi()">Run Daily ROI Credit Now</button>
+            <span id="roiRunStatus" style="margin-left:10px; font-size:0.8rem; color:#00e676;"></span>
+        </div>
+
+        <div class="card">
+            <div class="section-title" style="margin-bottom:6px;">My Referral Link</div>
+            <p style="color:#888; font-size:0.8rem; margin-bottom:10px;">Admin accounts can refer people too — the 5% bonus lands in your own Profit Wallet the same way.</p>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                <input type="text" id="adminRefLink" readonly style="flex:1; min-width:220px; background:#1a1a1a; border:1px solid #333; color:#fff; padding:10px; border-radius:8px; font-size:0.8rem;">
+                <button class="btn btn-gold" onclick="copyAdminRefLink()">Copy</button>
+            </div>
+            <p style="margin-top:10px; font-size:0.8rem; color:#888;">
+                Referrals: <strong id="adminRefCount" style="color:#fff;">0</strong> &nbsp;·&nbsp;
+                Earned: <strong id="adminRefEarned" style="color:#00e676;">$0.00</strong>
+            </p>
+        </div>
+    </div>
+
+    <!-- USERS -->
+    <div class="panel" id="panel-users">
+        <div class="section-title">Users</div>
+        <div class="toolbar">
+            <input type="text" class="search-input" id="userSearch" placeholder="Search by name or email...">
+            <button class="btn btn-outline" onclick="loadUsers()">Search</button>
+        </div>
+        <div id="usersTableWrap"><div class="loading">Loading users...</div></div>
+    </div>
+
+    <!-- TRANSACTIONS -->
+    <div class="panel" id="panel-transactions">
+        <div class="section-title">Transactions</div>
+        <div class="toolbar">
+            <select class="filter-select" id="txTypeFilter">
+                <option value="">All Types</option>
+                <option value="deposit">Deposits</option>
+                <option value="withdraw">Profit Withdrawals</option>
+                <option value="payout">Transfers (Bank/Wallet)</option>
+                <option value="transfer">Wallet Exchanges</option>
+                <option value="investment">Investments</option>
+                <option value="roi_credit">ROI Credits</option>
+                <option value="referral_bonus">Referral Bonuses</option>
+            </select>
+            <select class="filter-select" id="txStatusFilter">
+                <option value="">All Statuses</option>
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+                <option value="completed">Completed</option>
+            </select>
+            <button class="btn btn-outline" onclick="loadTransactions()">Filter</button>
+        </div>
+        <div id="txTableWrap"><div class="loading">Loading transactions...</div></div>
+    </div>
+
+    <!-- INVESTMENT PLANS -->
+    <div class="panel" id="panel-plans">
+        <div class="section-title">
+            Investment Plans
+            <button class="btn btn-gold" onclick="togglePlanForm()">+ New Plan</button>
+        </div>
+        <div class="card" id="planFormCard" style="display:none;">
+            <div class="form-row">
+                <div><label>Name</label><input type="text" id="planName" placeholder="e.g. Gold Tier"></div>
+                <div><label>Min Amount ($)</label><input type="number" id="planMin" placeholder="1000"></div>
+                <div><label>Max Amount ($, blank = no cap)</label><input type="number" id="planMax" placeholder="40000"></div>
+                <div><label>Daily ROI (%)</label><input type="number" step="0.1" id="planRoi" placeholder="1.5"></div>
+                <div>
+                    <label>Withdrawal</label>
+                    <select id="planWithdrawal">
+                        <option value="daily">Daily</option>
+                        <option value="48hr">48hr</option>
+                    </select>
+                </div>
+                <div><label>Platform Fee (%)</label><input type="number" step="0.1" id="planFee" placeholder="1.0"></div>
+                <div><label>Lock-in Period (days)</label><input type="number" id="planLock" placeholder="7"></div>
+            </div>
+            <button class="btn btn-gold" onclick="createPlan()">Create Plan</button>
+            <button class="btn btn-outline" onclick="togglePlanForm()">Cancel</button>
+        </div>
+        <div id="plansTableWrap"><div class="loading">Loading plans...</div></div>
+    </div>
+
+    <!-- ACTIVE INVESTMENTS -->
+    <div class="panel" id="panel-investments">
+        <div class="section-title">All Investments</div>
+        <div id="investmentsTableWrap"><div class="loading">Loading investments...</div></div>
+    </div>
+
+    <!-- REFERRALS -->
+    <div class="panel" id="panel-referrals">
+        <div class="section-title">Referral Payouts</div>
+        <div id="referralsTableWrap"><div class="loading">Loading referrals...</div></div>
+    </div>
+
+    <!-- PAYMENT METHODS -->
+    <div class="panel" id="panel-payment-methods">
+        <div class="section-title">
+            Deposit Payment Methods
+            <button class="btn btn-gold" onclick="togglePmForm()">+ New Method</button>
+        </div>
+        <p style="color:#888; font-size:0.8rem; margin-bottom:14px;">These are the account details shown to users on the Deposit page — the accounts they should send funds to.</p>
+        <div class="card" id="pmFormCard" style="display:none;">
+            <div class="form-row">
+                <div><label>Method Name</label><input type="text" id="pmName" placeholder="e.g. USDT (TRC20)"></div>
+            </div>
+            <div>
+                <label style="font-size:0.7rem; color:#888; display:block; margin-bottom:4px;">Account Details</label>
+                <textarea id="pmDetails" placeholder="Wallet address, or bank name / account number / account name..." style="width:100%; background:#1a1a1a; border:1px solid #333; color:#fff; padding:10px; border-radius:8px; font-size:0.85rem; min-height:70px;"></textarea>
+            </div>
+            <button class="btn btn-gold" style="margin-top:12px;" onclick="createPaymentMethod()">Add Method</button>
+            <button class="btn btn-outline" onclick="togglePmForm()">Cancel</button>
+        </div>
+        <div id="pmTableWrap"><div class="loading">Loading payment methods...</div></div>
+    </div>
+
+    <!-- SUPPORT CHAT -->
+    <div class="panel" id="panel-chat">
+        <div class="section-title">Support Chat</div>
+        <div style="display:flex; gap:16px; flex-wrap:wrap;">
+            <div style="flex:1; min-width:220px; max-width:300px;">
+                <div id="chatConversationsWrap"><div class="loading">Loading conversations...</div></div>
+            </div>
+            <div style="flex:2; min-width:280px;">
+                <div class="card" id="chatThreadCard" style="display:none; padding:0; overflow:hidden;">
+                    <div style="padding:14px 18px; border-bottom:1px solid rgba(255,255,255,0.06); font-weight:700;" id="chatThreadHeader"></div>
+                    <div id="chatThreadMessages" style="height:360px; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px;"></div>
+                    <div style="display:flex; gap:8px; padding:12px; border-top:1px solid rgba(255,255,255,0.06);">
+                        <input type="text" id="chatReplyInput" placeholder="Type a reply..." style="flex:1; background:#1a1a1a; border:1px solid #333; color:#fff; padding:10px 12px; border-radius:20px; font-size:0.85rem;">
+                        <button class="btn btn-gold" style="border-radius:20px;" onclick="sendChatReply()">Send</button>
+                    </div>
+                </div>
+                <div class="empty-state" id="chatNoSelection">Select a conversation to view messages.</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    if (!requireAdminRole()) { /* redirected */ }
+
+    function adminLogout() {
+        clearSession();
+        window.location.href = "login.html";
+    }
+
+    // ---------- TAB SWITCHING ----------
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(`panel-${btn.dataset.panel}`).classList.add('active');
+            loadPanel(btn.dataset.panel);
+        });
+    });
+
+    function loadPanel(name) {
+        if (name === 'overview') loadOverview();
+        if (name === 'users') loadUsers();
+        if (name === 'transactions') loadTransactions();
+        if (name === 'plans') loadPlans();
+        if (name === 'investments') loadInvestments();
+        if (name === 'referrals') loadReferrals();
+        if (name === 'payment-methods') loadPaymentMethods();
+        if (name === 'chat') loadChatConversations();
+    }
+
+    // ---------- OVERVIEW ----------
+    async function loadOverview() {
+        const wrap = document.getElementById('overviewStats');
+        try {
+            const s = await apiRequest('/api/admin/overview');
+            wrap.innerHTML = `
+                <div class="stat-card"><div class="label">Total Users</div><div class="value">${s.totalUsers}</div></div>
+                <div class="stat-card"><div class="label">Total Deposited</div><div class="value gold">$${formatMoney(s.totalDeposited)}</div></div>
+                <div class="stat-card"><div class="label">Total Withdrawn</div><div class="value gold">$${formatMoney(s.totalWithdrawn)}</div></div>
+                <div class="stat-card"><div class="label">Pending Deposits</div><div class="value">${s.pendingDeposits}</div></div>
+                <div class="stat-card"><div class="label">Pending Withdrawals</div><div class="value">${s.pendingWithdrawals}</div></div>
+                <div class="stat-card"><div class="label">Active Investments</div><div class="value">${s.activeInvestmentsCount} <span style="font-size:0.75rem; color:#888;">($${formatMoney(s.activeInvestmentsTotal)})</span></div></div>
+            `;
+        } catch (err) {
+            wrap.innerHTML = `<div class="empty-state">Failed to load overview.</div>`;
+        }
+    }
+
+    async function runDailyRoi() {
+        const status = document.getElementById('roiRunStatus');
+        status.textContent = 'Running...';
+        try {
+            const res = await apiRequest('/api/admin/investments/run-daily-roi', { method: 'POST' });
+            status.textContent = res.message;
+            loadOverview();
+        } catch (err) {
+            status.style.color = '#ff5252';
+            status.textContent = err.message || 'Failed';
+        }
+    }
+
+    // ---------- USERS ----------
+    async function loadUsers() {
+        const wrap = document.getElementById('usersTableWrap');
+        wrap.innerHTML = `<div class="loading">Loading users...</div>`;
+        const search = document.getElementById('userSearch').value.trim();
+        try {
+            const { users } = await apiRequest(`/api/admin/users${search ? '?search=' + encodeURIComponent(search) : ''}`);
+            if (users.length === 0) {
+                wrap.innerHTML = `<div class="empty-state">No users found.</div>`;
+                return;
+            }
+            wrap.innerHTML = `
+                <table>
+                    <thead><tr><th>Name</th><th>Email</th><th>Main</th><th>Profit</th><th>KYC</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody>
+                        ${users.map(u => `
+                            <tr>
+                                <td data-label="Name">${u.firstName} ${u.lastName}</td>
+                                <td data-label="Email">${u.email}</td>
+                                <td data-label="Main">$${formatMoney(u.mainBalance)}</td>
+                                <td data-label="Profit">$${formatMoney(u.profitBalance)}</td>
+                                <td data-label="KYC"><span class="badge ${u.kycStatus}">${u.kycStatus}</span></td>
+                                <td data-label="Status"><span class="badge ${u.frozen ? 'frozen' : 'active'}">${u.frozen ? 'Frozen' : 'Active'}</span></td>
+                                <td data-label="Actions">
+                                    <button class="btn btn-outline" onclick="editBalance(${u.id}, ${u.mainBalance}, ${u.profitBalance})">Edit Balance</button>
+                                    <button class="btn ${u.frozen ? 'btn-approve' : 'btn-reject'}" onclick="toggleFreeze(${u.id}, ${u.frozen ? 'false' : 'true'})">${u.frozen ? 'Unfreeze' : 'Freeze'}</button>
+                                    <button class="btn btn-outline" onclick="setKyc(${u.id})">Set KYC</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        } catch (err) {
+            wrap.innerHTML = `<div class="empty-state">Failed to load users.</div>`;
+        }
+    }
+
+    async function editBalance(id, main, profit) {
+        const newMain = prompt('Main wallet balance (USD):', main);
+        if (newMain === null) return;
+        const newProfit = prompt('Profit wallet balance (USD):', profit);
+        if (newProfit === null) return;
+        try {
+            await apiRequest(`/api/admin/users/${id}/balance`, {
+                method: 'PATCH',
+                body: { mainBalance: parseFloat(newMain), profitBalance: parseFloat(newProfit) }
+            });
+            loadUsers();
+        } catch (err) {
+            alert(err.message || 'Failed to update balance');
+        }
+    }
+
+    async function toggleFreeze(id, frozen) {
+        try {
+            await apiRequest(`/api/admin/users/${id}/freeze`, { method: 'PATCH', body: { frozen: frozen === 'true' } });
+            loadUsers();
+        } catch (err) {
+            alert(err.message || 'Failed to update status');
+        }
+    }
+
+    async function setKyc(id) {
+        const status = prompt('KYC status: unverified, pending, or verified');
+        if (!status || !['unverified', 'pending', 'verified'].includes(status)) {
+            if (status !== null) alert('Invalid status. Use: unverified, pending, or verified.');
+            return;
+        }
+        try {
+            await apiRequest(`/api/admin/users/${id}/kyc`, { method: 'PATCH', body: { status } });
+            loadUsers();
+        } catch (err) {
+            alert(err.message || 'Failed to update KYC');
+        }
+    }
+
+    // ---------- TRANSACTIONS ----------
+    function renderTxDestination(tx) {
+        if (!tx.destination) return '—';
+        if (tx.type === 'payout') {
+            try {
+                const d = JSON.parse(tx.destination);
+                if (d.type === 'bank') return `${d.bankName} · ${d.accountName} · ${d.accountNumber}`;
+                return `${d.network || 'Crypto'} · ${d.walletAddress}`;
+            } catch {
+                return tx.destination;
+            }
+        }
+        return tx.destination;
+    }
+
+    async function loadTransactions() {
+        const wrap = document.getElementById('txTableWrap');
+        wrap.innerHTML = `<div class="loading">Loading transactions...</div>`;
+        const type = document.getElementById('txTypeFilter').value;
+        const status = document.getElementById('txStatusFilter').value;
+        const params = new URLSearchParams();
+        if (type) params.set('type', type);
+        if (status) params.set('status', status);
+
+        const typeLabels = {
+            deposit: 'Deposit', withdraw: 'Profit Withdrawal', payout: 'Transfer (Bank/Wallet)',
+            transfer: 'Wallet Exchange', investment: 'Investment', roi_credit: 'ROI Credit', referral_bonus: 'Referral Bonus'
+        };
+
+        try {
+            const { transactions } = await apiRequest(`/api/admin/transactions?${params.toString()}`);
+            if (transactions.length === 0) {
+                wrap.innerHTML = `<div class="empty-state">No transactions found.</div>`;
+                return;
+            }
+            wrap.innerHTML = `
+                <table>
+                    <thead><tr><th>User</th><th>Type</th><th>Method</th><th>Destination</th><th>Amount</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+                    <tbody>
+                        ${transactions.map(tx => `
+                            <tr>
+                                <td data-label="User">${tx.first_name} ${tx.last_name}</td>
+                                <td data-label="Type">${typeLabels[tx.type] || tx.type}</td>
+                                <td data-label="Method">${tx.method || '—'}</td>
+                                <td data-label="Destination" style="max-width:200px; word-break:break-word;">${renderTxDestination(tx)}</td>
+                                <td data-label="Amount">$${formatMoney(tx.amount)}</td>
+                                <td data-label="Status"><span class="badge ${tx.status}">${tx.status}</span></td>
+                                <td data-label="Date">${formatDate(tx.created_at)}</td>
+                                <td data-label="Actions">
+                                    ${tx.status === 'pending' ? `
+                                        <button class="btn btn-approve" onclick="reviewTx(${tx.id}, 'approve')">Approve</button>
+                                        <button class="btn btn-reject" onclick="reviewTx(${tx.id}, 'reject')">Reject</button>
+                                    ` : '—'}
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        } catch (err) {
+            wrap.innerHTML = `<div class="empty-state">Failed to load transactions.</div>`;
+        }
+    }
+
+    async function reviewTx(id, action) {
+        if (!confirm(`Are you sure you want to ${action} this transaction?`)) return;
+        try {
+            await apiRequest(`/api/admin/transactions/${id}`, { method: 'PATCH', body: { action } });
+            loadTransactions();
+        } catch (err) {
+            alert(err.message || 'Failed to update transaction');
+        }
+    }
+
+    // ---------- INVESTMENT PLANS ----------
+    function togglePlanForm() {
+        const card = document.getElementById('planFormCard');
+        card.style.display = card.style.display === 'none' ? 'block' : 'none';
+    }
+
+    async function loadPlans() {
+        const wrap = document.getElementById('plansTableWrap');
+        wrap.innerHTML = `<div class="loading">Loading plans...</div>`;
+        try {
+            const { plans } = await apiRequest('/api/admin/plans');
+            if (plans.length === 0) {
+                wrap.innerHTML = `<div class="empty-state">No plans yet.</div>`;
+                return;
+            }
+            wrap.innerHTML = `
+                <table>
+                    <thead><tr><th>Name</th><th>Range</th><th>Daily ROI</th><th>Fee</th><th>Lock-in</th><th>Withdrawal</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody>
+                        ${plans.map(p => `
+                            <tr>
+                                <td data-label="Name">${p.name}</td>
+                                <td data-label="Range">$${formatMoney(p.min_amount)} ${p.max_amount ? '- $' + formatMoney(p.max_amount) : '+'}</td>
+                                <td data-label="Daily ROI">${p.daily_roi}%</td>
+                                <td data-label="Fee">${p.fee_percent || 0}%</td>
+                                <td data-label="Lock-in">${p.lock_days || 0}d</td>
+                                <td data-label="Withdrawal">${p.withdrawal_type}</td>
+                                <td data-label="Status"><span class="badge ${p.active ? 'active' : 'rejected'}">${p.active ? 'Active' : 'Inactive'}</span></td>
+                                <td data-label="Actions">
+                                    ${p.active
+                                        ? `<button class="btn btn-reject" onclick="deactivatePlan(${p.id})">Deactivate</button>`
+                                        : `<button class="btn btn-approve" onclick="activatePlan(${p.id})">Activate</button>`}
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        } catch (err) {
+            wrap.innerHTML = `<div class="empty-state">Failed to load plans.</div>`;
+        }
+    }
+
+    async function activatePlan(id) {
+        try {
+            await apiRequest(`/api/admin/plans/${id}`, { method: 'PATCH', body: { active: true } });
+            loadPlans();
+        } catch (err) {
+            alert(err.message || 'Failed to activate plan');
+        }
+    }
+
+    async function createPlan() {
+        const name = document.getElementById('planName').value.trim();
+        const minAmount = parseFloat(document.getElementById('planMin').value);
+        const maxAmountRaw = document.getElementById('planMax').value;
+        const dailyRoi = parseFloat(document.getElementById('planRoi').value);
+        const withdrawalType = document.getElementById('planWithdrawal').value;
+        const feePercent = parseFloat(document.getElementById('planFee').value) || 0;
+        const lockDays = parseInt(document.getElementById('planLock').value) || 0;
+
+        if (!name || !minAmount || !dailyRoi) {
+            alert('Name, min amount, and daily ROI are required.');
+            return;
+        }
+
+        try {
+            await apiRequest('/api/admin/plans', {
+                method: 'POST',
+                body: { name, minAmount, maxAmount: maxAmountRaw ? parseFloat(maxAmountRaw) : null, dailyRoi, withdrawalType, feePercent, lockDays }
+            });
+            togglePlanForm();
+            document.getElementById('planName').value = '';
+            document.getElementById('planMin').value = '';
+            document.getElementById('planMax').value = '';
+            document.getElementById('planRoi').value = '';
+            document.getElementById('planFee').value = '';
+            document.getElementById('planLock').value = '';
+            loadPlans();
+        } catch (err) {
+            alert(err.message || 'Failed to create plan');
+        }
+    }
+
+    async function deactivatePlan(id) {
+        if (!confirm('Deactivate this plan? Existing investments are unaffected.')) return;
+        try {
+            await apiRequest(`/api/admin/plans/${id}`, { method: 'DELETE' });
+            loadPlans();
+        } catch (err) {
+            alert(err.message || 'Failed to deactivate plan');
+        }
+    }
+
+    // ---------- INVESTMENTS ----------
+    async function loadInvestments() {
+        const wrap = document.getElementById('investmentsTableWrap');
+        wrap.innerHTML = `<div class="loading">Loading investments...</div>`;
+        try {
+            const { investments } = await apiRequest('/api/admin/investments');
+            if (investments.length === 0) {
+                wrap.innerHTML = `<div class="empty-state">No investments yet.</div>`;
+                return;
+            }
+            wrap.innerHTML = `
+                <table>
+                    <thead><tr><th>User</th><th>Plan</th><th>Amount</th><th>Daily ROI</th><th>Total Profit</th><th>Status</th><th>Started</th></tr></thead>
+                    <tbody>
+                        ${investments.map(i => `
+                            <tr>
+                                <td data-label="User">${i.first_name} ${i.last_name}</td>
+                                <td data-label="Plan">${i.plan_name}</td>
+                                <td data-label="Amount">$${formatMoney(i.amount)}</td>
+                                <td data-label="Daily ROI">${i.daily_roi}%</td>
+                                <td data-label="Total Profit">$${formatMoney(i.total_profit)}</td>
+                                <td data-label="Status"><span class="badge ${i.status}">${i.status}</span></td>
+                                <td data-label="Started">${formatDate(i.created_at)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        } catch (err) {
+            wrap.innerHTML = `<div class="empty-state">Failed to load investments.</div>`;
+        }
+    }
+
+    // ---------- REFERRALS ----------
+    async function loadReferrals() {
+        const wrap = document.getElementById('referralsTableWrap');
+        wrap.innerHTML = `<div class="loading">Loading referrals...</div>`;
+        try {
+            const { referrals } = await apiRequest('/api/admin/referrals');
+            if (referrals.length === 0) {
+                wrap.innerHTML = `<div class="empty-state">No referrals yet.</div>`;
+                return;
+            }
+            wrap.innerHTML = `
+                <table>
+                    <thead><tr><th>Referrer</th><th>Referred</th><th>Bonus</th><th>Status</th><th>Date</th></tr></thead>
+                    <tbody>
+                        ${referrals.map(r => `
+                            <tr>
+                                <td data-label="Referrer">${r.referrer_first} ${r.referrer_last}</td>
+                                <td data-label="Referred">${r.referred_first} ${r.referred_last}</td>
+                                <td data-label="Bonus">$${formatMoney(r.bonus_amount)}</td>
+                                <td data-label="Status"><span class="badge ${r.status}">${r.status}</span></td>
+                                <td data-label="Date">${formatDate(r.created_at)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        } catch (err) {
+            wrap.innerHTML = `<div class="empty-state">Failed to load referrals.</div>`;
+        }
+    }
+
+    // ---------- PAYMENT METHODS ----------
+    function togglePmForm() {
+        const card = document.getElementById('pmFormCard');
+        card.style.display = card.style.display === 'none' ? 'block' : 'none';
+    }
+
+    async function loadPaymentMethods() {
+        const wrap = document.getElementById('pmTableWrap');
+        wrap.innerHTML = `<div class="loading">Loading payment methods...</div>`;
+        try {
+            const { methods } = await apiRequest('/api/admin/payment-methods');
+            if (methods.length === 0) {
+                wrap.innerHTML = `<div class="empty-state">No payment methods yet.</div>`;
+                return;
+            }
+            wrap.innerHTML = `
+                <table>
+                    <thead><tr><th>Name</th><th>Account Details</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody>
+                        ${methods.map(m => `
+                            <tr>
+                                <td data-label="Name">${m.name}</td>
+                                <td data-label="Account Details" style="max-width:280px; word-break:break-word;">${m.account_details}</td>
+                                <td data-label="Status"><span class="badge ${m.active ? 'active' : 'rejected'}">${m.active ? 'Active' : 'Inactive'}</span></td>
+                                <td data-label="Actions">
+                                    ${m.active
+                                        ? `<button class="btn btn-reject" onclick="deactivatePaymentMethod(${m.id})">Deactivate</button>`
+                                        : `<button class="btn btn-approve" onclick="activatePaymentMethod(${m.id})">Activate</button>`}
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        } catch (err) {
+            wrap.innerHTML = `<div class="empty-state">Failed to load payment methods.</div>`;
+        }
+    }
+
+    async function createPaymentMethod() {
+        const name = document.getElementById('pmName').value.trim();
+        const accountDetails = document.getElementById('pmDetails').value.trim();
+        if (!name || !accountDetails) {
+            alert('Please fill in both the method name and account details.');
+            return;
+        }
+        try {
+            await apiRequest('/api/admin/payment-methods', { method: 'POST', body: { name, accountDetails } });
+            document.getElementById('pmName').value = '';
+            document.getElementById('pmDetails').value = '';
+            togglePmForm();
+            loadPaymentMethods();
+        } catch (err) {
+            alert(err.message || 'Failed to add payment method');
+        }
+    }
+
+    async function deactivatePaymentMethod(id) {
+        if (!confirm('Deactivate this payment method? Users will no longer see it on the Deposit page.')) return;
+        try {
+            await apiRequest(`/api/admin/payment-methods/${id}`, { method: 'DELETE' });
+            loadPaymentMethods();
+        } catch (err) {
+            alert(err.message || 'Failed to deactivate');
+        }
+    }
+
+    async function activatePaymentMethod(id) {
+        try {
+            await apiRequest(`/api/admin/payment-methods/${id}`, { method: 'PATCH', body: { active: true } });
+            loadPaymentMethods();
+        } catch (err) {
+            alert(err.message || 'Failed to activate');
+        }
+    }
+
+    // ---------- SUPPORT CHAT ----------
+    let activeChatUserId = null;
+
+    function escapeHtmlAdmin(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    async function loadChatConversations() {
+        const wrap = document.getElementById('chatConversationsWrap');
+        wrap.innerHTML = `<div class="loading">Loading conversations...</div>`;
+        try {
+            const { conversations } = await apiRequest('/api/admin/chat/conversations');
+            if (conversations.length === 0) {
+                wrap.innerHTML = `<div class="empty-state">No conversations yet. Users can message you from the chat bubble on their dashboard.</div>`;
+                return;
+            }
+            wrap.innerHTML = conversations.map(c => `
+                <div onclick="openChatThread(${c.user_id}, '${c.first_name} ${c.last_name}')"
+                     style="background:#050709; border:1px solid ${activeChatUserId === c.user_id ? '#c8a86a' : 'rgba(255,255,255,0.06)'}; border-radius:10px; padding:12px 14px; margin-bottom:8px; cursor:pointer;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <strong style="font-size:0.85rem;">${c.first_name} ${c.last_name}</strong>
+                        ${c.unread_count > 0 ? `<span class="badge pending">${c.unread_count}</span>` : ''}
+                    </div>
+                    <div style="font-size:0.75rem; color:#888; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtmlAdmin(c.last_message || '')}</div>
+                </div>
+            `).join('');
+        } catch (err) {
+            wrap.innerHTML = `<div class="empty-state">Failed to load conversations.</div>`;
+        }
+    }
+
+    async function openChatThread(userId, name) {
+        activeChatUserId = userId;
+        document.getElementById('chatNoSelection').style.display = 'none';
+        document.getElementById('chatThreadCard').style.display = 'block';
+        document.getElementById('chatThreadHeader').textContent = name;
+        await loadChatThread();
+        loadChatConversations(); // refresh unread badges/highlight
+    }
+
+    async function loadChatThread() {
+        if (!activeChatUserId) return;
+        try {
+            const { messages } = await apiRequest(`/api/admin/chat/${activeChatUserId}`);
+            const container = document.getElementById('chatThreadMessages');
+            if (messages.length === 0) {
+                container.innerHTML = `<p style="text-align:center; color:#666; font-size:0.85rem;">No messages yet.</p>`;
+                return;
+            }
+            container.innerHTML = messages.map(m => `
+                <div style="align-self:${m.sender === 'admin' ? 'flex-end' : 'flex-start'}; max-width:75%;">
+                    <div style="background:${m.sender === 'admin' ? '#c8a86a' : '#1a1d21'}; color:${m.sender === 'admin' ? '#000' : '#eee'}; padding:9px 12px; border-radius:12px; font-size:0.85rem;">${escapeHtmlAdmin(m.message)}</div>
+                    <div style="font-size:0.65rem; color:#666; margin-top:3px; text-align:${m.sender === 'admin' ? 'right' : 'left'};">${formatDate(m.created_at)}</div>
+                </div>
+            `).join('');
+            container.scrollTop = container.scrollHeight;
+        } catch (err) {
+            console.error('Failed to load chat thread', err);
+        }
+    }
+
+    async function sendChatReply() {
+        const input = document.getElementById('chatReplyInput');
+        const text = input.value.trim();
+        if (!text || !activeChatUserId) return;
+        input.value = '';
+        try {
+            await apiRequest(`/api/admin/chat/${activeChatUserId}`, { method: 'POST', body: { message: text } });
+            loadChatThread();
+        } catch (err) {
+            alert('Failed to send reply.');
+        }
+    }
+
+    document.getElementById('chatReplyInput')?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendChatReply();
+    });
+
+    // Poll the open thread + conversation list every 5s while the Support Chat tab is active
+    setInterval(() => {
+        const chatPanelActive = document.getElementById('panel-chat').classList.contains('active');
+        if (!chatPanelActive) return;
+        if (activeChatUserId) loadChatThread();
+        loadChatConversations();
+    }, 5000);
+
+    // ---------- ADMIN'S OWN REFERRAL LINK ----------
+    let adminRefLinkValue = '';
+
+    async function loadAdminReferralWidget() {
+        try {
+            const data = await apiRequest('/api/user/referrals');
+            adminRefLinkValue = `${window.location.origin}/register.html?ref=${data.referralCode}`;
+            document.getElementById('adminRefLink').value = adminRefLinkValue;
+            document.getElementById('adminRefCount').textContent = data.totalReferrals;
+            document.getElementById('adminRefEarned').textContent = `$${formatMoney(data.totalEarned)}`;
+        } catch (err) {
+            document.getElementById('adminRefLink').value = 'Failed to load referral link';
+        }
+    }
+
+    function copyAdminRefLink() {
+        if (!adminRefLinkValue) return;
+        navigator.clipboard.writeText(adminRefLinkValue);
+        alert('Referral link copied!');
+    }
+
+    // ---------- INIT ----------
+    loadOverview();
+    loadAdminReferralWidget();
+</script>
+
+</body>
+</html>

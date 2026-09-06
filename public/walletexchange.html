@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; }
+        .container { max-width: 450px; margin: auto; padding: 20px; }
+        .exchange-card { background: #050709; border: 1px solid #333; border-radius: 12px; padding: 20px; }
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; color: #888; font-size: 0.8rem; margin-bottom: 8px; }
+        .input-group input { width: 100%; padding: 12px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; color: #fff; box-sizing: border-box; }
+        .swap-icon { text-align: center; margin: 10px 0; color: #c8a86a; font-size: 1.2rem; }
+        .exchange-btn { width: 100%; padding: 15px; background: #c8a86a; border: none; border-radius: 8px; color: #000; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 style="text-align:center;">Wallet Exchange</h2>
+    
+    <div class="exchange-card">
+        <div class="input-group">
+            <label>You Pay (USD Balance)</label>
+            <input type="number" id="pay-amount" placeholder="0.00">
+        </div>
+        
+        <div class="swap-icon"><i class="fa-solid fa-arrow-down"></i></div>
+        
+        <div class="input-group">
+            <label>You Receive (BTC Wallet)</label>
+            <input type="number" id="receive-amount" placeholder="0.00" disabled>
+        </div>
+    
+        <div style="font-size: 0.8rem; color: #666; margin-bottom: 20px; text-align: center;">
+            Rate: 1 USD = 0.000015 BTC
+        </div>
+    
+        <button class="exchange-btn">CONFIRM EXCHANGE</button>
+    </div>
+</div>
+
+<script>
+    const exchangeRate = 0.000015;
+
+    const payInput = document.getElementById('pay-amount');
+    const receiveInput = document.getElementById('receive-amount');
+
+    //  Add an event listener to listen for typing
+    payInput.addEventListener('input', function() {
+        const payValue = parseFloat(payInput.value);
+        
+        if (!isNaN(payValue)) {
+            // . Perform the math and update the receive box
+            const result = payValue * exchangeRate;
+            receiveInput.value = result.toFixed(6); // Shows 6 decimal places
+        } else {
+            receiveInput.value = ''; // Clear it if the input is empty
+        }
+    });
+</script>
+</body>
+</html>

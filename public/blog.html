@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog | SharkTrade Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="api.js"></script>
+    <script src="chat-widget.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { background: #000; color: #eee; font-family: 'Segoe UI', sans-serif; margin: 0; }
+        .top-bar {
+            padding: 18px 24px; border-bottom: 1px solid rgba(255,255,255,0.08);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .top-bar a.logo { color: #fff; font-weight: 800; font-size: 1.1rem; text-decoration: none; }
+        .top-bar a.logo span { color: #c8a86a; }
+        .top-bar a.back { color: #c8a86a; text-decoration: none; font-size: 0.85rem; }
+        .content { max-width: 780px; margin: 0 auto; padding: 40px 24px 80px; }
+        .content h1 { font-size: 1.8rem; margin-bottom: 6px; color: #fff; }
+        .content .subtitle { color: #888; font-size: 0.85rem; margin-bottom: 34px; }
+        .post-card {
+            background: #050709; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px;
+            padding: 26px; margin-bottom: 22px;
+        }
+        .post-meta { font-size: 0.72rem; color: #888; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .post-meta span { color: #c8a86a; }
+        .post-title { font-size: 1.2rem; color: #fff; margin-bottom: 12px; }
+        .post-body { font-size: 0.9rem; color: #ccc; line-height: 1.7; }
+        .demo-note {
+            background: rgba(200,168,106,0.08); border: 1px solid rgba(200,168,106,0.25);
+            border-radius: 10px; padding: 14px 18px; font-size: 0.82rem; color: #c8a86a; margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="top-bar">
+    <a href="index.html" class="logo">SharkTrade <span>Pro</span></a>
+    <a href="index.html" class="back"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
+</div>
+
+<div class="content">
+    <h1>Blog</h1>
+    <p class="subtitle">Updates, insights, and platform news</p>
+    <div class="demo-note"><i class="fa-solid fa-circle-info"></i> Sample posts for demonstration purposes.</div>
+
+    <div class="post-card">
+        <div class="post-meta">September 1, 2026 &nbsp;&middot;&nbsp; <span>Platform Update</span></div>
+        <div class="post-title">Introducing the New Investor Dashboard</div>
+        <div class="post-body">
+            We've rebuilt the investor dashboard from the ground up &mdash; real-time wallet balances, a cleaner investment log, and a simplified deposit flow. Every wallet action now has a full audit trail, so you always know exactly where your funds stand.
+        </div>
+    </div>
+
+    <div class="post-card">
+        <div class="post-meta">August 18, 2026 &nbsp;&middot;&nbsp; <span>Market Insight</span></div>
+        <div class="post-title">Why Diversifying Across Investment Tiers Matters</div>
+        <div class="post-body">
+            Spreading your capital across multiple plan tiers &mdash; rather than committing everything to a single plan &mdash; can smooth out your overall return profile over time. Our Minimum, Maximum, and Premium tiers are built to let you balance risk and reward the way that fits your goals.
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

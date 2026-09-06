@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Logs | SharkTrade Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="api.js"></script>
+    <style>
+        body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; }
+        .container { max-width: 450px; margin: 20px auto; padding: 20px; }
+        
+        .log-card {
+            background: #050709;
+            border: 1px solid #1a1a1a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .log-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .plan-name { font-weight: 700; color: #c8a86a; }
+        .status { font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; background: #1a1a1a; }
+        
+        .log-row { display: flex; justify-content: space-between; font-size: 0.85rem; padding: 5px 0; color: #888; }
+        .val { color: #fff; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="dashboard.html" style="color:#c8a86a; text-decoration:none; font-size: 0.8rem;"><i class="fa-solid fa-arrow-left"></i> BACK</a>
+    <h2 style="text-align:center; margin: 25px 0;">Investment Log</h2>
+
+    <div id="logContainer">
+        <p style="text-align:center; color:#666;">Loading...</p>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        if (!requireLogin()) return;
+        const container = document.getElementById('logContainer');
+        try {
+            const { investments } = await apiRequest('/api/user/investments');
+            if (investments.length === 0) {
+                container.innerHTML = `<p style="text-align:center; color:#666; padding: 30px 0;">No investments yet. <a href="investment.html" style="color:#c8a86a;">Browse investment plans</a>.</p>`;
+                return;
+            }
+            container.innerHTML = investments.map(inv => `
+                <div class="log-card">
+                    <div class="log-header">
+                        <span class="plan-name">${inv.plan_name}</span>
+                        <span class="status" style="color:${inv.status === 'active' ? '#00E676' : '#888'};">${inv.status === 'active' ? 'Active' : 'Completed'}</span>
+                    </div>
+                    <div class="log-row"><span>Invested</span> <span class="val">$${formatMoney(inv.amount)}</span></div>
+                    <div class="log-row"><span>Daily ROI</span> <span class="val">${inv.daily_roi}%</span></div>
+                    <div class="log-row"><span>Total Profit</span> <span class="val">$${formatMoney(inv.total_profit)}</span></div>
+                    <div class="log-row"><span>Started</span> <span class="val">${formatDate(inv.created_at)}</span></div>
+                </div>
+            `).join('');
+        } catch (err) {
+            container.innerHTML = `<p style="text-align:center; color:#ff5252;">Failed to load investment log.</p>`;
+        }
+    });
+</script>
+
+</body>
+</html>

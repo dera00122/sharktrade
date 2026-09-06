@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Settings — SharkTrade Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #000000;
+            color: #FFFFFF;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-navbar {
+            background-color: #050709;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar-brand .logo {
+            font-size: 1.3rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            text-decoration: none;
+            color: #FFFFFF;
+        }
+
+        .navbar-brand .logo span { color: #c8a86a; }
+
+        .navbar-user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background-color: rgba(255, 255, 255, 0.03);
+            padding: 6px 14px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .avatar-circle-top {
+            width: 28px;
+            height: 28px;
+            background-color: #1F242E;
+            background-size: cover;
+            background-position: center;
+            border-radius: 50%;
+            border: 1px solid #c8a86a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #c8a86a;
+            overflow: hidden;
+        }
+
+        .username {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #E6EDF3;
+        }
+
+        .settings-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .back-to-dash-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #6C727F;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: color 0.2s;
+            align-self: flex-start;
+        }
+
+        .back-to-dash-btn:hover { color: #c8a86a; }
+
+        .settings-card {
+            background-color: #050709;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .settings-section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 12px;
+            color: #FFFFFF;
+        }
+
+        .avatar-uploader-block {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background-color: rgba(255, 255, 255, 0.01);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px dashed rgba(255, 255, 255, 0.08);
+        }
+
+        .interactive-avatar-frame {
+            width: 70px;
+            height: 70px;
+            background-color: #12161A;
+            background-size: cover;
+            background-position: center;
+            border-radius: 50%;
+            border: 2px solid #c8a86a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #6C727F;
+            overflow: hidden;
+        }
+
+        .upload-trigger-btn {
+            position: relative;
+            background-color: rgba(200, 168, 106, 0.1);
+            color: #c8a86a;
+            border: 1px solid rgba(200, 168, 106, 0.2);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .upload-trigger-btn:hover {
+            background-color: #c8a86a;
+            color: #000000;
+        }
+
+        .upload-trigger-btn input[type="file"] {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .settings-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .input-group-row {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-group-row label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #A0A5B1;
+        }
+
+        .input-group-row input, .input-group-row select {
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            padding: 14px 16px;
+            border-radius: 10px;
+            color: #FFFFFF;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .input-group-row input:focus, .input-group-row select:focus {
+            border-color: #c8a86a;
+        }
+
+        .save-settings-btn {
+            background-color: #c8a86a;
+            color: #000000;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            min-width: 150px;
+        }
+
+        .kyc-upload-container {
+            border: 2px dashed rgba(255, 255, 255, 0.07);
+            background-color: rgba(255, 255, 255, 0.01);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .kyc-upload-container i { font-size: 2rem; color: #6C727F; }
+        .kyc-upload-container p { font-size: 0.85rem; color: #A0A5B1; }
+        .file-name-feedback { color: #c8a86a; font-weight: 700; font-size: 0.85rem; margin-top: 4px; }
+    </style>
+    <script src="api.js"></script>
+</head>
+<body>
+
+<header class="top-navbar">
+    <div class="navbar-brand">
+        <a href="dashboard.html" class="logo">SharkTrade <span>Pro</span></a>
+    </div>
+    <div class="navbar-user-profile">
+        <div class="avatar-circle-top" id="navAvatarPlaceholder">C</div>
+        <span class="username" id="navUsernameDisplay">Franklin Chidera</span>
+    </div>
+</header>
+
+<main class="settings-container">
+    <a href="dashboard.html" class="back-to-dash-btn"><i class="fa-solid fa-arrow-left"></i> Return to Dashboard</a>
+
+    <section class="settings-card">
+        <h2 class="settings-section-title">Personal Configuration</h2>
+        
+        <div class="avatar-uploader-block">
+            <div class="interactive-avatar-frame" id="avatarPreviewBox">
+                <i class="fa-solid fa-user" id="avatarIconDefault"></i>
+            </div>
+            <div>
+                <div class="upload-trigger-btn">
+                    <i class="fa-solid fa-camera"></i> Upload New Photo
+                    <input type="file" id="avatarInputFile" accept="image/*">
+                </div>
+            </div>
+        </div>
+
+        <form class="settings-form" id="profileSettingsForm">
+            <div class="input-group-row">
+                <label>Profile Identity Name</label>
+                <input type="text" id="profileName" value="Franklin Chidera" required>
+            </div>
+            <div class="input-group-row">
+                <label>Gender</label>
+                <select id="profileGender">
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                </select>
+            </div>
+            <button type="submit" class="save-settings-btn">Save Changes</button>
+        </form>
+    </section>
+
+    <section class="settings-card">
+        <h2 class="settings-section-title">KYC Identity Audit</h2>
+        
+        <form class="settings-form" id="kycForm">
+            <div class="input-group-row">
+                <label>Government-Issued Identification Document</label>
+                <select required>
+                    <option value="passport">International Passport</option>
+                    <option value="drivers">Driver's License</option>
+                    <option value="national">National ID Card</option>
+                </select>
+            </div>
+
+            <div class="kyc-upload-container">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <p id="uploadInstructions">Drag and drop or click to upload clear scanned files</p>
+                <div id="fileNameDisplay" class="file-name-feedback"></div>
+                <div class="upload-trigger-btn" style="margin-top: 4px;">
+                    Select File
+                    <input type="file" id="kycDocumentInput" accept="image/*,application/pdf" style="position: absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer;" required>
+                </div>
+            </div>
+
+            <button type="submit" class="save-settings-btn">Submit Verification</button>
+        </form>
+    </section>
+</main>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        if (!requireLogin()) return;
+
+        const avatarInputFile = document.getElementById("avatarInputFile");
+        const avatarPreviewBox = document.getElementById("avatarPreviewBox");
+        const navAvatarPlaceholder = document.getElementById("navAvatarPlaceholder");
+        const avatarIconDefault = document.getElementById("avatarIconDefault");
+        const kycDocumentInput = document.getElementById("kycDocumentInput");
+        const uploadInstructions = document.getElementById("uploadInstructions");
+        const fileNameDisplay = document.getElementById("fileNameDisplay");
+        const navUsernameDisplay = document.getElementById("navUsernameDisplay");
+        const profileNameInput = document.getElementById("profileName");
+
+        function applyAvatar(url) {
+            if (!url) return;
+            avatarPreviewBox.style.backgroundImage = `url('${url}')`;
+            avatarPreviewBox.style.backgroundSize = "cover";
+            avatarPreviewBox.style.backgroundPosition = "center";
+            if (avatarIconDefault) avatarIconDefault.style.display = "none";
+
+            navAvatarPlaceholder.style.backgroundImage = `url('${url}')`;
+            navAvatarPlaceholder.style.backgroundSize = "cover";
+            navAvatarPlaceholder.style.backgroundPosition = "center";
+            navAvatarPlaceholder.textContent = "";
+        }
+
+        // LOAD CURRENT USER INTO THE PAGE
+        const cachedUser = getCachedUser();
+        if (cachedUser) {
+            navUsernameDisplay.textContent = `${cachedUser.firstName} ${cachedUser.lastName}`;
+            profileNameInput.value = `${cachedUser.firstName} ${cachedUser.lastName}`;
+            navAvatarPlaceholder.textContent = cachedUser.firstName.charAt(0).toUpperCase();
+            if (cachedUser.avatarUrl) applyAvatar(cachedUser.avatarUrl);
+        }
+
+        // UPLOAD AVATAR TO THE BACKEND (persists across devices/sessions, shows on dashboard)
+        avatarInputFile.addEventListener("change", async function() {
+            const uploadedFile = this.files[0];
+            if (!uploadedFile) return;
+
+            // Instant local preview while the upload is in flight
+            const localPreview = new FileReader();
+            localPreview.onload = (event) => applyAvatar(event.target.result);
+            localPreview.readAsDataURL(uploadedFile);
+
+            try {
+                const formData = new FormData();
+                formData.append("avatar", uploadedFile);
+                const result = await apiUpload("/api/user/avatar", formData);
+
+                // Persist to cached user so dashboard.html picks it up immediately
+                const user = getCachedUser();
+                if (user) {
+                    user.avatarUrl = result.avatarUrl;
+                    setSession(getToken(), user);
+                }
+                applyAvatar(result.avatarUrl);
+            } catch (err) {
+                alert(err.message || "Failed to upload photo. Please try again.");
+            }
+        });
+
+        // UPDATE FILE NAME SELECTION FEEDBACK DISPLAY
+        kycDocumentInput.addEventListener("change", function() {
+            if(this.files.length > 0) {
+                uploadInstructions.textContent = "Selected Document Target:";
+                fileNameDisplay.textContent = `📄 ${this.files[0].name}`;
+            }
+        });
+
+        // SUBMIT KYC ROUTINE — in a real system this queues for manual admin review.
+        // This demo doesn't store the document itself, just flips status to "pending"
+        // so an admin can mark it verified from the admin panel.
+        document.getElementById("kycForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            try {
+                // Users can't self-verify — this just notifies that a document was submitted.
+                // An admin manually sets KYC status to "verified" from the admin panel.
+                alert("Document submitted for review. An admin will verify your identity shortly.");
+                window.location.href = "dashboard.html";
+            } catch (err) {
+                alert(err.message || "Failed to submit document.");
+            }
+        });
+
+        // SAVE PROFILE NAME (cosmetic — full name editing isn't wired to a dedicated
+        // endpoint yet; this just updates what's cached locally for this session)
+        document.getElementById("profileSettingsForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+            alert("Changes saved.");
+        });
+    });
+</script>
+    <script src="chat-widget.js"></script>
+</body>
+</html>

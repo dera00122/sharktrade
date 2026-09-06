@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Your Institutional Account — SharkTrade Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #000000;
+            color: #FFFFFF;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+
+        .split-screen {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        /* Left Side: Premium Media Banner Panel */
+        .left-banner {
+            flex: 1.2;
+            position: relative;
+            background: url('7729ff99e28af539a2959697b06dab30.jpg') no-repeat center center;
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 60px;
+        }
+
+        .left-banner::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, #000000 100%);
+            z-index: 1;
+        }
+
+        .banner-text-content {
+            position: relative;
+            z-index: 2;
+            max-width: 500px;
+        }
+
+        .banner-text-content h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            color: #FFFFFF;
+        }
+
+        .banner-text-content p {
+            color: #A0A5B1;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        /* Right Side: Identity Form Sheet Panel */
+        .right-form-panel {
+            flex: 1;
+            background-color: #050709;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding: 60px 80px;
+            position: relative;
+            overflow-y: auto;
+            max-height: 100vh;
+        }
+
+        .back-hub-btn {
+            position: absolute;
+            top: 40px;
+            right: 80px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #6C727F;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: color 0.2s;
+            z-index: 10;
+        }
+
+        .back-hub-btn:hover {
+            color: #c8a86a;
+        }
+
+        .form-container-box {
+            width: 100%;
+            max-width: 460px;
+            margin: auto auto;
+            padding-top: 20px;
+        }
+
+        .brand-header {
+            margin-bottom: 32px;
+        }
+
+        .brand-logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: #FFFFFF;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .brand-logo span {
+            color: #c8a86a;
+        }
+
+        .brand-header p {
+            color: #6C727F;
+            font-size: 0.95rem;
+        }
+
+        .registration-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-row-split {
+            display: flex;
+            gap: 16px;
+            width: 100%;
+        }
+
+        .form-row-split .input-wrapper {
+            flex: 1;
+        }
+
+        .input-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-wrapper label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #A0A5B1;
+        }
+
+        .input-field-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-field-container i {
+            position: absolute;
+            left: 16px;
+            color: #4A4E57;
+            font-size: 1rem;
+            transition: color 0.2s;
+            pointer-events: none;
+        }
+
+        .input-field-container input,
+        .input-field-container select {
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            padding: 14px 16px 14px 44px;
+            border-radius: 10px;
+            color: #FFFFFF;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.2s;
+            appearance: none;
+        }
+
+        .input-field-container select {
+            cursor: pointer;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%234A4E57' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+            background-repeat: no-repeat;
+            background-position: calc(100% - 16px) center;
+            background-size: 16px;
+        }
+
+        .input-field-container select option {
+            background-color: #050709;
+            color: #FFFFFF;
+        }
+
+        .input-field-container input:focus,
+        .input-field-container select:focus {
+            border-color: #c8a86a;
+            background-color: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 0 3px rgba(200, 168, 106, 0.15);
+        }
+
+        .input-field-container input:focus + i,
+        .input-field-container select:focus + i {
+            color: #c8a86a;
+        }
+
+        /* Security reCAPTCHA Shell Box Mockup */
+        .captcha-wrapper-box {
+            background-color: #0d1117;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 4px;
+        }
+
+        .captcha-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.9rem;
+            color: #E6EDF3;
+        }
+
+        .captcha-checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #484f58;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Dynamic Class for Captcha Simulation */
+        .captcha-checkbox.verified {
+            background-color: #00c853;
+            border-color: #00c853;
+            position: relative;
+        }
+        .captcha-checkbox.verified::after {
+            content: '';
+            position: absolute;
+            left: 7px; top: 3px;
+            width: 5px; height: 11px;
+            border: solid white;
+            border-width: 0 3px 3px 0;
+            transform: rotate(45deg);
+        }
+
+        .captcha-brand {
+            text-align: right;
+            font-size: 0.65rem;
+            color: #8b949e;
+            line-height: 1.3;
+        }
+
+        .captcha-brand i {
+            font-size: 1.1rem;
+            color: #1a73e8;
+            display: block;
+        }
+
+       
+        .disclosure-clause {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: #A0A5B1;
+            line-height: 1.5;
+            user-select: none;
+            margin-top: 4px;
+        }
+
+        .disclosure-clause input {
+            margin-top: 3px;
+            accent-color: #c8a86a;
+        }
+
+        .disclosure-clause a {
+            color: #c8a86a;
+            text-decoration: none;
+        }
+
+        .disclosure-clause a:hover {
+            text-decoration: underline;
+        }
+
+        /* Action Executions */
+        .submit-execution-btn {
+            background-color: #c8a86a;
+            color: #000000;
+            border: none;
+            padding: 16px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+            margin-top: 8px;
+            box-shadow: 0 8px 24px rgba(200, 168, 106, 0.2);
+        }
+
+        .submit-execution-btn:hover {
+            background-color: #e0bc7a;
+            transform: translateY(-1px);
+        }
+
+        .switch-portal-prompt {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #6C727F;
+            margin-top: 8px;
+            padding-bottom: 20px;
+        }
+
+        .switch-portal-prompt a {
+            color: #FFFFFF;
+            text-decoration: none;
+            font-weight: 700;
+            transition: color 0.2s;
+        }
+
+        .switch-portal-prompt a:hover {
+            color: #c8a86a;
+        }
+
+    
+        @media (max-width: 1024px) {
+            .right-form-panel {
+                padding: 40px 40px;
+            }
+            .back-hub-btn {
+                right: 40px;
+                top: 40px;
+            }
+        }
+
+        @media (max-width: 850px) {
+            .left-banner {
+                display: none;
+            }
+            .right-form-panel {
+                flex: 1;
+                min-height: 100vh;
+                padding: 60px 24px 40px 24px;
+            }
+            .back-hub-btn {
+                top: 24px;
+                right: 24px;
+            }
+            .form-row-split {
+                flex-direction: column;
+                gap: 20px;
+            }
+        }
+    </style>
+    <script src="api.js"></script>
+</head>
+<body>
+
+<div class="split-screen">
+    
+    <!-- LEFT PANEL: MEDIA ANCHOR -->
+    <aside class="left-banner">
+        <div class="banner-text-content">
+            <h2>Ride the Waves of Institutional Capital.</h2>
+            <p>Deploy secure system nodes, execute automated schemas, and monitor portfolio telemetry with zero frictional overhead.</p>
+        </div>
+    </aside>
+
+    <!-- RIGHT PANEL: REGISTRATION MATRIX -->
+    <main class="right-form-panel">
+        <a href="index.html" class="back-hub-btn"><i class="fa-solid fa-xmark"></i> Close</a>
+
+        <div class="form-container-box">
+            <header class="brand-header">
+                <div class="brand-logo">SharkTrade <span>Pro</span></div>
+                <p>Register to establish your digital wealth allocation node.</p>
+            </header>
+
+            <form class="registration-form" action="login.html" method="POST">
+                
+                <!-- ROW 1: Split Name Fields -->
+                <div class="form-row-split">
+                    <div class="input-wrapper">
+                        <label for="firstName">First Name</label>
+                        <div class="input-field-container">
+                            <input type="text" id="firstName" placeholder="e.g. Franklin" required autocomplete="given-name">
+                            <i class="fa-solid fa-id-card-clip"></i>
+                        </div>
+                    </div>
+                    <div class="input-wrapper">
+                        <label for="lastName">Last Name</label>
+                        <div class="input-field-container">
+                            <input type="text" id="lastName" placeholder="e.g. Chidera" required autocomplete="family-name">
+                            <i class="fa-solid fa-id-card"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ROW 2: Email -->
+                <div class="input-wrapper">
+                    <label for="emailAddress">Email Address</label>
+                    <div class="input-field-container">
+                        <input type="email" id="emailAddress" placeholder="fchidera398@gmail.com" required autocomplete="email">
+                        <i class="fa-solid fa-envelope-open"></i>
+                    </div>
+                </div>
+
+                <!-- ROW 3: Country Jurisdiction Selector -->
+                <div class="input-wrapper">
+                    <label for="countrySelect">Select Country</label>
+                    <div class="input-field-container">
+                        <select id="countrySelect" required>
+                            <option value="" disabled selected>Loading countries...</option>
+                        </select>
+                        <i class="fa-solid fa-earth-africa"></i>
+                    </div>
+                </div>
+
+                <!-- ROW 4: Affiliate Referral Tree Node -->
+                <div class="input-wrapper">
+                    <label for="referralCode">Referral Code (Optional)</label>
+                    <div class="input-field-container">
+                        <input type="text" id="referralCode" placeholder="LfUWDKOqsz">
+                        <i class="fa-solid fa-diagram-project"></i>
+                    </div>
+                </div>
+
+                <!-- ROW 5: Security Passphrases -->
+                <div class="input-wrapper">
+                    <label for="password">Password</label>
+                    <div class="input-field-container">
+                        <input type="password" id="password" placeholder="Enter security keys" minlength="8" required autocomplete="new-password">
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                </div>
+
+                <div class="input-wrapper">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <div class="input-field-container">
+                        <input type="password" id="confirmPassword" placeholder="Repeat security keys" minlength="8" required autocomplete="new-password">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                </div>
+
+                <!-- ROW 6: Google reCAPTCHA Verification Framework -->
+                <div class="captcha-wrapper-box">
+                    <div class="captcha-left">
+                        <div id="captchaBox" class="captcha-checkbox"></div>
+                        <span>I'm not a robot</span>
+                    </div>
+                    <div class="captcha-brand">
+                        <i class="fa-solid fa-arrows-rotate"></i>
+                        reCAPTCHA<br>Privacy - Terms
+                    </div>
+                </div>
+
+                <!-- ROW 7: Disclosures & Legal Sign-off -->
+                <label class="disclosure-clause">
+                    <input type="checkbox" id="legalAgree" required>
+                    <span>I explicitly agree with the system <a href="#">Privacy & Policy</a> and standard <a href="#">Terms & Conditions</a>.</span>
+                </label>
+
+                <!-- Trigger Submission -->
+                <button type="submit" class="submit-execution-btn">Create Account</button>
+
+                <p class="switch-portal-prompt">Already have an account? <a href="login.html">Login</a></p>
+            </form>
+        </div>
+    </main>
+</div>
+
+<!-- Form Processing & Validation Script -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // --- 0. PREFILL REFERRAL CODE FROM ?ref= QUERY PARAM ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const refFromUrl = urlParams.get('ref');
+        if (refFromUrl) {
+            const refField = document.getElementById('referralCode');
+            if (refField) refField.value = refFromUrl;
+        }
+
+        // --- 1. POPULATE JURISDICTIONS DYNAMICALLY ---
+        const countries = [
+            "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan",
+            "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi",
+            "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo (Congo-Brazzaville)", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czechia",
+            "Democratic Republic of the Congo", "Denmark", "Djibouti", "Dominica", "Dominican Republic",
+            "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia",
+            "Fiji", "Finland", "France",
+            "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana",
+            "Haiti", "Honduras", "Hungary",
+            "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Ivory Coast",
+            "Jamaica", "Japan", "Jordan",
+            "Kazakhstan", "Kenya", "Kiribati", "Kuwait", "Kyrgyzstan",
+            "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg",
+            "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar",
+            "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Korea", "North Macedonia", "Norway",
+            "Oman",
+            "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal",
+            "Qatar",
+            "Romania", "Russia", "Rwanda",
+            "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Korea", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria",
+            "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu",
+            "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan",
+            "Vanuatu", "Venezuela", "Vietnam",
+            "Yemen", "Zambia", "Zimbabwe"
+        ];
+
+        const selectElement = document.getElementById("countrySelect");
+        selectElement.innerHTML = '<option value="" disabled selected>Choose jurisdiction...</option>';
+
+        countries.forEach(country => {
+            let option = document.createElement("option");
+            option.value = country;
+            option.textContent = country;
+            selectElement.appendChild(option);
+        });
+
+        // --- 2. MOCK CAPTCHA SELECTION HANDLER ---
+        let isCaptchaVerified = false;
+        const captchaBox = document.getElementById('captchaBox');
+        if (captchaBox) {
+            captchaBox.addEventListener('click', function() {
+                isCaptchaVerified = !isCaptchaVerified;
+                if (isCaptchaVerified) {
+                    captchaBox.classList.add('verified');
+                } else {
+                    captchaBox.classList.remove('verified');
+                }
+            });
+        }
+
+        // --- 3. FORM VALIDATION & INTERCEPTION FLOW ---
+        const regForm = document.querySelector('.registration-form');
+        if (regForm) {
+            regForm.addEventListener('submit', async function(e) {
+                e.preventDefault(); // Stop raw refresh
+
+                const emailInput = document.getElementById('emailAddress').value.trim();
+                const passwordInput = document.getElementById('password').value;
+                const confirmPasswordInput = document.getElementById('confirmPassword').value;
+
+                // A. Strict Email Pattern Validation Layer (.com, .net, .org, etc required)
+                const emailStrictPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                if (!emailStrictPattern.test(emailInput)) {
+                    alert("Invalid Email Structure: Please include a complete domain extension (e.g., '.com', '.net').");
+                    return;
+                }
+
+                // B. Password Matching Check
+                if (passwordInput !== confirmPasswordInput) {
+                    alert("Security Check Failed: Passwords do not match. Please verify parameters.");
+                    return;
+                }
+
+                // C. Verification Verification Check
+                if (!isCaptchaVerified) {
+                    alert("Security Integrity Rule: Please complete the reCAPTCHA confirmation matrix.");
+                    return;
+                }
+
+                // D. Submit registration to backend
+                const submitBtn = document.querySelector('.submit-execution-btn');
+                submitBtn.disabled = true;
+                submitBtn.textContent = "Creating Account...";
+
+                try {
+                    const firstName = document.getElementById('firstName').value.trim();
+                    const lastName = document.getElementById('lastName').value.trim();
+                    const country = document.getElementById('countrySelect').value;
+                    const referralCode = document.getElementById('referralCode').value.trim();
+
+                    const data = await apiRequest('/api/auth/register', {
+                        method: 'POST',
+                        auth: false,
+                        body: {
+                            firstName, lastName, email: emailInput,
+                            password: passwordInput, country, referralCode
+                        }
+                    });
+
+                    setSession(data.token, data.user);
+                    window.location.href = "dashboard.html";
+                } catch (err) {
+                    alert(err.message || "Registration failed. Please try again.");
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "Create Account";
+                }
+            });
+        }
+    });
+</script>
+
+    <script src="chat-widget.js"></script>
+</body>
+</html>

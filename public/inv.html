@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="api.js"></script>
+    <style>
+        body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; padding: 20px; }
+        .container { max-width: 500px; margin: 0 auto; }
+        .card { background: #050709; border: 1px solid #c8a86a; padding: 25px; border-radius: 12px; }
+        h2 { color: #c8a86a; margin-bottom: 20px; }
+        .input-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; color: #888; font-size: 0.85rem; }
+        input, select { width: 100%; background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; box-sizing: border-box; }
+        .deposit-btn { width: 100%; background: #c8a86a; color: #000; padding: 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .deposit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .summary-box { background: #1a1a1a; padding: 15px; border-radius: 8px; margin-top: 20px; font-size: 0.9rem; }
+
+        .account-box {
+            background: #0d0f12; border: 1px dashed #c8a86a; border-radius: 10px;
+            padding: 16px; margin-top: 10px; font-size: 0.85rem; line-height: 1.5; color: #ddd;
+            word-break: break-word;
+        }
+        .account-box .copy-btn {
+            display: inline-block; margin-top: 10px; background: rgba(200,168,106,0.12);
+            color: #c8a86a; border: 1px solid rgba(200,168,106,0.3); padding: 6px 12px;
+            border-radius: 6px; font-size: 0.75rem; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="dashboard.html" style="color:#c8a86a; text-decoration:none; font-size: 0.85rem;">&larr; BACK</a>
+    <div class="card" style="margin-top: 15px;">
+        <h2>Deposit Funds</h2>
+        <p style="color:#888; font-size:0.8rem; margin-top:-14px; margin-bottom:18px;">Demo mode — no real payment is processed. Send funds to the account shown below, then submit — an admin will approve it in the dashboard.</p>
+
+        <form id="depositForm">
+            <div class="input-group">
+                <label>Payment Method</label>
+                <select id="method" required>
+                    <option value="">Loading methods...</option>
+                </select>
+            </div>
+
+            <div class="account-box" id="accountBox" style="display:none;">
+                <strong style="color:#c8a86a;">Send funds to:</strong>
+                <div id="accountDetailsText" style="margin-top: 8px;"></div>
+                <div class="copy-btn" onclick="copyAccountDetails()">Copy Details</div>
+            </div>
+
+            <div class="input-group" style="margin-top:20px;">
+                <label>Amount (USD)</label>
+                <input type="number" id="amount" placeholder="Min 50 USD" required oninput="calculateFee()">
+            </div>
+
+            <div class="summary-box" id="reviewSection" style="display: none;">
+                <p><strong>Review Details:</strong></p>
+                <p>Charge (1%): <span id="feeDisplay">0</span> USD</p>
+                <p>Total to Pay: <span id="totalDisplay">0</span> USD</p>
+                <label style="margin-top:14px;">Upload Payment Slip (demo — not stored)</label>
+                <input type="file">
+            </div>
+
+            <button type="button" class="deposit-btn" id="proceedBtn" onclick="showReview()">PROCEED TO PAYMENT</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    let paymentMethods = [];
+
+    function calculateFee() {
+        const amount = document.getElementById('amount').value;
+        const fee = amount * 0.01;
+        document.getElementById('feeDisplay').innerText = fee.toFixed(2);
+        document.getElementById('totalDisplay').innerText = (parseFloat(amount) + fee).toFixed(2);
+    }
+
+    function showAccountDetails() {
+        const methodId = document.getElementById('method').value;
+        const method = paymentMethods.find(m => String(m.id) === String(methodId));
+        const box = document.getElementById('accountBox');
+        if (!method) { box.style.display = 'none'; return; }
+        document.getElementById('accountDetailsText').textContent = method.account_details;
+        box.style.display = 'block';
+    }
+
+    function copyAccountDetails() {
+        const text = document.getElementById('accountDetailsText').textContent;
+        navigator.clipboard.writeText(text);
+        const btn = document.querySelector('.copy-btn');
+        const original = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = original, 1500);
+    }
+
+    function showReview() {
+        const amount = parseFloat(document.getElementById('amount').value);
+        const methodId = document.getElementById('method').value;
+        if (!methodId) { alert("Please select a payment method."); return; }
+        if (!amount || amount <= 0) {
+            alert("Please enter a valid amount.");
+            return;
+        }
+        document.getElementById('reviewSection').style.display = 'block';
+        document.getElementById('proceedBtn').innerText = 'CONFIRM DEPOSIT';
+        document.getElementById('proceedBtn').setAttribute('onclick', 'submitDeposit()');
+    }
+
+    async function submitDeposit() {
+        const methodId = document.getElementById('method').value;
+        const method = paymentMethods.find(m => String(m.id) === String(methodId));
+        const amount = parseFloat(document.getElementById('amount').value);
+        const btn = document.getElementById('proceedBtn');
+        btn.disabled = true;
+        btn.textContent = "Submitting...";
+
+        try {
+            await apiRequest('/api/user/deposits', {
+                method: 'POST',
+                body: { method: method ? method.name : 'Unknown', amount }
+            });
+            alert('Deposit request sent! Please await admin approval.');
+            window.location.href = 'deposit-log.html';
+        } catch (err) {
+            alert(err.message || 'Failed to submit deposit request.');
+            btn.disabled = false;
+            btn.textContent = 'CONFIRM DEPOSIT';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        if (!requireLogin()) return;
+
+        const select = document.getElementById('method');
+        try {
+            const { methods } = await apiRequest('/api/user/payment-methods');
+            paymentMethods = methods;
+            if (methods.length === 0) {
+                select.innerHTML = '<option value="">No payment methods available</option>';
+            } else {
+                select.innerHTML = methods.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+                showAccountDetails();
+            }
+        } catch (err) {
+            select.innerHTML = '<option value="">Failed to load methods</option>';
+        }
+
+        select.addEventListener('change', showAccountDetails);
+    });
+</script>
+
+    <script src="chat-widget.js"></script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Details | SharkTrade Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
+        .container { max-width: 450px; margin: 0 auto; }
+        .audit-card { background: #050709; border: 1px solid #333; border-radius: 12px; padding: 25px; }
+        .data-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #1a1a1a; font-size: 0.9rem; }
+        .label { color: #888; }
+        .value { color: #fff; font-weight: 600; }
+        .help-btn { width: 100%; padding: 15px; margin-top: 20px; background: transparent; border: 1px solid #c8a86a; color: #c8a86a; border-radius: 8px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="withdraw.html" style="color:#c8a86a; text-decoration:none;"><i class="fa-solid fa-arrow-left"></i> Back to Logs</a>
+    <h2 style="text-align:center; margin-top: 20px;">Transaction Audit</h2>
+
+    <div class="audit-card">
+        <div style="text-align:center; margin-bottom: 20px;">
+            <div class="label">Amount Transferred</div>
+            <div style="font-size: 2rem; font-weight: 700; color: #00e676;">$250.00</div>
+        </div>
+
+        <div class="data-row"><span class="label">Status</span> <span class="value">Completed</span></div>
+        <div class="data-row"><span class="label">Date</span> <span class="value">June 08, 2026</span></div>
+        <div class="data-row"><span class="label">TXID</span> <span class="value" style="color:#c8a86a;">WT123456789</span></div>
+        <div class="data-row"><span class="label">Network Fee</span> <span class="value">$0.00</span></div>
+        <div class="data-row"><span class="label">Recipient</span> <span class="value">BTC: 57e94c6...</span></div>
+
+        <button class="help-btn" onclick="window.location.href='mailto:support@sharktradepro.com'">NEED HELP WITH THIS?</button>
+    </div>
+</div>
+
+</body>
+</html>

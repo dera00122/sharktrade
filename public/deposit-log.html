@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deposit Logs | SharkTrade Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="api.js"></script>
+    <style>
+        body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; }
+        .container { max-width: 450px; margin: 20px auto; padding: 20px; }
+        
+        .log-card {
+            background: #050709;
+            border: 1px solid #1a1a1a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .log-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .method { font-weight: 700; color: #c8a86a; }
+        .status { font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; background: #1a1a1a; }
+        
+        .log-row { display: flex; justify-content: space-between; font-size: 0.85rem; padding: 5px 0; color: #888; }
+        .val { color: #fff; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="dashboard.html" style="color:#c8a86a; text-decoration:none; font-size: 0.8rem;"><i class="fa-solid fa-arrow-left"></i> BACK</a>
+    <h2 style="text-align:center; margin: 25px 0;">Deposit History</h2>
+
+    <div id="logContainer">
+        <p style="text-align:center; color:#666;">Loading...</p>
+    </div>
+</div>
+
+<script>
+    const statusColor = { pending: '#FFC107', approved: '#00E676', rejected: '#ff5252' };
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        if (!requireLogin()) return;
+        const container = document.getElementById('logContainer');
+        try {
+            const { transactions } = await apiRequest('/api/user/transactions?type=deposit');
+            if (transactions.length === 0) {
+                container.innerHTML = `<p style="text-align:center; color:#666; padding: 30px 0;">No deposits yet. <a href="inv.html" style="color:#c8a86a;">Make your first deposit</a>.</p>`;
+                return;
+            }
+            container.innerHTML = transactions.map(tx => `
+                <div class="log-card">
+                    <div class="log-header">
+                        <span class="method">${tx.method}</span>
+                        <span class="status" style="color:${statusColor[tx.status] || '#888'};">${tx.status.charAt(0).toUpperCase() + tx.status.slice(1)}</span>
+                    </div>
+                    <div class="log-row"><span>Amount</span> <span class="val">$${formatMoney(tx.amount)}</span></div>
+                    <div class="log-row"><span>Fee (1%)</span> <span class="val">$${formatMoney(tx.fee)}</span></div>
+                    <div class="log-row"><span>Date</span> <span class="val">${formatDate(tx.created_at)}</span></div>
+                </div>
+            `).join('');
+        } catch (err) {
+            container.innerHTML = `<p style="text-align:center; color:#ff5252;">Failed to load deposit history.</p>`;
+        }
+    });
+</script>
+
+</body>
+</html>

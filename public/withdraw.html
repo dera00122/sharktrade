@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdraw Profit | SharkTrade Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="api.js"></script>
+    <style>
+        body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; }
+        .container { max-width: 450px; margin: 0 auto; padding: 20px; }
+
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 10px; }
+        .tab { background: #1a1a1a; padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; border: 1px solid #333; }
+        .tab.active { background: #c8a86a; color: #000; font-weight: bold; }
+
+        .log-card { background: #050709; border: 1px solid #333; border-radius: 12px; padding: 20px; margin-bottom: 15px; }
+        .log-header { display: flex; justify-content: space-between; font-size: 0.75rem; color: #888; margin-bottom: 10px; }
+        .status { font-weight: 800; font-size: 0.7rem; padding: 4px 8px; border-radius: 4px; display: inline-block; }
+        .amount { font-size: 1.3rem; font-weight: 700; margin: 8px 0; }
+
+        .withdraw-card { background: #050709; border: 1px solid #c8a86a; border-radius: 12px; padding: 20px; margin-bottom: 25px; }
+        .withdraw-card label { display: block; font-size: 0.8rem; color: #888; margin-bottom: 6px; }
+        .withdraw-card select, .withdraw-card input {
+            width: 100%; background: #1a1a1a; border: 1px solid #333; color: #fff;
+            padding: 12px; border-radius: 8px; box-sizing: border-box; margin-bottom: 16px;
+        }
+        .withdraw-btn { width: 100%; padding: 14px; background: #c8a86a; border: none; border-radius: 8px; font-weight: 800; color: #000; cursor: pointer; }
+        .withdraw-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .available-note { font-size: 0.75rem; color: #666; margin: -10px 0 16px; }
+        .info-note { font-size: 0.78rem; color: #888; margin-top: -8px; margin-bottom: 18px; line-height: 1.4; }
+
+        .review-box { background: #0d0f12; border: 1px solid #333; border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+        .review-row { display: flex; justify-content: space-between; font-size: 0.85rem; padding: 6px 0; border-bottom: 1px solid #1a1a1a; }
+        .review-row:last-child { border-bottom: none; }
+        .review-row span:first-child { color: #888; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="dashboard.html" style="color:#c8a86a; text-decoration:none; font-size: 0.8rem;"><i class="fa-solid fa-arrow-left"></i> BACK</a>
+    <h2 style="text-align:center; margin: 20px 0 4px;">Withdraw Profit</h2>
+    <p style="text-align:center; color:#888; font-size:0.8rem; margin-top:0; margin-bottom:20px;">Cash out your investment earnings from your Profit Wallet.</p>
+
+    <!-- STEP 1: FORM -->
+    <div class="withdraw-card" id="formStep">
+        <label>Profit Wallet Balance</label>
+        <p class="available-note" id="availableBalance">Loading...</p>
+
+        <label>Amount (USD)</label>
+        <input type="number" id="amount" placeholder="0.00">
+
+        <label>Destination Wallet Address</label>
+        <input type="text" id="destination" placeholder="e.g. TXxxxxxxxxxxxxxxxxxx">
+
+        <p class="info-note">This amount stays in your Profit Wallet until an admin approves the request — nothing is deducted while it's pending.</p>
+
+        <button class="withdraw-btn" id="reviewBtn" onclick="showReview()">REVIEW WITHDRAWAL</button>
+    </div>
+
+    <!-- STEP 2: REVIEW -->
+    <div class="withdraw-card" id="reviewStep" style="display:none;">
+        <h3 style="margin-bottom: 14px; font-size: 1rem;">Review Your Request</h3>
+        <div class="review-box">
+            <div class="review-row"><span>From</span><span>Profit Wallet</span></div>
+            <div class="review-row"><span>Amount</span><span id="reviewAmount">$0.00</span></div>
+            <div class="review-row"><span>Destination</span><span id="reviewDestination" style="word-break: break-all; text-align:right; max-width: 220px;">—</span></div>
+        </div>
+        <p class="info-note">Double check the destination address — once approved by an admin, this can't be reversed.</p>
+        <button class="withdraw-btn" id="confirmBtn" onclick="submitWithdrawal()">CONFIRM WITHDRAWAL</button>
+        <button class="withdraw-btn" style="background:transparent; border:1px solid #444; color:#ccc; margin-top:10px;" onclick="backToForm()">Edit Request</button>
+    </div>
+
+    <h3 style="font-size:1rem; margin-bottom: 10px;">Withdrawal History</h3>
+    <div class="tabs">
+        <div class="tab active" data-status="all" onclick="filterLogs('all', this)">All</div>
+        <div class="tab" data-status="approved" onclick="filterLogs('approved', this)">Approved</div>
+        <div class="tab" data-status="pending" onclick="filterLogs('pending', this)">Pending</div>
+        <div class="tab" data-status="rejected" onclick="filterLogs('rejected', this)">Rejected</div>
+    </div>
+
+    <div id="log-container">
+        <p style="text-align:center; color:#666;">Loading...</p>
+    </div>
+</div>
+
+<script>
+    let allWithdrawals = [];
+    const statusColor = { pending: '#ffc107', approved: '#00e676', rejected: '#ff5252' };
+
+    function showReview() {
+        const amount = parseFloat(document.getElementById('amount').value);
+        const destination = document.getElementById('destination').value.trim();
+
+        if (!amount || amount <= 0) { alert('Please enter a valid amount.'); return; }
+        if (!destination) { alert('Please enter a destination wallet address.'); return; }
+
+        document.getElementById('reviewAmount').textContent = `$${formatMoney(amount)}`;
+        document.getElementById('reviewDestination').textContent = destination;
+
+        document.getElementById('formStep').style.display = 'none';
+        document.getElementById('reviewStep').style.display = 'block';
+    }
+
+    function backToForm() {
+        document.getElementById('reviewStep').style.display = 'none';
+        document.getElementById('formStep').style.display = 'block';
+    }
+
+    async function loadWithdrawals() {
+        const [{ transactions }, summary] = await Promise.all([
+            apiRequest('/api/user/transactions?type=withdraw'),
+            apiRequest('/api/user/summary')
+        ]);
+        allWithdrawals = transactions;
+        document.getElementById('availableBalance').textContent = `$${formatMoney(summary.profitBalance)} USD available`;
+        renderLogs('all');
+    }
+
+    function renderLogs(filter = 'all') {
+        const container = document.getElementById('log-container');
+        const rows = filter === 'all' ? allWithdrawals : allWithdrawals.filter(t => t.status === filter);
+
+        if (rows.length === 0) {
+            container.innerHTML = `
+                <div style="text-align:center; padding: 40px 20px; color: #888;">
+                    <i class="fa-solid fa-receipt" style="font-size: 2.5rem; margin-bottom: 15px; color: #333;"></i>
+                    <p>No withdrawals in this category yet.</p>
+                </div>`;
+            return;
+        }
+
+        container.innerHTML = rows.map(tx => `
+            <div class="log-card">
+                <div class="log-header"><span>TX #${tx.id}</span> <span>${formatDate(tx.created_at)}</span></div>
+                <div class="status" style="background: ${statusColor[tx.status]}1A; color: ${statusColor[tx.status]};">
+                    ${tx.status.toUpperCase()}
+                </div>
+                <div class="amount">$${formatMoney(tx.amount)} USD</div>
+                <div style="font-size: 0.85rem; color:#888;">From: <strong style="color:#fff;">Profit Wallet</strong></div>
+                <div style="font-size: 0.85rem; color:#888;">To: <strong style="color:#fff; word-break: break-all;">${tx.destination || '—'}</strong></div>
+            </div>
+        `).join('');
+    }
+
+    function filterLogs(status, el) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        renderLogs(status);
+    }
+
+    async function submitWithdrawal() {
+        const amount = parseFloat(document.getElementById('amount').value);
+        const destination = document.getElementById('destination').value.trim();
+        const btn = document.getElementById('confirmBtn');
+
+        btn.disabled = true;
+        btn.textContent = 'Submitting...';
+
+        try {
+            await apiRequest('/api/user/withdrawals', {
+                method: 'POST',
+                body: { amount, destination }
+            });
+            alert('Withdrawal request submitted. It will show as Pending until an admin reviews it.');
+            document.getElementById('amount').value = '';
+            document.getElementById('destination').value = '';
+            backToForm();
+            await loadWithdrawals();
+        } catch (err) {
+            alert(err.message || 'Failed to submit withdrawal.');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'CONFIRM WITHDRAWAL';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if (!requireLogin()) return;
+        loadWithdrawals().catch(() => {
+            document.getElementById('log-container').innerHTML = `<p style="text-align:center; color:#ff5252;">Failed to load withdrawal history.</p>`;
+        });
+    });
+</script>
+    <script src="chat-widget.js"></script>
+</body>
+</html>

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transfer | SharkTrade Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="api.js"></script>
+    <style>
+        body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; }
+        .container { max-width: 450px; margin: 0 auto; padding: 20px; }
+
+        .card { background: #050709; border: 1px solid #333; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        .card label { display: block; font-size: 0.8rem; color: #888; margin-bottom: 6px; margin-top: 14px; }
+        .card label:first-child { margin-top: 0; }
+        .card select, .card input {
+            width: 100%; background: #1a1a1a; border: 1px solid #333; color: #fff;
+            padding: 12px; border-radius: 8px; box-sizing: border-box; font-size: 0.9rem;
+        }
+
+        .toggle-row { display: flex; gap: 10px; margin-top: 6px; }
+        .toggle-btn {
+            flex: 1; padding: 10px; text-align: center; border-radius: 8px; border: 1px solid #333;
+            background: #1a1a1a; color: #aaa; cursor: pointer; font-size: 0.85rem;
+        }
+        .toggle-btn.active { background: #c8a86a; color: #000; font-weight: 700; border-color: #c8a86a; }
+
+        .action-btn { width: 100%; padding: 14px; background: #c8a86a; border: none; border-radius: 8px; font-weight: 800; color: #000; cursor: pointer; margin-top: 20px; }
+        .action-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .action-btn.outline { background: transparent; border: 1px solid #444; color: #ccc; margin-top: 10px; }
+
+        .available-note { font-size: 0.75rem; color: #666; margin-top: -6px; }
+        .info-note { font-size: 0.78rem; color: #888; margin-top: 14px; line-height: 1.4; }
+
+        .review-row { display: flex; justify-content: space-between; font-size: 0.85rem; padding: 8px 0; border-bottom: 1px solid #1a1a1a; }
+        .review-row:last-child { border-bottom: none; }
+        .review-row span:first-child { color: #888; }
+        .review-row span:last-child { text-align: right; max-width: 220px; word-break: break-word; }
+
+        .log-card { background: #050709; border: 1px solid #333; border-radius: 12px; padding: 18px; margin-bottom: 12px; }
+        .log-header { display: flex; justify-content: space-between; font-size: 0.75rem; color: #888; margin-bottom: 8px; }
+        .status { font-weight: 800; font-size: 0.7rem; padding: 4px 8px; border-radius: 4px; display: inline-block; }
+        .amount { font-size: 1.15rem; font-weight: 700; margin: 6px 0; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="dashboard.html" style="color:#c8a86a; text-decoration:none; font-size: 0.8rem;"><i class="fa-solid fa-arrow-left"></i> BACK</a>
+    <h2 style="text-align:center; margin: 20px 0 4px;">Transfer</h2>
+    <p style="text-align:center; color:#888; font-size:0.8rem; margin-top:0; margin-bottom:20px;">Send funds from any wallet to your bank account or an external crypto wallet.</p>
+
+    <!-- STEP 1: SOURCE + AMOUNT -->
+    <div class="card" id="step1">
+        <label>From Wallet</label>
+        <select id="sourceWallet">
+            <option value="main">Main Wallet</option>
+            <option value="profit">Profit Wallet</option>
+        </select>
+        <p class="available-note" id="availableNote">Loading balances...</p>
+
+        <label>Amount (USD)</label>
+        <input type="number" id="amount" placeholder="0.00">
+
+        <button class="action-btn" onclick="goToStep(2)">CONTINUE</button>
+    </div>
+
+    <!-- STEP 2: DESTINATION DETAILS -->
+    <div class="card" id="step2" style="display:none;">
+        <label style="margin-top:0;">Send To</label>
+        <div class="toggle-row">
+            <div class="toggle-btn active" id="bankToggle" onclick="setDestType('bank')">Bank Account</div>
+            <div class="toggle-btn" id="cryptoToggle" onclick="setDestType('crypto')">Crypto Wallet</div>
+        </div>
+
+        <div id="bankFields">
+            <label>Bank Name</label>
+            <input type="text" id="bankName" placeholder="e.g. GTBank">
+            <label>Account Name</label>
+            <input type="text" id="accountName" placeholder="e.g. Franklin Chidera">
+            <label>Account Number</label>
+            <input type="text" id="accountNumber" placeholder="e.g. 0123456789">
+            <label>Routing / SWIFT Code (optional)</label>
+            <input type="text" id="swiftCode" placeholder="e.g. GTBINGLA">
+        </div>
+
+        <div id="cryptoFields" style="display:none;">
+            <label>Network</label>
+            <select id="cryptoNetwork">
+                <option value="USDT (TRC20)">USDT (TRC20)</option>
+                <option value="Bitcoin (BTC)">Bitcoin (BTC)</option>
+                <option value="Ethereum (ERC20)">Ethereum (ERC20)</option>
+            </select>
+            <label>Wallet Address</label>
+            <input type="text" id="walletAddress" placeholder="e.g. TXxxxxxxxxxxxxxxxxxx">
+        </div>
+
+        <button class="action-btn" onclick="goToReview()">REVIEW TRANSFER</button>
+        <button class="action-btn outline" onclick="goToStep(1)">Back</button>
+    </div>
+
+    <!-- STEP 3: REVIEW -->
+    <div class="card" id="step3" style="display:none;">
+        <h3 style="margin-bottom: 6px; font-size: 1rem;">Review Your Transfer</h3>
+        <div id="reviewRows"></div>
+        <p class="info-note">This amount stays in your wallet until an admin approves the transfer — nothing is deducted while it's pending.</p>
+        <button class="action-btn" id="confirmBtn" onclick="submitTransfer()">CONFIRM TRANSFER</button>
+        <button class="action-btn outline" onclick="goToStep(2)">Edit Details</button>
+    </div>
+
+    <h3 style="font-size:1rem; margin-bottom: 10px;">Transfer History</h3>
+    <div id="log-container">
+        <p style="text-align:center; color:#666;">Loading...</p>
+    </div>
+</div>
+
+<script>
+    let mainBalance = 0, profitBalance = 0;
+    let destType = 'bank';
+
+    function goToStep(n) {
+        document.getElementById('step1').style.display = n === 1 ? 'block' : 'none';
+        document.getElementById('step2').style.display = n === 2 ? 'block' : 'none';
+        document.getElementById('step3').style.display = n === 3 ? 'block' : 'none';
+
+        if (n === 2) {
+            const amount = parseFloat(document.getElementById('amount').value);
+            const source = document.getElementById('sourceWallet').value;
+            const available = source === 'main' ? mainBalance : profitBalance;
+            if (!amount || amount <= 0) { alert('Please enter a valid amount.'); goToStep(1); return; }
+            if (amount > available) { alert(`Insufficient ${source} wallet balance. Available: $${formatMoney(available)}`); goToStep(1); return; }
+        }
+    }
+
+    function setDestType(type) {
+        destType = type;
+        document.getElementById('bankToggle').classList.toggle('active', type === 'bank');
+        document.getElementById('cryptoToggle').classList.toggle('active', type === 'crypto');
+        document.getElementById('bankFields').style.display = type === 'bank' ? 'block' : 'none';
+        document.getElementById('cryptoFields').style.display = type === 'crypto' ? 'block' : 'none';
+    }
+
+    function getDetails() {
+        if (destType === 'bank') {
+            return {
+                bankName: document.getElementById('bankName').value.trim(),
+                accountName: document.getElementById('accountName').value.trim(),
+                accountNumber: document.getElementById('accountNumber').value.trim(),
+                swiftCode: document.getElementById('swiftCode').value.trim()
+            };
+        }
+        return {
+            network: document.getElementById('cryptoNetwork').value,
+            walletAddress: document.getElementById('walletAddress').value.trim()
+        };
+    }
+
+    function goToReview() {
+        const details = getDetails();
+        if (destType === 'bank' && (!details.bankName || !details.accountName || !details.accountNumber)) {
+            alert('Please fill in bank name, account name, and account number.');
+            return;
+        }
+        if (destType === 'crypto' && !details.walletAddress) {
+            alert('Please enter a wallet address.');
+            return;
+        }
+
+        const amount = parseFloat(document.getElementById('amount').value);
+        const source = document.getElementById('sourceWallet').value;
+
+        const rows = [
+            ['From', source === 'main' ? 'Main Wallet' : 'Profit Wallet'],
+            ['Amount', `$${formatMoney(amount)}`],
+            ['Destination Type', destType === 'bank' ? 'Bank Account' : 'Crypto Wallet']
+        ];
+        if (destType === 'bank') {
+            rows.push(['Bank Name', details.bankName], ['Account Name', details.accountName], ['Account Number', details.accountNumber]);
+            if (details.swiftCode) rows.push(['SWIFT/Routing', details.swiftCode]);
+        } else {
+            rows.push(['Network', details.network], ['Wallet Address', details.walletAddress]);
+        }
+
+        document.getElementById('reviewRows').innerHTML = rows.map(([k, v]) =>
+            `<div class="review-row"><span>${k}</span><span>${v}</span></div>`
+        ).join('');
+
+        goToStep(3);
+    }
+
+    async function submitTransfer() {
+        const amount = parseFloat(document.getElementById('amount').value);
+        const source = document.getElementById('sourceWallet').value;
+        const details = getDetails();
+        const btn = document.getElementById('confirmBtn');
+
+        btn.disabled = true;
+        btn.textContent = 'Submitting...';
+
+        try {
+            await apiRequest('/api/user/payouts', {
+                method: 'POST',
+                body: { source, amount, destinationType: destType, details }
+            });
+            alert('Transfer request submitted. It will show as Pending until an admin reviews it.');
+            window.location.href = 'dashboard.html';
+        } catch (err) {
+            alert(err.message || 'Failed to submit transfer.');
+            btn.disabled = false;
+            btn.textContent = 'CONFIRM TRANSFER';
+        }
+    }
+
+    function renderDestination(destinationRaw) {
+        try {
+            const d = JSON.parse(destinationRaw);
+            if (d.type === 'bank') return `${d.bankName} — ${d.accountNumber}`;
+            return `${d.network || 'Crypto'} — ${d.walletAddress}`;
+        } catch {
+            return destinationRaw || '—';
+        }
+    }
+
+    async function loadLog() {
+        const statusColor = { pending: '#ffc107', approved: '#00e676', rejected: '#ff5252' };
+        const container = document.getElementById('log-container');
+        try {
+            const { transactions } = await apiRequest('/api/user/transactions?type=payout');
+            if (transactions.length === 0) {
+                container.innerHTML = `<p style="text-align:center; color:#666; padding:20px 0;">No transfers yet.</p>`;
+                return;
+            }
+            container.innerHTML = transactions.map(tx => `
+                <div class="log-card">
+                    <div class="log-header"><span>TX #${tx.id}</span> <span>${formatDate(tx.created_at)}</span></div>
+                    <div class="status" style="background: ${statusColor[tx.status]}1A; color: ${statusColor[tx.status]};">${tx.status.toUpperCase()}</div>
+                    <div class="amount">$${formatMoney(tx.amount)} USD</div>
+                    <div style="font-size:0.85rem; color:#888;">From: <strong style="color:#fff;">${tx.method}</strong></div>
+                    <div style="font-size:0.85rem; color:#888;">To: <strong style="color:#fff;">${renderDestination(tx.destination)}</strong></div>
+                </div>
+            `).join('');
+        } catch {
+            container.innerHTML = `<p style="text-align:center; color:#ff5252;">Failed to load transfer history.</p>`;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        if (!requireLogin()) return;
+        try {
+            const summary = await apiRequest('/api/user/summary');
+            mainBalance = summary.mainBalance;
+            profitBalance = summary.profitBalance;
+            updateAvailableNote();
+        } catch { /* handled below via log load failure too */ }
+
+        document.getElementById('sourceWallet').addEventListener('change', updateAvailableNote);
+        function updateAvailableNote() {
+            const source = document.getElementById('sourceWallet').value;
+            const available = source === 'main' ? mainBalance : profitBalance;
+            document.getElementById('availableNote').textContent = `$${formatMoney(available)} USD available`;
+        }
+
+        loadLog();
+    });
+</script>
+    <script src="chat-widget.js"></script>
+</body>
+</html>

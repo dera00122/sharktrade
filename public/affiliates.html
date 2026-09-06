@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Plans | SharkTrade</title>
+    <style>
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #14171C; 
+            color: #FFFFFF;
+            overflow-x: hidden;
+        }
+
+        /* --- FULL HEADER PHOTO COVER WRAPPER --- */
+        .header-photo-cover-wrapper {
+            width: 100%;
+            min-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            
+            background: linear-gradient(rgba(20, 23, 28, 0.85), rgba(20, 23, 28, 0.92)), 
+                        url('https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=1600&auto=format&fit=crop') no-repeat center center;
+            background-size: cover;
+            background-attachment: scroll;
+        }
+
+        /* --- NAVIGATION HEADER --- */
+        .affiliate-nav {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .brand-logo {
+            color: #FFFFFF;
+            font-size: 1.5rem;
+            font-weight: 800;
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-actions .register-btn {
+            background-color: #c8a86a; 
+            color: #14171C;
+            text-decoration: none;
+            font-weight: 700;
+            padding: 10px 24px;
+            border-radius: 999px;
+            font-size: 0.9rem;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .nav-actions .register-btn:hover {
+            transform: translateY(-1px);
+            background-color: #dec491;
+        }
+
+        /* --- HERO TEXT BLOCK --- */
+        .hero-centered-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 60px 24px;
+        }
+
+        .hero-headline {
+            font-size: 3.2rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            line-height: 1.15;
+            letter-spacing: -1.5px;
+            margin-bottom: 24px;
+        }
+
+        .hero-description {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #A0A5B1;
+            max-width: 600px;
+            margin-bottom: 40px;
+        }
+
+        .cta-pill-btn {
+            background-color: #c8a86a; 
+            color: #14171C;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1rem;
+            padding: 16px 44px;
+            border-radius: 999px;
+            transition: background-color 0.2s, transform 0.2s;
+            box-shadow: 0 4px 15px rgba(200, 168, 106, 0.2);
+        }
+
+        .cta-pill-btn:hover {
+            background-color: #dec491;
+            transform: scale(1.03);
+        }
+
+        /* --- HOW IT WORKS EDITORIAL SYSTEM  --- */
+        .process-flow-section {
+            background-color: #FFFFFF; 
+            color: #14171C;
+            padding: 120px 24px;
+        }
+
+        .process-title {
+            text-align: center;
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 90px;
+            letter-spacing: -1px;
+        }
+
+        .steps-stack-wrapper {
+            max-width: 720px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 64px;
+        }
+
+        .step-row {
+            display: grid;
+            grid-template-columns: 100px 1fr;
+            align-items: flex-start;
+            gap: 24px;
+        }
+
+        .step-number-box {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .step-index {
+            font-size: 3.8rem;
+            font-weight: 400;
+            color: #c8a86a;
+            line-height: 0.9;
+            letter-spacing: -2px;
+        }
+
+        .step-label {
+            font-size: 1.1rem;
+            font-weight: 800;
+            margin-top: 8px;
+            color: #14171C;
+            letter-spacing: -0.3px;
+        }
+
+        .step-body-text {
+            font-size: 1.15rem;
+            line-height: 1.65;
+            color: #333333;
+            padding-top: 2px;
+        }
+
+        /* --- ALGORITHM POLICY NOTE PANEL --- */
+        .algo-note-container {
+            background-color: #F5F5F7;
+            border-left: 4px solid #c8a86a;
+            border-radius: 16px;
+            padding: 36px;
+            margin-top: 32px;
+        }
+
+        .algo-note-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #c8a86a;
+            margin-bottom: 12px;
+        }
+
+        .algo-note-body {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #14171C;
+            font-weight: 600;
+        }
+
+        /* --- CLOSING LOWER ACTION SECTION --- */
+        .lower-conversion-bar {
+            background-color: #14171C;
+            padding: 100px 24px;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .lower-conversion-bar h3 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 36px;
+            letter-spacing: -0.5px;
+        }
+
+        .global-register-btn {
+            display: inline-block;
+            background-color: #c8a86a;
+            color: #14171C;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 18px 52px;
+            border-radius: 999px;
+            transition: transform 0.2s, background-color 0.2s;
+            box-shadow: 0 4px 15px rgba(200, 168, 106, 0.2);
+        }
+
+        .global-register-btn:hover {
+            transform: scale(1.03);
+            background-color: #dec491;
+        }
+
+        /* --- RESPONSIVE SCREEN ADJUSTMENTS --- */
+        @media (min-width: 768px) {
+            .hero-headline {
+                font-size: 4.2rem;
+            }
+            .step-row {
+                gap: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Continuous photo-backed header background wrapper -->
+    <div class="header-photo-cover-wrapper">
+        
+        <!-- Navigation Header over the background photo -->
+        <nav class="affiliate-nav">
+            <a href="index.html" class="brand-logo">SharkTrade</a>
+            <div class="nav-actions">
+                <a href="register.html" class="register-btn">Sign Up</a>
+            </div>
+        </nav>
+
+        <!-- Centered Investment Hero Content Area -->
+        <header class="hero-centered-container">
+            <h1 class="hero-headline">Smart Investing Made Simple.</h1>
+            <p class="hero-description">
+                Put your capital to work with automated precision. Explore robust, high-performance investment plans designed to maximize your returns systematically.
+                </p>
+            <a href="register.html" class="cta-pill-btn">Get Started</a>
+        </header>
+
+    </div>
+
+    <main>
+       
+        <section class="process-flow-section">
+            <h2 class="process-title">How it works</h2>
+
+            <div class="steps-stack-wrapper">
+                <!-- Step 1 -->
+                <div class="step-row">
+                    <div class="step-number-box">
+                        <span class="step-index">01</span>
+                        <span class="step-label">Select</span>
+                    </div>
+                    <div class="step-body-text">
+                        An investor chooses a trading plan such as $1000, $5000, $10000, 1BTC, etc.
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="step-row">
+                    <div class="step-number-box">
+                        <span class="step-index">02</span>
+                        <span class="step-label">Fund</span>
+                    </div>
+                    <div class="step-body-text">
+                        Deposit their investment through our available methods of payment such as Bitcoin.
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="step-row">
+                    <div class="step-number-box">
+                        <span class="step-index">03</span>
+                        <span class="step-label">Optimize</span>
+                    </div>
+                    <div class="step-body-text">
+                        We have high-tech P-T bots that manipulate the normal Relibie signal giving us maximum profits.
+                    </div>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="step-row">
+                    <div class="step-number-box">
+                        <span class="step-index">04</span>
+                        <span class="step-label">Share</span>
+                    </div>
+                    <div class="step-body-text">
+                        We use the same amount to earn our profit too where we get 15% of what you earn.
+                    </div>
+                </div>
+
+                <!-- Step 5 -->
+                <div class="step-row">
+                    <div class="step-number-box">
+                        <span class="step-index">05</span>
+                        <span class="step-label">Payout</span>
+                    </div>
+                    <div class="step-body-text">
+                        Once your profit is ready we ask you for your receiving account details for payment and dispatch your profit immediately to your account.
+                    </div>
+                </div>
+
+                <!-- Algorithm Assurance System Note Box -->
+                <div class="algo-note-container">
+                    <div class="algo-note-title">Note</div>
+                    <p class="algo-note-body">
+                        Our algorithm is always accurate. We do not gamble and take no risks at all. We ensure our clients get 100% profit for our survival.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Lower conversion register action section -->
+        <section class="lower-conversion-bar">
+            <h3>Ready to get started?</h3>
+            <a href="register.html" class="global-register-btn">Register Now</a>
+        </section>
+    </main>
+
+</body>
+</html>

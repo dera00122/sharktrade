@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="api.js"></script>
+    <style>
+        body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
+        .container { max-width: 450px; margin: 0 auto; }
+        .ref-card { background: #050709; border: 1px solid #333; border-radius: 12px; padding: 25px; text-align: center; }
+        .ref-link-box { background: #1a1a1a; padding: 15px; border-radius: 8px; margin: 20px 0; border: 1px dashed #c8a86a; color: #c8a86a; font-family: monospace; cursor: pointer; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .stat-box { background: #1a1a1a; padding: 15px; border-radius: 8px; }
+        .stat-value { font-size: 1.2rem; font-weight: bold; color: #c8a86a; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="dashboard.html" style="color:#c8a86a; text-decoration:none; font-size: 0.8rem;"><i class="fa-solid fa-arrow-left"></i> BACK</a>
+    <h2 style="text-align:center; margin-top: 15px;">Referral Program</h2>
+
+    <div class="ref-card">
+        <p style="color:#888;">Share your link and earn 5% on every deposit your referrals make.</p>
+
+        <div class="ref-link-box" id="refLinkBox" onclick="copyLink()">
+            Loading... <i class="fa-solid fa-copy" style="margin-left: 10px;"></i>
+        </div>
+
+        <div class="stat-grid">
+            <div class="stat-box">
+                <div style="font-size: 0.7rem; color: #888;">TOTAL EARNED</div>
+                <div class="stat-value" id="totalEarned">$0.00</div>
+            </div>
+            <div class="stat-box">
+                <div style="font-size: 0.7rem; color: #888;">REFERRALS</div>
+                <div class="stat-value" id="totalReferrals">0</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div style="margin-top: 30px;">
+    <h3 style="font-size: 1rem; color: #fff; margin-bottom: 10px;">Recent Referrals</h3>
+    <table style="width: 100%; border-collapse: collapse; background: #050709; border-radius: 8px; overflow: hidden;">
+        <thead>
+            <tr style="background: #1a1a1a; text-align: left; font-size: 0.8rem; color: #888;">
+                <th style="padding: 12px;">User</th>
+                <th style="padding: 12px;">Status</th>
+                <th style="padding: 12px;">Earnings</th>
+            </tr>
+        </thead>
+        <tbody style="font-size: 0.85rem;" id="referralsTableBody">
+            <tr><td style="padding: 12px; color:#666;" colspan="3">Loading...</td></tr>
+        </tbody>
+    </table>
+</div>
+<script>
+    let refLink = "";
+
+    function copyLink() {
+        if (!refLink) return;
+        navigator.clipboard.writeText(refLink);
+        alert("Referral link copied to clipboard!");
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        if (!requireLogin()) return;
+        try {
+            const data = await apiRequest('/api/user/referrals');
+            refLink = `${window.location.origin}/register.html?ref=${data.referralCode}`;
+
+            document.getElementById('refLinkBox').innerHTML = `${refLink} <i class="fa-solid fa-copy" style="margin-left: 10px;"></i>`;
+            document.getElementById('totalEarned').textContent = `$${formatMoney(data.totalEarned)}`;
+            document.getElementById('totalReferrals').textContent = data.totalReferrals;
+
+            const tbody = document.getElementById('referralsTableBody');
+            if (data.referrals.length === 0) {
+                tbody.innerHTML = `<tr><td style="padding: 12px; color:#666;" colspan="3">No referrals yet. Share your link above!</td></tr>`;
+            } else {
+                tbody.innerHTML = data.referrals.map(r => `
+                    <tr style="border-bottom: 1px solid #1a1a1a;">
+                        <td style="padding: 12px;">${r.first_name} ${r.last_name}</td>
+                        <td style="padding: 12px; color: ${r.status === 'paid' ? '#00e676' : '#ffc107'};">${r.status === 'paid' ? 'Active' : 'Pending'}</td>
+                        <td style="padding: 12px;">$${formatMoney(r.bonus_amount)}</td>
+                    </tr>
+                `).join('');
+            }
+        } catch (err) {
+            document.getElementById('refLinkBox').textContent = 'Failed to load referral data.';
+        }
+    });
+</script>
+    <script src="chat-widget.js"></script>
+</body>
+</html>

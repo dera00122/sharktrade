@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet Exchange | SharkTrade Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="api.js"></script>
+    <style>
+        body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; }
+        .container { max-width: 450px; margin: 20px auto; padding: 20px; }
+        
+        .transfer-card {
+            background: #050709;
+            border: 1px solid #1a1a1a;
+            border-radius: 12px;
+            padding: 25px;
+        }
+
+        .label { font-size: 0.75rem; color: #888; text-transform: uppercase; margin-bottom: 5px; }
+        .input-box {
+            width: 100%;
+            background: #000;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+
+        .summary-row { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 10px; }
+        
+        .action-btn {
+            width: 100%; padding: 14px; background: #c8a86a; border: none;
+            border-radius: 8px; font-weight: 800; cursor: pointer; margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="dashboard.html" style="color:#c8a86a; text-decoration:none;"><i class="fa-solid fa-arrow-left"></i> BACK</a>
+    <h2 style="text-align:center; margin: 25px 0;">Wallet Exchange</h2><p style="text-align:center; color:#888; font-size:0.8rem; margin-top:-18px; margin-bottom:20px;">Instantly move funds between your Main and Profit wallets.</p>
+
+    <div class="transfer-card">
+        <div class="label">From</div>
+        <select class="input-box" id="fromWallet">
+            <option value="profit">Profit Wallet</option>
+            <option value="main">Main Wallet</option>
+        </select>
+
+        <div class="label">To</div>
+        <select class="input-box" id="toWallet">
+            <option value="main">Main Wallet</option>
+            <option value="profit">Profit Wallet</option>
+        </select>
+
+        <div class="label">Amount (USD)</div>
+        <input type="number" class="input-box" id="amount" placeholder="0.00">
+
+        <div class="summary-row"><span>Fee</span> <strong>$0.00</strong></div>
+        <div class="summary-row"><span>Total Receive</span> <strong id="totalReceive">$0.00</strong></div>
+
+        <button class="action-btn" id="transferBtn" onclick="submitTransfer()">CONFIRM TRANSFER</button>
+    </div>
+</div>
+
+<script>
+    document.getElementById('amount').addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value) || 0;
+        document.getElementById('totalReceive').textContent = `$${val.toFixed(2)}`;
+    });
+
+    // Keep from/to from matching each other
+    document.getElementById('fromWallet').addEventListener('change', syncWallets);
+    document.getElementById('toWallet').addEventListener('change', syncWallets);
+    function syncWallets() {
+        const from = document.getElementById('fromWallet');
+        const to = document.getElementById('toWallet');
+        if (from.value === to.value) {
+            to.value = from.value === 'main' ? 'profit' : 'main';
+        }
+    }
+
+    async function submitTransfer() {
+        const from = document.getElementById('fromWallet').value;
+        const to = document.getElementById('toWallet').value;
+        const amount = parseFloat(document.getElementById('amount').value);
+        const btn = document.getElementById('transferBtn');
+
+        if (!amount || amount <= 0) {
+            alert('Please enter a valid amount.');
+            return;
+        }
+        if (from === to) {
+            alert('Source and destination wallets must be different.');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Processing...';
+
+        try {
+            await apiRequest('/api/user/transfer', { method: 'POST', body: { from, to, amount } });
+            alert('Transfer completed.');
+            window.location.href = 'dashboard.html';
+        } catch (err) {
+            alert(err.message || 'Transfer failed.');
+            btn.disabled = false;
+            btn.textContent = 'CONFIRM TRANSFER';
+        }
+    }
+
+    if (!requireLogin()) { /* redirected */ }
+</script>
+
+    <script src="chat-widget.js"></script>
+</body>
+</html>

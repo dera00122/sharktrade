@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — SharkTrade Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /*1. CORE ENGINE & RESET */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #000000;
+            color: #FFFFFF;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track { background: #000000; }
+        ::-webkit-scrollbar-thumb { background: #1F242E; border-radius: 10px; }
+
+        /*2 TOP NAVIGATION BAR Header*/
+        .top-navbar {
+            background-color: #050709;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar-brand .logo {
+            font-size: 1.3rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .navbar-brand .logo span { color: #c8a86a; }
+
+        .navbar-user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background-color: rgba(255, 255, 255, 0.03);
+            padding: 6px 14px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .navbar-user-profile:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+            border-color: #c8a86a;
+        }
+
+        .avatar-badge {
+            width: 28px;
+            height: 28px;
+            background-color: #12161A;
+            border-radius: 50%;
+            border: 1px solid #c8a86a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #c8a86a;
+            font-weight: 700;
+            font-size: 0.8rem;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .username {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #E6EDF3;
+        }
+
+        /*3. CENTRAL CONTAINER LAYOUT */
+        .dashboard-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Verification Warning Banner */
+        .verification-alert-banner {
+            background: linear-gradient(90deg, rgba(200, 168, 106, 0.1) 0%, rgba(5, 7, 9, 0.4) 100%);
+            border: 1px solid rgba(200, 168, 106, 0.2);
+            border-radius: 12px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .alert-text-side {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #E6EDF3;
+        }
+
+        .alert-text-side i { color: #c8a86a; font-size: 1.1rem; }
+
+        .action-submit-link {
+            color: #c8a86a;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 700;
+            background-color: rgba(200, 168, 106, 0.1);
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .action-submit-link:hover { background-color: #c8a86a; color: #000000; }
+
+        /* Dual Wallet Layout */
+        .dual-wallet-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .wallet-display-card {
+            background-color: #050709;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 14px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .wallet-display-card.highlighted {
+            border-color: rgba(200, 168, 106, 0.3);
+            background: linear-gradient(145deg, #050709 0%, rgba(200, 168, 106, 0.02) 100%);
+        }
+
+        .wallet-label-meta {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6C727F;
+        }
+
+        .wallet-value-numeric {
+            font-size: 1.35rem;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+        }
+
+        .wallet-value-numeric span { color: #c8a86a; }
+
+        /*Statistics Analytics Row Strip */
+        .analytics-strip-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            background-color: #050709;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .analytics-metric-box {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .analytics-metric-box:not(:last-child) {
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .analytics-title { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #6C727F; }
+        .analytics-value { font-size: 0.9rem; font-weight: 700; color: #FFFFFF; }
+        .analytics-value.profit-green { color: #00E676; }
+
+        /*Actions Row Row */
+        .pillar-actions-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .pillar-btn {
+            background-color: #050709;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: #FFFFFF;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+
+        .pillar-btn i { font-size: 1.2rem; color: #c8a86a; }
+        .pillar-btn:hover { background-color: rgba(200, 168, 106, 0.05); border-color: #c8a86a; }
+
+        /*Referral Inline Widget Component */
+        .referral-share-widget {
+            background-color: #050709;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .ref-header-label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #A0A5B1; }
+        
+        .ref-input-container {
+            display: flex;
+            background-color: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 8px;
+            overflow: hidden;
+            padding: 4px;
+        }
+
+        .ref-link-text {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #6C727F;
+            font-size: 0.8rem;
+            padding-left: 10px;
+            font-weight: 600;
+        }
+
+        .ref-copy-btn {
+            background-color: rgba(200, 168, 106, 0.1);
+            color: #c8a86a;
+            border: 1px solid rgba(200, 168, 106, 0.15);
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .ref-copy-btn:hover { background-color: #c8a86a; color: #000000; }
+
+        /*Responsive Matrix Navigation */
+        .navigation-grid-menu {
+            background-color: #050709;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            overflow: hidden;
+        }
+
+        @media(min-width: 400px) {
+            .navigation-grid-menu { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        .grid-menu-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 20px 10px;
+            color: #A0A5B1;
+            text-decoration: none;
+            font-size: 0.78rem;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            border-right: 1px solid rgba(255, 255, 255, 0.04);
+            transition: all 0.2s;
+        }
+
+        .grid-menu-item i { font-size: 1.3rem; color: #E6EDF3; }
+        .grid-menu-item:hover { background-color: rgba(255, 255, 255, 0.02); color: #c8a86a; }
+
+        /* TradingView Widget Wrapper */
+        .tradingview-widget-wrapper {
+            background-color: #050709;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .widget-header-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: -0.2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .widget-header-title span {
+            width: 8px;
+            height: 8px;
+            background-color: #00E676;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 8px #00E676;
+        }
+
+        .tradingview-widget-container { width: 100%; height: 300px; border-radius: 8px; overflow: hidden; }
+
+        /*  Asset Management Activity Logs Sheet */
+        .log-sheet-card {
+            background-color: #050709;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .log-section-title { font-size: 0.9rem; font-weight: 700; color: #FFFFFF; letter-spacing: -0.2px; }
+        
+        .log-rows-container { display: flex; flex-direction: column; gap: 12px; }
+
+        .log-row-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        .log-row-item:last-child { border-bottom: none; padding-bottom: 0; }
+
+        .log-meta-left { display: flex; align-items: center; gap: 12px; }
+        
+        .log-icon-frame {
+            width: 36px;
+            height: 36px;
+            background-color: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            color: #A0A5B1;
+        }
+        .log-icon-frame.deposit { color: #00E676; background-color: rgba(0, 230, 118, 0.05); }
+
+        .log-details { display: flex; flex-direction: column; gap: 2px; }
+        .log-action-title { font-size: 0.82rem; font-weight: 700; color: #E6EDF3; }
+        .log-timestamp { font-size: 11px; color: #6C727F; font-weight: 600; }
+
+        .log-amount-right { text-align: right; display: flex; flex-direction: column; gap: 2px; }
+        .log-numeric-value { font-size: 0.85rem; font-weight: 700; color: #FFFFFF; }
+        .log-numeric-value.plus-green { color: #00E676; }
+        .log-status-badge { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #6C727F; }
+        .log-status-badge.pending-orange { color: #FF9100; }
+    </style>
+    <script src="api.js"></script>
+</head>
+<body>
+
+<header class="top-navbar">
+    <div class="navbar-brand">
+        <div class="logo">SharkTrade <span>Pro</span></div>
+    </div>
+    <a href="settings.html" class="navbar-user-profile">
+        <div class="avatar-badge" id="dashNavAvatar">C</div>
+        <span class="username">Franklin Chidera</span>
+    </a>
+</header>
+
+<main class="dashboard-container">
+
+    <section class="verification-alert-banner" id="identityBanner">
+        <div class="alert-text-side">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>Please Verify Your Identity</span>
+        </div>
+        <a href="settings.html" class="action-submit-link">Submit Now</a>
+    </section>
+
+    <section class="dual-wallet-grid">
+        <div class="wallet-display-card">
+            <span class="wallet-label-meta">Main Wallet</span>
+            <div class="wallet-value-numeric" id="mainWalletValue">0.00 <span>USD</span></div>
+        </div>
+        <div class="wallet-display-card highlighted">
+            <span class="wallet-label-meta">Profit Wallet</span>
+            <div class="wallet-value-numeric" id="profitWalletValue">0.00 <span>USD</span></div>
+        </div>
+    </section>
+
+    <section class="analytics-strip-row">
+        <div class="analytics-metric-box">
+            <span class="analytics-title">Total Invested</span>
+            <span class="analytics-value" id="totalInvestedValue">$0.00</span>
+        </div>
+        <div class="analytics-metric-box">
+            <span class="analytics-title">Total Earned</span>
+            <span class="analytics-value profit-green" id="totalEarnedValue">+$0.00</span>
+        </div>
+        <div class="analytics-metric-box">
+            <span class="analytics-title">Avg. ROI</span>
+            <span class="analytics-value profit-green" id="avgRoiValue">0.00%</span>
+        </div>
+    </section>
+
+    <section class="pillar-actions-row">
+        <a href="inv.html" class="pillar-btn"><i class="fa-solid fa-circle-plus"></i> Deposit</a>
+        <a href="investment.html" class="pillar-btn"><i class="fa-solid fa-chart-pie"></i> Investment</a>
+        <a href="withdraw.html" class="pillar-btn"><i class="fa-solid fa-circle-minus"></i> Withdraw</a>
+    </section>
+
+    <section class="referral-share-widget">
+        <span class="ref-header-label">Investor Referral System</span>
+        <div class="ref-input-container">
+            <input type="text" class="ref-link-text" id="refLinkInput" value="" readonly>
+            <button class="ref-copy-btn" id="refCopyBtn">Copy Link</button>
+        </div>
+    </section>
+
+    <section class="navigation-grid-menu">
+        <a href="schemas.html" class="grid-menu-item"><i class="fa-solid fa-layer-group" style="color:#c8a86a;"></i> Schemas</a>
+        
+<a href="external-transfer.html" class="grid-menu-item">
+    <i class="fa-solid fa-money-bill-transfer"></i> Transfer
+</a>
+        <a href="invest-log.html" class="grid-menu-item"><i class="fa-solid fa-list-check"></i> Invest Log</a>
+        <a href="deposit-log.html" class="grid-menu-item"><i class="fa-solid fa-receipt"></i> Deposit Log</a>
+        <a href="withdraw.html" class="grid-menu-item"><i class="fa-solid fa-clock-history"></i> Withdraw Log</a>
+        <a href="transfer.html" class="grid-menu-item"><i class="fa-solid fa-arrow-right-arrow-left"></i> Wallet Exch.</a>
+        <a href="referral.html" class="grid-menu-item"><i class="fa-solid fa-users-viewfinder"></i> Referral</a>
+        
+        <a href="vip.html" class="grid-menu-item"><i class="fa-solid fa-satellite-dish" style="color:#c8a86a;"></i> Market Signals</a>
+        
+        <a href="support-ticket.html" class="grid-menu-item"><i class="fa-solid fa-headset"></i> Support Ticket</a>
+        <a href="settings.html" class="grid-menu-item"><i class="fa-solid fa-gears" style="color:#c8a86a;"></i> Settings</a>
+        <a href="javascript:void(0)" onclick="logout()" class="grid-menu-item"><i class="fa-solid fa-arrow-right-from-bracket" style="color:#ff5252;"></i> Logout</a>
+    </section>
+
+    <section class="tradingview-widget-wrapper">
+        <div class="widget-header-title">
+            <span></span> BTCUSD Crypto Market Terminal
+        </div>
+        <div class="tradingview-widget-container">
+            <div id="tradingview_crypto_node" style="width:100%; height:100%;"></div>
+            <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+            <script type="text/javascript">
+                new TradingView.widget({
+                    "width": "100%",
+                    "height": "100%",
+                    "symbol": "BINANCE:BTCUSD",
+                    "interval": "D",
+                    "timezone": "Etc/UTC",
+                    "theme": "dark",
+                    "style": "1",
+                    "locale": "en",
+                    "enable_publishing": false,
+                    "hide_side_toolbar": true,
+                    "allow_symbol_change": false,
+                    "container_id": "tradingview_crypto_node",
+                    "backgroundColor": "#050709",
+                    "gridColor": "rgba(255, 255, 255, 0.02)"
+                });
+            </script>
+        </div>
+    </section>
+
+    <section class="log-sheet-card">
+        <h3 class="log-section-title">Recent Activity Logs</h3>
+        <div class="log-rows-container" id="recentActivityContainer">
+            <p style="color:#666; font-size:0.85rem; text-align:center; padding:20px 0;">Loading...</p>
+        </div>
+    </section>
+
+</main>
+
+<script>
+    function logout() {
+        clearSession();
+        window.location.href = "login.html";
+    }
+
+    document.addEventListener("DOMContentLoaded", async function() {
+        if (!requireLogin()) return;
+
+        const cachedUser = getCachedUser();
+        const usernameEl = document.querySelector(".username");
+        const topNavAvatar = document.getElementById("dashNavAvatar");
+        if (cachedUser) {
+            usernameEl.textContent = `${cachedUser.firstName} ${cachedUser.lastName}`;
+            topNavAvatar.textContent = cachedUser.firstName.charAt(0).toUpperCase();
+        }
+
+        // 1. Identity verification banner reflects real KYC status
+        const banner = document.getElementById("identityBanner");
+
+        // 2. Referral link
+        const refLinkInput = document.getElementById("refLinkInput");
+        const refCopyBtn = document.getElementById("refCopyBtn");
+        if (refCopyBtn && refLinkInput) {
+            refCopyBtn.addEventListener("click", function() {
+                refLinkInput.select();
+                refLinkInput.setSelectionRange(0, 99999);
+                navigator.clipboard.writeText(refLinkInput.value);
+
+                refCopyBtn.textContent = "Copied!";
+                refCopyBtn.style.backgroundColor = "#00E676";
+                refCopyBtn.style.color = "#000000";
+                refCopyBtn.style.borderColor = "#00E676";
+
+                setTimeout(() => {
+                    refCopyBtn.textContent = "Copy Link";
+                    refCopyBtn.style.backgroundColor = "rgba(200, 168, 106, 0.1)";
+                    refCopyBtn.style.color = "#c8a86a";
+                    refCopyBtn.style.borderColor = "rgba(200, 168, 106, 0.2)";
+                }, 2000);
+            });
+        }
+
+        // 3. Load live data from the backend (also called on a timer to reflect auto profit ticks)
+        async function loadDashboard() {
+            try {
+                const [{ user }, summary, { investments }, { transactions }] = await Promise.all([
+                    apiRequest("/api/auth/me"),
+                    apiRequest("/api/user/summary"),
+                    apiRequest("/api/user/investments"),
+                    apiRequest("/api/user/transactions")
+                ]);
+
+                setSession(getToken(), user); // refresh cached user with latest balances
+
+                document.getElementById("mainWalletValue").innerHTML = `${formatMoney(summary.mainBalance)} <span>USD</span>`;
+                document.getElementById("profitWalletValue").innerHTML = `${formatMoney(summary.profitBalance)} <span>USD</span>`;
+
+                if (user.kycStatus === "verified" && banner) banner.style.display = "none";
+
+                refLinkInput.value = `${window.location.origin}/register.html?ref=${user.referralCode}`;
+
+                if (summary.avatarUrl) {
+                    topNavAvatar.style.backgroundImage = `url('${summary.avatarUrl}')`;
+                    topNavAvatar.style.backgroundSize = "cover";
+                    topNavAvatar.style.backgroundPosition = "center";
+                    topNavAvatar.textContent = "";
+                }
+
+                const totalInvested = investments.reduce((s, i) => s + i.amount, 0);
+                const totalEarned = investments.reduce((s, i) => s + i.total_profit, 0);
+                const avgRoi = investments.length
+                    ? investments.reduce((s, i) => s + i.daily_roi, 0) / investments.length
+                    : 0;
+
+                document.getElementById("totalInvestedValue").textContent = `$${formatMoney(totalInvested)}`;
+                document.getElementById("totalEarnedValue").textContent = `+$${formatMoney(totalEarned)}`;
+                document.getElementById("avgRoiValue").textContent = `${avgRoi.toFixed(2)}%`;
+
+                // Recent activity: last 5 transactions across all types
+                const container = document.getElementById("recentActivityContainer");
+                const recent = transactions.slice(0, 5);
+
+                if (recent.length === 0) {
+                    container.innerHTML = `<p style="color:#666; font-size:0.85rem; text-align:center; padding:20px 0;">No activity yet. Make your first deposit to get started.</p>`;
+                } else {
+                    const iconMap = {
+                        deposit: "fa-arrow-trend-up", withdraw: "fa-arrow-trend-down",
+                        transfer: "fa-money-bill-transfer", payout: "fa-building-columns", investment: "fa-chart-pie",
+                        roi_credit: "fa-coins", referral_bonus: "fa-users"
+                    };
+                    const labelMap = {
+                        deposit: "Deposit", withdraw: "Profit Withdrawal", transfer: "Wallet Exchange", payout: "Transfer to Bank/Wallet",
+                        investment: "Investment", roi_credit: "Investment Profit Yield", referral_bonus: "Referral Bonus"
+                    };
+                    const statusColor = { pending: "#FFC107", approved: "#00E676", rejected: "#ff5252", completed: "#00E676" };
+
+                    container.innerHTML = recent.map(tx => `
+                        <div class="log-row-item">
+                            <div class="log-meta-left">
+                                <div class="log-icon-frame" style="color:#c8a86a; background:rgba(200,168,106,0.05);">
+                                    <i class="fa-solid ${iconMap[tx.type] || 'fa-receipt'}"></i>
+                                </div>
+                                <div class="log-details">
+                                    <span class="log-action-title">${labelMap[tx.type] || tx.type} ${tx.method ? '— ' + tx.method : ''}</span>
+                                    <span class="log-timestamp">${formatDate(tx.created_at)}</span>
+                                </div>
+                            </div>
+                            <div class="log-amount-right">
+                                <span class="log-numeric-value plus-green">${['withdraw', 'payout'].includes(tx.type) ? '-' : '+'}$${formatMoney(tx.amount)}</span>
+                                <span class="log-status-badge" style="color:${statusColor[tx.status] || '#888'};">${tx.status.toUpperCase()}</span>
+                            </div>
+                        </div>
+                    `).join("");
+                }
+            } catch (err) {
+                console.error("Failed to load dashboard data", err);
+            }
+        }
+
+        await loadDashboard();
+        // Re-poll periodically so Profit Wallet / Total Earned reflect the server's
+        // automatic ROI ticks (every 30 min by default) without needing a manual refresh.
+        setInterval(loadDashboard, 60 * 1000);
+    });
+</script>
+
+    <script src="chat-widget.js"></script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal | SharkTrade Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="api.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            background: #000; color: #fff; font-family: 'Segoe UI', sans-serif;
+            margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        .card {
+            width: 100%; max-width: 380px; background: #050709; border: 1px solid rgba(200,168,106,0.3);
+            border-radius: 14px; padding: 32px 26px;
+        }
+        .badge {
+            display: inline-flex; align-items: center; gap: 6px; background: rgba(200,168,106,0.1);
+            color: #c8a86a; font-size: 0.7rem; font-weight: 700; padding: 5px 12px; border-radius: 20px;
+            margin-bottom: 18px; letter-spacing: 0.5px;
+        }
+        h2 { margin: 0 0 6px; font-size: 1.3rem; }
+        p.subtitle { color: #888; font-size: 0.82rem; margin: 0 0 24px; }
+        label { display: block; font-size: 0.8rem; color: #888; margin-bottom: 6px; }
+        input {
+            width: 100%; background: #1a1a1a; border: 1px solid #333; color: #fff;
+            padding: 12px; border-radius: 8px; margin-bottom: 18px; font-size: 0.9rem;
+        }
+        .submit-btn {
+            width: 100%; padding: 13px; background: #c8a86a; border: none; border-radius: 8px;
+            font-weight: 800; color: #000; cursor: pointer; font-size: 0.9rem;
+        }
+        .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .note { font-size: 0.72rem; color: #555; text-align: center; margin-top: 20px; line-height: 1.5; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <span class="badge"><i class="fa-solid fa-shield-halved"></i> ADMIN PORTAL</span>
+    <h2>Admin Sign In</h2>
+    <p class="subtitle">This portal is for authorized administrators only.</p>
+
+    <form id="adminLoginForm">
+        <label for="email">Email</label>
+        <input type="email" id="email" required>
+
+        <label for="password">Password</label>
+        <input type="password" id="password" required>
+
+        <button type="submit" class="submit-btn" id="submitBtn">Sign In</button>
+    </form>
+
+    <p class="note">Not an admin? <a href="login.html" style="color:#c8a86a;">Go to the regular sign-in page</a>.</p>
+</div>
+
+<script>
+    document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const btn = document.getElementById('submitBtn');
+
+        btn.disabled = true;
+        btn.textContent = 'Signing in...';
+
+        try {
+            const data = await apiRequest('/api/auth/login', {
+                method: 'POST',
+                auth: false,
+                body: { email, password }
+            });
+
+            if (data.user.role !== 'admin') {
+                alert('This account is not an admin account. Please use the regular sign-in page.');
+                btn.disabled = false;
+                btn.textContent = 'Sign In';
+                return;
+            }
+
+            setSession(data.token, data.user);
+            window.location.href = 'admin.html';
+        } catch (err) {
+            alert(err.message || 'Sign in failed. Please check your credentials.');
+            btn.disabled = false;
+            btn.textContent = 'Sign In';
+        }
+    });
+</script>
+
+</body>
+</html>

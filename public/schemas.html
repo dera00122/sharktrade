@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Plans Overview | SharkTrade Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="api.js"></script>
+    <script src="chat-widget.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+
+        .plan-card {
+            background: #050709; border: 1px solid #333; border-radius: 14px;
+            padding: 22px; margin-bottom: 18px;
+        }
+        .plan-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .plan-name { font-size: 1.15rem; font-weight: 800; color: #c8a86a; }
+        .plan-roi-badge { background: rgba(0,230,118,0.12); color: #00e676; font-size: 0.8rem; font-weight: 700; padding: 5px 12px; border-radius: 20px; }
+
+        .plan-detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 14px; margin-bottom: 18px; }
+        .plan-detail-item .label { font-size: 0.68rem; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+        .plan-detail-item .value { font-size: 0.95rem; font-weight: 700; color: #fff; margin-top: 3px; }
+
+        .projection-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-top: 6px; }
+        .projection-table th { text-align: left; color: #888; font-weight: 600; padding: 8px 6px; border-bottom: 1px solid #222; }
+        .projection-table td { padding: 8px 6px; border-bottom: 1px solid #16191d; color: #ddd; }
+        .projection-table td.profit { color: #00e676; font-weight: 700; }
+
+        .invest-btn {
+            width: 100%; padding: 12px; margin-top: 16px; background: #c8a86a;
+            border: none; border-radius: 8px; color: #000; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 0.8rem;
+        }
+
+        .calc-bar {
+            display: flex; align-items: center; gap: 10px; margin-bottom: 26px; flex-wrap: wrap;
+            background: #0d0f12; border: 1px solid #333; border-radius: 12px; padding: 14px 18px;
+        }
+        .calc-bar label { font-size: 0.8rem; color: #888; }
+        .calc-bar input {
+            background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 8px 12px;
+            border-radius: 8px; width: 140px; font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="dashboard.html" style="color:#c8a86a; text-decoration:none; font-size: 0.85rem;">&larr; BACK TO DASHBOARD</a>
+    <h2 style="margin: 20px 0 4px;">Investment Plans Overview</h2>
+    <p style="color:#888; font-size:0.85rem; margin-top:0; margin-bottom:22px;">Full breakdown of every plan — daily ROI, platform fees, lock-in periods, and projected returns.</p>
+
+    <div class="calc-bar">
+        <label>Calculate projected returns for:</label>
+        <input type="number" id="calcAmount" value="1000" min="0">
+        <span style="color:#888; font-size:0.8rem;">USD hypothetical deposit</span>
+    </div>
+
+    <div id="plansContainer">
+        <p style="text-align:center; color:#666;">Loading plans...</p>
+    </div>
+</div>
+
+<script>
+    let plans = [];
+
+    function projectedProfit(plan, amount, days) {
+        return amount * (plan.daily_roi / 100) * days;
+    }
+
+    function renderPlans() {
+        const amount = parseFloat(document.getElementById('calcAmount').value) || 0;
+        const container = document.getElementById('plansContainer');
+
+        if (plans.length === 0) {
+            container.innerHTML = `<p style="text-align:center; color:#666;">No investment plans are currently available.</p>`;
+            return;
+        }
+
+        container.innerHTML = plans.map(plan => {
+            const day7 = projectedProfit(plan, amount, 7);
+            const day30 = projectedProfit(plan, amount, 30);
+            const day90 = projectedProfit(plan, amount, 90);
+            const fee = plan.fee_percent || 0;
+            const lockDays = plan.lock_days || 0;
+
+            return `
+                <div class="plan-card">
+                    <div class="plan-header">
+                        <span class="plan-name">${plan.name}</span>
+                        <span class="plan-roi-badge">${plan.daily_roi}% / day</span>
+                    </div>
+
+                    <div class="plan-detail-grid">
+                        <div class="plan-detail-item">
+                            <div class="label">Investment Range</div>
+                            <div class="value">$${formatMoney(plan.min_amount)}${plan.max_amount ? ' - $' + formatMoney(plan.max_amount) : '+'}</div>
+                        </div>
+                        <div class="plan-detail-item">
+                            <div class="label">Platform Fee</div>
+                            <div class="value">${fee}%</div>
+                        </div>
+                        <div class="plan-detail-item">
+                            <div class="label">Lock-in Period</div>
+                            <div class="value">${lockDays > 0 ? lockDays + ' days' : 'None'}</div>
+                        </div>
+                        <div class="plan-detail-item">
+                            <div class="label">Profit Withdrawal</div>
+                            <div class="value">${plan.withdrawal_type === 'daily' ? 'Daily' : 'Every 48hrs'}</div>
+                        </div>
+                    </div>
+
+                    <table class="projection-table">
+                        <thead>
+                            <tr><th>Period</th><th>Projected Profit</th><th>After Fee</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>7 days</td>
+                                <td class="profit">+$${formatMoney(day7)}</td>
+                                <td>+$${formatMoney(day7 * (1 - fee / 100))}</td>
+                            </tr>
+                            <tr>
+                                <td>30 days</td>
+                                <td class="profit">+$${formatMoney(day30)}</td>
+                                <td>+$${formatMoney(day30 * (1 - fee / 100))}</td>
+                            </tr>
+                            <tr>
+                                <td>90 days</td>
+                                <td class="profit">+$${formatMoney(day90)}</td>
+                                <td>+$${formatMoney(day90 * (1 - fee / 100))}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <p style="font-size:0.7rem; color:#666; margin-top:10px;">
+                        Projections assume a constant daily rate and are for illustration only — actual results depend on account activity. Platform fee shown is deducted from profit, not principal.
+                    </p>
+
+                    <a href="investment.html"><button class="invest-btn">Invest in ${plan.name}</button></a>
+                </div>
+            `;
+        }).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        if (!requireLogin()) return;
+        try {
+            const data = await apiRequest('/api/user/plans');
+            plans = data.plans;
+            renderPlans();
+        } catch (err) {
+            document.getElementById('plansContainer').innerHTML = `<p style="text-align:center; color:#ff5252;">Failed to load investment plans.</p>`;
+        }
+
+        document.getElementById('calcAmount').addEventListener('input', renderPlans);
+    });
+</script>
+
+</body>
+</html>

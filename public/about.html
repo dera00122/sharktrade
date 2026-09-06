@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us | SharkTrade</title>
+    <style>
+       
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #1E2229; 
+            color: #FFFFFF;
+            overflow-x: hidden;
+            padding-bottom: 0;
+        }
+
+        /* --- BLACK HERO WRAPPER CONTAINING NAVIGATION --- */
+        .hero-master-container {
+            position: relative;
+            width: 100%;
+            height: 70vh;
+            min-height: 500px;
+            background-color: #000000; 
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- NAVIGATION INSIDE BLACK HEADER --- */
+        .about-nav {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .brand-logo {
+            color: #FFFFFF;
+            font-size: 1.5rem;
+            font-weight: 800;
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .nav-login-btn {
+            color: #A0A5B1;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        .nav-login-btn:hover {
+            color: #c8a86a;
+        }
+
+        .nav-signup-btn {
+            background-color: #c8a86a; 
+            color: #14171C;
+            text-decoration: none;
+            font-weight: 700;
+            padding: 10px 20px;
+            border-radius: 999px;
+            font-size: 0.9rem;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .nav-signup-btn:hover {
+            transform: translateY(-1px);
+            background-color: #dec491;
+        }
+
+        /* --- HERO TEXT INNER BLOCK --- */
+        .hero-text-frame {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 0 24px 60px 24px;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            max-width: 800px;
+            line-height: 1.25;
+            letter-spacing: -1px;
+            z-index: 2;
+        }
+
+        /* --- ANIMATED GRID LINES --- */
+        .matrix-grid {
+            position: absolute;
+            top: -10%;
+            left: -10%;
+            width: 120%;
+            height: 120%;
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            opacity: 0.45;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .matrix-tick {
+            width: 2px;
+            height: 24px;
+            background-color: #FFFFFF;
+            margin: auto;
+            border-radius: 2px;
+            transform: rotate(0deg);
+            animation: rippleRotate 6s ease-in-out infinite;
+        }
+
+        .matrix-grid div:nth-child(4n) .matrix-tick { animation-delay: 1.5s; }
+        .matrix-grid div:nth-child(4n+1) .matrix-tick { animation-delay: 3s; }
+        .matrix-grid div:nth-child(4n+2) .matrix-tick { animation-delay: 4.5s; }
+
+        @keyframes rippleRotate {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(45deg); }
+            50% { transform: rotate(-45deg); }
+            75% { transform: rotate(15deg); }
+        }
+
+        /* --- VALUES CAROUSEL DECK --- */
+        .values-intro-section {
+            max-width: 1200px;
+            margin: 80px auto 30px auto;
+            padding: 0 24px;
+            text-align: center;
+        }
+
+        .values-headline {
+            font-size: 1.8rem;
+            font-weight: 700;
+            line-height: 1.4;
+            max-width: 900px;
+            margin: 0 auto;
+            color: #FFFFFF;
+        }
+
+        .carousel-outer-container {
+            max-width: 1200px;
+            margin: 0 auto 80px auto;
+            position: relative;
+        }
+
+        
+        .carousel-viewframe {
+            width: 100%;
+            padding: 20px 24px;
+            overflow-x: auto;
+            display: flex;
+            gap: 24px;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            scrollbar-width: none; 
+        }
+
+        .carousel-viewframe::-webkit-scrollbar {
+            display: none; 
+        }
+
+        
+        .value-card {
+            flex: 0 0 calc(100% - 16px); 
+            background-color: #14171C; 
+            border: 1px solid rgba(200, 168, 106, 0.12);
+            border-radius: 24px;
+            padding: 32px;
+            scroll-snap-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            height: 520px; 
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .value-card:hover {
+            transform: translateY(-4px);
+            border-color: #c8a86a;
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .card-top h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            line-height: 1.2;
+        }
+
+        .action-plus-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #c8a86a;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .card-graphic-box {
+            width: 100%;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #c8a86a;
+            opacity: 0.85;
+            margin-bottom: 20px;
+        }
+
+        .card-graphic-box svg {
+            width: 70px;
+            height: 70px;
+        }
+
+        .card-body-text {
+            color: #A0A5B1;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            overflow: hidden;
+        }
+
+        .card-body-text strong {
+            color: #FFFFFF;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.05rem;
+        }
+
+        /* --- CAROUSEL SLIDE DOTS INDICATOR --- */
+        .carousel-dots-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 32px;
+        }
+
+        .slide-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.2);
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .slide-dot.active-dot {
+            background-color: #c8a86a;
+            transform: scale(1.3);
+        }
+
+        /* --- DESKTOP AND TABLET RESPONSIVE CAROUSEL SLIDES --- */
+        @media (min-width: 600px) {
+            .value-card {
+                flex: 0 0 360px; 
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .hero-title { font-size: 3.5rem; }
+            .values-headline { font-size: 2.2rem; }
+            .value-card {
+                flex: 0 0 380px;
+            }
+        }
+
+        /* --- BOTTOM CALL TO ACTION BLOCK --- */
+        .join-system-section {
+            background-color: #000000;
+            width: 100%;
+            padding: 100px 24px;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .join-headline {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            max-width: 600px;
+            margin: 0 auto 36px auto;
+            line-height: 1.25;
+            letter-spacing: -0.5px;
+        }
+
+        .join-cta-btn {
+            display: inline-block;
+            background-color: #c8a86a;
+            color: #14171C;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1rem;
+            padding: 16px 36px;
+            border-radius: 999px;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .join-cta-btn:hover {
+            transform: scale(1.03);
+            background-color: #dec491;
+        }
+
+        @media (min-width: 768px) {
+            .join-headline {
+                font-size: 3.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Section Background Frame -->
+    <div class="hero-master-container">
+        <div class="matrix-grid" id="matrixGrid"></div>
+        
+        <nav class="about-nav">
+            <a href="index.html" class="brand-logo">SharkTrade</a>
+            <div class="nav-actions">
+                <a href="#login" class="nav-login-btn">Log in</a>
+                <a href="#register" class="nav-signup-btn">Sign up</a>
+            </div>
+        </nav>
+
+        <header class="hero-text-frame">
+            <h1 class="hero-title">We’re on a mission to democratize finance for all.</h1>
+        </header>
+    </div>
+
+    <main>
+        <section class="values-intro-section">
+            <h2 class="values-headline">At SharkTrade, our values are in service of our customers. We strive to uphold our values every day.</h2>
+        </section>
+
+        <!-- Values Card Grid Slider System -->
+        <div class="carousel-outer-container">
+            <div class="carousel-viewframe" id="valuesCarousel">
+
+                <!-- Card 1: Insane Customer Focus -->
+                <a href="#register" class="value-card">
+                    <div class="card-top">
+                        <h3>Insane Customer Focus</h3>
+                        <span class="action-plus-icon">+</span>
+                    </div>
+                    <div class="card-graphic-box">
+                        <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.2">
+                            <polygon points="50,15 85,40 50,65 15,40" />
+                            <polygon points="50,35 70,50 50,65 30,50" />
+                            <line x1="50" y1="65" x2="50" y2="90" />
+                        </svg>
+                    </div>
+                    <p class="card-body-text">
+                        <strong>Our customers are why we exist.</strong> We listen to them, design for their needs, and aim to make our user experience elegant and intuitive. We put what’s best for customers at the center of decision-making, bringing them the best in technology coupled with real value. When there are customer pain points, we fix them quickly.
+                    </p>
+                </a>
+
+                <!-- Card 2: High Performance -->
+                <a href="#register" class="value-card">
+                    <div class="card-top">
+                        <h3>High Performance</h3>
+                        <span class="action-plus-icon">+</span>
+                    </div>
+                    <div class="card-graphic-box">
+                        <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.2">
+                            <circle cx="40" cy="45" r="14" />
+                            <circle cx="65" cy="65" r="10" />
+                            <path d="M40,25 L40,31 M26,45 L32,45 M65,51 L65,57 M55,65 L61,65" />
+                        </svg>
+                    </div>
+                    <p class="card-body-text">
+                        <strong>We operate with extreme urgency.</strong> We push for progress without compromising quality—and when something is broken, we fix it. We’re driven by impact and pride ourselves in our ability to be nimble and quickly adjust our strategy when presented with new information. Friction and obstacles don’t deter us from pursuing what’s truly important.
+                    </p>
+                </a>
+
+                <!-- Card 3: Safety Always -->
+                <a href="#register" class="value-card">
+                    <div class="card-top">
+                        <h3>Safety Always</h3>
+                        <span class="action-plus-icon">+</span>
+                    </div>
+                    <div class="card-graphic-box">
+                        <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.2">
+                            <circle cx="50" cy="54" r="14" />
+                            <path d="M50,18 C68,18 76,26 76,44 C76,66 50,82 50,82 C50,82 24,66 24,44 C24,26 32,18 50,18 Z" />
+                        </svg>
+                    </div>
+                    <p class="card-body-text">
+                        <strong>Trust is hard earned and easily lost.</strong> We take our responsibility for our customers’ finances seriously. We are compliant, approach risks thoughtfully, and never compromise trust for speed.
+                    </p>
+                </a>
+
+                <!-- Card 4: One Robinhood -->
+                <a href="#register" class="value-card">
+                    <div class="card-top">
+                        <h3>One Robinhood</h3>
+                        <span class="action-plus-icon">+</span>
+                    </div>
+                    <div class="card-graphic-box">
+                        <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.2">
+                            <path d="M30,75 L45,45 L75,25 L60,55 Z" />
+                            <line x1="30" y1="75" x2="65" y2="40" />
+                        </svg>
+                    </div>
+                    <p class="card-body-text">
+                        <strong>We’re all invested in the same mission.</strong> We earn each other’s trust through honesty, inclusion, and respect – because finger-pointing never does the trick. We invite contrary perspectives, support each other, and debate with energy and kindness. Once decisions are made, we move in unison with ownership and accountability, powered by the thrill of building something great together.
+                    </p>
+                </a>
+
+                <!-- Card 5: Financial Freedom (New 5/7) -->
+                <a href="#register" class="value-card">
+                    <div class="card-top">
+                        <h3>Radical Inclusion</h3>
+                        <span class="action-plus-icon">+</span>
+                    </div>
+                    <div class="card-graphic-box">
+                        <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.2">
+                            <circle cx="35" cy="50" r="12"/>
+                            <circle cx="65" cy="50" r="12"/>
+                            <circle cx="50" cy="50" r="20" stroke-dasharray="4,4"/>
+                        </svg>
+                    </div>
+                    <p class="card-body-text">
+                        <strong>Finance should welcome everyone.</strong> We are building a system open to all backgrounds and asset sizes. By lowering boundaries and barriers to entry, we create space for fresh generations of market participants to flourish.
+                    </p>
+                </a>
+
+                <!-- Card 6: Absolute Integrity (New 6/7) -->
+                <a href="#register" class="value-card">
+                    <div class="card-top">
+                        <h3>Absolute Integrity</h3>
+                        <span class="action-plus-icon">+</span>
+                    </div>
+                    <div class="card-graphic-box">
+                        <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.2">
+                            <path d="M25,30 L75,30 L50,75 Z" />
+                            <circle cx="50" cy="30" r="4" fill="currentColor"/>
+                        </svg>
+                    </div>
+                    <p class="card-body-text">
+                        <strong>Honesty guides our path forward.</strong> We hold transparency above short-term advantages, sharing straightforward data with our trading community. Doing the right thing ensures a sturdy framework that endures long-term market shifts.
+                    </p>
+                </a>
+
+                <!-- Card 7: Forward Innovation (New 7/7) -->
+                <a href="#register" class="value-card">
+                    <div class="card-top">
+                        <h3>Forward Innovation</h3>
+                        <span class="action-plus-icon">+</span>
+                    </div>
+                    <div class="card-graphic-box">
+                        <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.2">
+                            <path d="M50,20 L80,50 L50,80 L20,50 Z" />
+                            <polyline points="40,50 48,58 62,44" />
+                        </svg>
+                    </div>
+                    <p class="card-body-text">
+                        <strong>We constantly invent the tomorrow.</strong> Stagnation isn't an option for us. Our engineering squads constantly build superior modern algorithms and asset tools to maintain your continuous edge in modern digital trade execution.
+                    </p>
+                </a>
+
+            </div>
+
+            <!-- Slide Dots (Dynamic for all 7 cards) -->
+            <div class="carousel-dots-indicator" id="carouselDots">
+                <button class="slide-dot active-dot" onclick="scrollToCard(0)"></button>
+                <button class="slide-dot" onclick="scrollToCard(1)"></button>
+                <button class="slide-dot" onclick="scrollToCard(2)"></button>
+                <button class="slide-dot" onclick="scrollToCard(3)"></button>
+                <button class="slide-dot" onclick="scrollToCard(4)"></button>
+                <button class="slide-dot" onclick="scrollToCard(5)"></button>
+                <button class="slide-dot" onclick="scrollToCard(6)"></button>
+            </div>
+        </div>
+
+        <section class="join-system-section">
+            <h2 class="join-headline">Join us and build the financial system for everyone.</h2>
+            <a href="#register" class="join-cta-btn">Sign up</a>
+        </section>
+    </main>
+
+    <script>
+      
+        const grid = document.getElementById('matrixGrid');
+        for (let i = 0; i < 96; i++) {
+            const container = document.createElement('div');
+            const tick = document.createElement('div');
+            tick.className = 'matrix-tick';
+            container.appendChild(tick);
+            grid.appendChild(container);
+        }
+
+      
+        const carousel = document.getElementById('valuesCarousel');
+        const dots = document.querySelectorAll('.slide-dot');
+
+        carousel.addEventListener('scroll', () => {
+            const scrollLeft = carousel.scrollLeft;
+            let activeIndex = 0;
+            let minDistance = Infinity;
+            
+            const cards = carousel.querySelectorAll('.value-card');
+            cards.forEach((card, index) => {
+                const distance = Math.abs(card.offsetLeft - carousel.offsetLeft - scrollLeft);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    activeIndex = index;
+                }
+            });
+            
+            dots.forEach((dot, index) => {
+                if(index === activeIndex) {
+                    dot.classList.add('active-dot');
+                } else {
+                    dot.classList.remove('active-dot');
+                }
+            });
+        });
+
+        // Sliding Animation Trigger Control Utility
+        function scrollToCard(index) {
+            const cards = carousel.querySelectorAll('.value-card');
+            if (cards[index]) {
+                const targetLeft = cards[index].offsetLeft - carousel.offsetLeft - 12; 
+                carousel.scrollTo({
+                    left: targetLeft,
+                    behavior: 'smooth'
+                });
+            }
+        }
+    </script>
+</body>
+</html>
+
+
+

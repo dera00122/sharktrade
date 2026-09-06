@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Careers | SharkTrade</title>
+    <style>
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #1E2229; 
+            color: #FFFFFF;
+            overflow-x: hidden;
+        }
+
+        /* --- EXTENDED HERO & VISION BACKGROUND WRAPPER --- */
+        .hero-vision-bg-wrapper {
+            width: 100%;
+            
+            background: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.9)), 
+                        url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1600&auto=format&fit=crop') no-repeat center center;
+            background-size: cover;
+            background-attachment: scroll; 
+        }
+
+        /* --- NAVIGATION HEADER --- */
+        .careers-nav {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .brand-logo {
+            color: #FFFFFF;
+            font-size: 1.5rem;
+            font-weight: 800;
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .nav-roles-btn {
+            background-color: #c8a86a; /* Champagne Gold */
+            color: #14171C;
+            text-decoration: none;
+            font-weight: 700;
+            padding: 10px 24px;
+            border-radius: 999px;
+            font-size: 0.9rem;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .nav-roles-btn:hover {
+            transform: translateY(-1px);
+            background-color: #dec491;
+        }
+
+        /* --- HERO MAIN TYPOGRAPHY PANEL --- */
+        .hero-text-frame {
+            height: 60vh;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 0 24px;
+        }
+
+        .hero-title {
+            font-size: 3.2rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            max-width: 600px;
+            line-height: 1.15;
+            letter-spacing: -1.5px;
+            margin-bottom: 24px;
+        }
+
+        .hero-subtitle {
+            font-size: 1.15rem;
+            color: #A0A5B1;
+            max-width: 500px;
+            line-height: 1.5;
+            margin-bottom: 40px;
+        }
+
+        .browse-cta-btn {
+            background-color: #c8a86a;
+            color: #14171C;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1rem;
+            padding: 16px 40px;
+            border-radius: 999px;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .browse-cta-btn:hover {
+            transform: scale(1.03);
+            background-color: #dec491;
+        }
+
+        /* --- LEADERSHIP VISION BLOCK --- */
+        .vision-quote-section {
+            background-color: transparent; 
+            width: 100%;
+            padding: 80px 24px 120px 24px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .vision-container {
+            max-width: 850px;
+            margin: 0 auto;
+        }
+
+        .vision-quote-text {
+            font-size: 1.8rem;
+            font-weight: 600;
+            line-height: 1.45;
+            color: #FFFFFF;
+            letter-spacing: -0.5px;
+            margin-bottom: 32px;
+        }
+
+        .vision-author {
+            font-size: 1.1rem;
+            color: #FFFFFF;
+            font-weight: 700;
+        }
+
+        .vision-title {
+            font-size: 0.95rem;
+            color: #A0A5B1;
+            margin-top: 4px;
+        }
+
+        /* --- ACCORDION SYSTEM SECTION --- */
+        .build-culture-section {
+            background-color: #F5F5F7; 
+            color: #14171C;
+            padding: 100px 24px;
+        }
+
+        .section-header-block {
+            max-width: 650px;
+            margin: 0 auto 60px auto;
+            text-align: center;
+        }
+
+        .section-main-title {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            letter-spacing: -1px;
+        }
+
+        .section-intro-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #4A4A4A;
+        }
+
+        .accordion-wrapper {
+            max-width: 720px;
+            margin: 0 auto;
+            background: #FFFFFF;
+            border-radius: 24px;
+            padding: 16px 32px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        }
+
+        .accordion-row {
+            border-bottom: 1px solid #E5E5E7;
+            padding: 24px 0;
+            cursor: pointer;
+        }
+
+        .accordion-row:last-child {
+            border-bottom: none;
+        }
+
+        .accordion-trigger {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            background: none;
+            border: none;
+            text-align: left;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #14171C;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .accordion-icon {
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: #14171C;
+            transition: transform 0.2s ease;
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding-top 0.3s ease;
+            color: #4A4A4A;
+            font-size: 1rem;
+            line-height: 1.6;
+            padding-right: 30px;
+        }
+
+        .accordion-row.row-active .accordion-content {
+            padding-top: 16px;
+        }
+
+        /* --- TESTIMONIAL GRID MATRIX SECTION --- */
+        .testimonials-grid-section {
+            background-color: #1E2229; 
+            padding: 100px 24px;
+        }
+
+        .testimonials-headline {
+            text-align: center;
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            letter-spacing: -1px;
+            margin-bottom: 60px;
+        }
+
+        .grid-layout-frame {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        .testimonial-card {
+            background-color: #14171C; 
+            border: 1px solid rgba(200, 168, 106, 0.1);
+            border-radius: 24px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 240px;
+            transition: border-color 0.3s;
+        }
+
+        .testimonial-card:hover {
+            border-color: #c8a86a;
+        }
+
+        .quote-main-body {
+            font-size: 1.25rem;
+            font-weight: 500;
+            line-height: 1.5;
+            color: #FFFFFF;
+            margin-bottom: 32px;
+        }
+
+        .employee-signature {
+            font-size: 0.95rem;
+            color: #A0A5B1;
+            font-weight: 600;
+        }
+
+        .employee-signature span {
+            color: rgba(255, 255, 255, 0.4);
+            font-weight: 400;
+            margin-left: 4px;
+        }
+
+        /* --- RESPONSIVE DESKTOP LAYOUT SHIFTS --- */
+        @media (min-width: 768px) {
+            .hero-title { font-size: 4.5rem; max-width: 800px; }
+            .vision-quote-text { font-size: 2.4rem; }
+            .grid-layout-frame {
+                grid-template-columns: repeat(2, 1fr); 
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .hero-title { font-size: 5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Combined Wrapper capturing Header, Hero, and Quote blocks onto one image background -->
+    <div class="hero-vision-bg-wrapper">
+        
+        <nav class="careers-nav">
+            <a href="index.html" class="brand-logo">SharkTrade</a>
+            <div class="nav-actions">
+                <a href="#openings" class="nav-roles-btn">Open Roles</a>
+            </div>
+        </nav>
+
+        <header class="hero-text-frame">
+            <h1 class="hero-title">Build the Future of Finance</h1>
+            <p class="hero-subtitle">Our mission is to democratize finance for all.</p>
+            <a href="#openings" class="browse-cta-btn">Browse Openings</a>
+        </header>
+
+        <!-- Founder Executive Statement Quote sits perfectly inside the image area now -->
+        <section class="vision-quote-section">
+            <div class="vision-container">
+                <p class="vision-quote-text">
+                    “Technology is rapidly disrupting the financial services industry. In this technological competition, victory will go to the sharpest and most hardcore team.”
+                </p>
+                <h4 class="vision-author">Vlad Tenev</h4>
+                <p class="vision-title">Co-Founder and CEO</p>
+            </div>
+        </section>
+
+    </div>
+
+    <main>
+        <!-- "How We Build" Functional Accordion System Section -->
+        <section class="build-culture-section">
+            <div class="section-header-block">
+                <h2 class="section-main-title">How we build</h2>
+                <p class="section-intro-text">
+                    We are a collaborative, intensely driven team operating at the highest level of performance. This isn’t a place for the complacent. It’s where ambition makes ideas a reality and careers accelerate at full speed. Here's what you'll find if you join us:
+                </p>
+            </div>
+
+            <div class="accordion-wrapper">
+                <!-- Row 1 -->
+                <div class="accordion-row" onclick="toggleAccordion(this)">
+                    <button class="accordion-trigger" aria-expanded="false">
+                        <span>Ethics and compliance are at the center of what we do.</span>
+                        <span class="accordion-icon">+</span>
+                    </button>
+                    <div class="accordion-content">
+                        <p>We hold ourselves to the highest standards of ethics and regulatory compliance, as we know customer trust is hard earned and easily lost. See our Code of Conduct here.</p>
+                    </div>
+                </div>
+
+                <!-- Row 2 -->
+                <div class="accordion-row" onclick="toggleAccordion(this)">
+                    <button class="accordion-trigger" aria-expanded="false">
+                        <span>We operate with an extreme sense of urgency.</span>
+                        <span class="accordion-icon">+</span>
+                    </button>
+                    <div class="accordion-content">
+                        <p>Market cycles move instantly. Our engineering, compliance, and product squads deploy high-performance updates at speed because our users rely on fast execution every trading session.</p>
+                    </div>
+                </div>
+
+                <!-- Row 3 -->
+                <div class="accordion-row" onclick="toggleAccordion(this)">
+                    <button class="accordion-trigger" aria-expanded="false">
+                        <span>We believe in doing more with less.</span>
+                        <span class="accordion-icon">+</span>
+                    </button>
+                    <div class="accordion-content">
+                        <p>We build elegant, modular infrastructure code and scale systematically. Efficiency is our foundational operational baseline for processing mass financial trades cleanly.</p>
+                    </div>
+                </div>
+
+                <!-- Row 4 -->
+                <div class="accordion-row" onclick="toggleAccordion(this)">
+                    <button class="accordion-trigger" aria-expanded="false">
+                        <span>Bureaucracy won't slow you down.</span>
+                        <span class="accordion-icon">+</span>
+                    </button>
+                    <div class="accordion-content">
+                        <p>We run a completely flat organization. Great design and robust math win over hierarchy every single day. If you see a way to optimize a data pattern, write it and ship it.</p>
+                    </div>
+                </div>
+
+                <!-- Row 5 -->
+                <div class="accordion-row" onclick="toggleAccordion(this)">
+                    <button class="accordion-trigger" aria-expanded="false">
+                        <span>Expectations are high; performance matters.</span>
+                        <span class="accordion-icon">+</span>
+                    </button>
+                    <div class="accordion-content">
+                        <p>We assemble high-caliber engineering talent. We challenge one another constructively to build resilient systems capable of setting global financial benchmarks.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dynamic Responsive Testimonials Grid Section -->
+        <section class="testimonials-grid-section" id="openings">
+            <h2 class="testimonials-headline">Hear from our team</h2>
+            
+            <div class="grid-layout-frame">
+                <!-- Testimonial 1 -->
+                <div class="testimonial-card">
+                    <p class="quote-main-body">“It’s intense, but in the best way. We move fast because we care deeply about what we ship.”</p>
+                    <p class="employee-signature">- Tanya D., <span>Crypto</span></p>
+                </div>
+
+                <!-- Testimonial 2 -->
+                <div class="testimonial-card">
+                    <p class="quote-main-body">“We’re not dragging outdated legacy systems into the future — we’re built on a modern stack, using the best technology.”</p>
+                    <p class="employee-signature">- Tam B., <span>Engineering</span></p>
+                </div>
+
+                <!-- Testimonial 3 -->
+                <div class="testimonial-card">
+                    <p class="quote-main-body">“You’ll never hear ‘that’s not my job’ around here. Everyone’s in it together — when we win, it’s as a team.”</p>
+                    <p class="employee-signature">- Oren N., <span>Customer Experience</span></p>
+                </div>
+
+                <!-- Testimonial 4 -->
+                <div class="testimonial-card">
+                    <p class="quote-main-body">“Hard questions aren’t a threat here — they’re expected. Everyone’s hands-on and good ideas win over big egos.”</p>
+                    <p class="employee-signature">- Gina P., <span>Brokerage</span></p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        
+        function toggleAccordion(element) {
+            const content = element.querySelector('.accordion-content');
+            const icon = element.querySelector('.accordion-icon');
+            const button = element.querySelector('.accordion-trigger');
+            
+            const isActive = element.classList.contains('row-active');
+            
+            if (isActive) {
+                content.style.maxHeight = null;
+                element.classList.remove('row-active');
+                icon.textContent = '+';
+                button.setAttribute('aria-expanded', 'false');
+            } else {
+                content.style.maxHeight = content.scrollHeight + "px";
+                element.classList.add('row-active');
+                icon.textContent = '—';
+                button.setAttribute('aria-expanded', 'true');
+            }
+        }
+    </script>
+</body>
+</html>

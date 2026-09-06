@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Strategies | SharkTrade</title>
+    <style>
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #000000;
+            color: #FFFFFF;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* --- CINEMATIC HERO BACKGROUND IMAGE --- */
+        .hero-cinematic-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 780px; 
+            background-image: url('image/435d9cdab48bdcd99a2548383c9c5f47.jpg');
+            background-size: cover;
+            background-position: center top;
+            background-repeat: no-repeat;
+            z-index: 1;
+            
+            /* Dual Masks: Darkens the image for text readability and fades it perfectly to pure black at the bottom */
+            background-blend-mode: overlay;
+            background-color: rgba(0, 0, 0, 0.45);
+            -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+            mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+        }
+
+        /* --- STICKY TRANSPARENT NAVIGATION HEADER --- */
+        .global-nav {
+            width: 100%;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            background-color: rgba(0, 0, 0, 0.4); 
+            backdrop-filter: blur(20px); 
+            -webkit-backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+            z-index: 1000; 
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            color: #FFFFFF;
+            font-size: 1.35rem;
+            font-weight: 800;
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: #A0A5B1;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #FFFFFF;
+        }
+
+        .nav-cta {
+            background-color: #ccff00; 
+            color: #000000;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 8px 20px;
+            border-radius: 999px;
+            font-size: 0.9rem;
+            transition: opacity 0.2s;
+        }
+
+        .nav-cta:hover {
+            opacity: 0.9;
+        }
+
+        /* --- STANDALONE PAGE CONTENT WRAPPER --- */
+        .strategies-viewport-section {
+            position: relative;
+            z-index: 10; 
+            padding: 60px 24px;
+            width: 100%;
+        }
+
+        .strat-wrapper {
+            width: 100%;
+            max-width: 540px; 
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* --- HERO HEADLINES  */
+        .strat-meta-tag {
+    font-size: 0.85rem;
+    color: #FFFFFF; 
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 700;
+    
+    
+    background-color: rgba(0, 0, 0, 0.6); 
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    
+    padding: 6px 16px;
+    border-radius: 999px;
+    margin-bottom: 24px;
+    display: inline-block; 
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+        .strat-hero-title {
+            font-family: "Georgia", serif;
+            font-size: 2.8rem;
+            font-weight: 400;
+            text-align: center;
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+            margin-bottom: 20px;
+            text-shadow: 0 4px 24px rgba(0, 0, 0, 0.9); 
+        }
+
+        /* Viewport Spacer to display the background devices clearly */
+        .hero-viewport-spacer {
+            width: 100%;
+            height: 280px; 
+            pointer-events: none;
+        }
+
+        .strat-hero-explanation {
+            font-size: 1.1rem;
+            line-height: 1.55;
+            text-align: center;
+            color: #FFFFFF;
+            margin-top: 40px;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+        }
+
+        .disclaimer-text-block {
+            font-size: 0.78rem;
+            color: #6C727F;
+            text-align: center;
+            margin-top: 24px;
+            line-height: 1.4;
+            padding: 0 16px;
+        }
+
+        /* --- PRIMARY CALL TO ACTION BUTTON --- */
+        .action-btn-row {
+            width: 100%;
+            margin-top: 40px;
+        }
+
+        .lime-action-btn {
+            display: block;
+            width: 100%;
+            text-align: center;
+            background-color: #ccff00;
+            color: #000000;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.05rem;
+            padding: 18px;
+            border-radius: 999px;
+            transition: opacity 0.2s;
+        }
+
+        .lime-action-btn:hover {
+            opacity: 0.9;
+        }
+
+        .unique-padding {
+            padding: 16px 48px;
+            display: inline-block;
+            width: auto;
+        }
+
+        /* --- STRUCTURAL DIVIDERS & TEXT CARDS --- */
+        .section-divider-dash {
+            width: 1px;
+            height: 100px;
+            border-left: 1px dashed rgba(255, 255, 255, 0.2);
+            margin: 64px auto;
+        }
+
+        .horizontal-rule-line {
+            width: 100%;
+            height: 1px;
+            background-color: rgba(255, 255, 255, 0.15);
+            margin: 48px 0 32px 0;
+        }
+
+        .strat-mid-headline {
+            font-size: 2rem;
+            font-weight: 500;
+            text-align: center;
+            letter-spacing: -0.5px;
+            line-height: 1.25;
+        }
+
+        .strat-large-headline {
+            font-size: 2.6rem;
+            font-weight: 500;
+            text-align: center;
+            letter-spacing: -1px;
+            margin-bottom: 24px;
+        }
+
+        .insights-text-container {
+            width: 100%;
+            text-align: left;
+        }
+
+        .insight-block-title {
+            font-size: 1.6rem;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        .insight-block-desc {
+            font-size: 1.1rem;
+            color: #A0A5B1;
+            line-height: 1.5;
+        }
+
+        /* --- TRADINGVIEW LIVE FRAME CONTAINER --- */
+        .tradingview-widget-vault {
+            width: 100%;
+            height: 240px;
+            background-color: #0b0c0e;
+            border-radius: 16px;
+            margin: 32px 0;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        /* --- EXACT ALGORITHMIC PRECISION SYSTEM FLOW --- */
+        .exact-precision-flow-card {
+            width: 100%;
+            background-color: #0b0c0e;
+            border-radius: 20px;
+            padding: 32px 24px;
+            margin: 32px 0 64px 0;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        .precision-step {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .step-indicator-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #ccff00; 
+            border-radius: 50%;
+            margin-top: 6px;
+            flex-shrink: 0;
+            box-shadow: 0 0 8px rgba(204, 255, 0, 0.6);
+        }
+
+        .step-content-body {
+            text-align: left;
+        }
+
+        .step-content-body h5 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 6px;
+            letter-spacing: -0.2px;
+        }
+
+        .step-content-body p {
+            font-size: 0.95rem;
+            color: #A0A5B1;
+            line-height: 1.5;
+        }
+
+        /* Floating Status Toggle Bars Stack Layout */
+        .animated-toggle-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin: 40px 0 64px 0;
+            width: 150px;
+        }
+
+        .toggle-track-wire {
+            width: 100%;
+            height: 38px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 999px;
+            position: relative;
+            padding: 4px;
+        }
+
+        .toggle-track-wire.neon-accent {
+            border-color: #ccff00;
+        }
+
+        .toggle-thumb-node {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background-color: #FFFFFF;
+            position: absolute;
+        }
+
+        .state-right { right: 4px; animation: slideL 3s ease-in-out infinite alternate; }
+        .state-left { left: 4px; animation: slideR 3s ease-in-out infinite alternate; }
+
+        @keyframes slideL { 100% { transform: translateX(-104px); } }
+        @keyframes slideR { 100% { transform: translateX(104px); } }
+
+        /* --- PREMIUM PERFORMANCE FEE CHART MATRIX --- */
+        .fee-explanation-text {
+            font-size: 1.1rem;
+            line-height: 1.55;
+            text-align: center;
+            color: #A0A5B1;
+            margin-bottom: 40px;
+        }
+
+        .fee-graph-box {
+            width: 100%;
+            background-color: #000000;
+            padding: 16px 8px;
+            margin-bottom: 64px;
+        }
+
+        .chart-header-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 30px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #ffffff;
+            text-align: center;
+            line-height: 1.3;
+            margin-bottom: 12px;
+        }
+
+        .chart-header-row span:first-child {
+            color: #6c727f;
+            font-weight: 400;
+        }
+
+        .chart-header-row small {
+            color: #6c727f;
+            font-weight: 400;
+        }
+
+        .chart-canvas-wrapper {
+            width: 100%;
+            height: 160px;
+            position: relative;
+        }
+
+        .clean-vector-engine {
+            width: 100%;
+            height: 100%;
+        }
+
+        .chart-footer-axis {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 24px;
+            margin-top: 12px;
+            font-size: 0.78rem;
+            color: #8e8e93;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .chart-footer-axis small {
+            color: #6c727f;
+        }
+
+        .premium-legend-bar {
+            margin-top: 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-left: 24px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #8e8e93;
+        }
+
+        .indicator-line {
+            display: inline-block;
+            width: 14px;
+            height: 2px;
+            margin-right: 10px;
+        }
+
+        .white-line { background-color: #ffffff; }
+        .gold-line { background-color: #c8a86a; }
+
+        /* Bottom Closing CTA Segment Area */
+        .closing-action-void {
+            width: 100%;
+            text-align: center;
+            padding: 80px 0 40px 0;
+            background: radial-gradient(circle at bottom, rgba(204,255,0,0.06), transparent 75%);
+        }
+
+        .closing-headline {
+            font-family: "Georgia", serif;
+            font-size: 2.4rem;
+            font-weight: 400;
+            margin-bottom: 36px;
+            letter-spacing: -0.5px;
+        }
+
+        /* --- GLOBAL PREMIUM FOOTER --- */
+        .global-footer {
+            width: 100%;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            background-color: #050505;
+            padding: 40px 24px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #6C727F;
+            position: relative;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="hero-cinematic-backdrop"></div>
+
+    <nav class="global-nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">SharkTrade</a>
+            <div class="nav-menu">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="strategies.html" class="nav-link active">Strategies</a>
+                <a href="register.html" class="nav-cta">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="strategies-viewport-section">
+        <div class="strat-wrapper">
+            
+            <div class="strat-meta-tag">SharkTrade Strategies</div>
+            <h1 class="strat-hero-title">Strategy that works harder. <br>So you don't have to.</h1>
+
+            <div class="hero-viewport-spacer"></div>
+
+            <p class="strat-hero-explanation">
+                Define your financial goals and SharkTrade Strategies will deliver a tailored, expert-managed portfolio. Follow current market trends, always know why your money moves, and invest with confidence.
+            </p>
+            <div class="disclaimer-text-block">*For illustrative purposes only. Not a recommendation of any security or strategy.</div>
+            
+            <div class="action-btn-row">
+                <a href="register.html" class="lime-action-btn">Explore Strategies Now</a>
+            </div>
+
+            <div class="section-divider-dash"></div>
+            <h2 class="strat-mid-headline">Cutting-edge tech meets mathematical logic</h2>
+            
+            <div class="horizontal-rule-line"></div>
+            
+            <div class="insights-text-container">
+                <h3 class="insight-block-title">Timely market insights</h3>
+                <p class="insight-block-desc">Get the full context and a deeper understanding of each portfolio adjustment.</p>
+            </div>
+
+            <div class="tradingview-widget-vault">
+                <div id="tradingview_market_chart" style="height: 100%; width: 100%;"></div>
+                <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+                <script type="text/javascript">
+                new TradingView.widget({
+                    "autosize": true,
+                    "symbol": "OANDA:XAUUSD",
+                    "interval": "D",
+                    "timezone": "Etc/UTC",
+                    "theme": "dark",
+                    "style": "3",
+                    "locale": "en",
+                    "enable_publishing": false,
+                    "hide_top_toolbar": true,
+                    "hide_legend": true,
+                    "save_image": false,
+                    "container_id": "tradingview_market_chart",
+                    "backgroundColor": "#0b0c0e",
+                    "gridColor": "rgba(255, 255, 255, 0.04)"
+                });
+                </script>
+            </div>
+
+            <div class="horizontal-rule-line"></div>
+            
+            <div class="insights-text-container">
+                <h3 class="insight-block-title">Algorithmic precision and experience</h3>
+                <p class="insight-block-desc">Our framework combines advanced quantitative models built across macro market cycles.</p>
+            </div>
+
+            <div class="exact-precision-flow-card">
+                <div class="precision-step">
+                    <div class="step-indicator-dot"></div>
+                    <div class="step-content-body">
+                        <h5>Automated oversight 24/7</h5>
+                        <p>Our algorithms monitor the markets around the clock, automatically adjusting your holdings based on shifting trends.</p>
+                    </div>
+                </div>
+
+                <div class="precision-step">
+                    <div class="step-indicator-dot"></div>
+                    <div class="step-content-body">
+                        <h5>Deep historical testing</h5>
+                        <p>Every strategy is backed by rigorous backtesting over decades of market history to optimize performance and manage downside risks effectively.</p>
+                    </div>
+                </div>
+
+                <div class="precision-step">
+                    <div class="step-indicator-dot"></div>
+                    <div class="step-content-body">
+                        <h5>Institutional grade custody</h5>
+                        <p>Your assets are held securely with leading established custodians, ensuring regulatory alignment and high-tier compliance protection.</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="strat-mid-headline">This is more than a standard automatic bot</h2>
+            
+            <div class="animated-toggle-stack">
+                <div class="toggle-track-wire"><div class="toggle-thumb-node state-right"></div></div>
+                <div class="toggle-track-wire neon-accent"><div class="toggle-thumb-node state-left"></div></div>
+                <div class="toggle-track-wire"><div class="toggle-thumb-node state-right"></div></div>
+            </div>
+
+            <h2 class="strat-large-headline">Don't pay more to invest more</h2>
+            <p class="fee-explanation-text">
+                SharkTrade Strategies operates on a minimal baseline utility structure—and premium verification status unlocks lower execution scaling limits for every dollar optimized over $100K.
+            </p>
+
+            <div class="fee-graph-box">
+                <div class="chart-header-row">
+                    <span>0.30%</span>
+                    <span>0.25%<br><small>$125</small></span>
+                    <span>0.25%<br><small>$250</small></span>
+                    <span>0.25%<br><small>$625</small></span>
+                    <span>0.25%<br><small>$1,250</small></span>
+                </div>
+
+                <div class="chart-canvas-wrapper">
+                    <svg class="clean-vector-engine" viewBox="0 0 400 180" preserveAspectRatio="none">
+                        <line x1="0" y1="30" x2="400" y2="30" stroke="rgba(255,255,255,0.06)" />
+                        <line x1="0" y1="90" x2="400" y2="90" stroke="rgba(255,255,255,0.06)" />
+                        <line x1="0" y1="150" x2="400" y2="150" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" />
+                        
+                        <line x1="40" y1="50" x2="360" y2="50" stroke="#ffffff" stroke-width="2.5" />
+                        
+                        <path d="M 40 70 L 146 70 L 253 115 L 360 135" fill="none" stroke="#c8a86a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" />
+                        
+                        <text x="135" y="62" fill="#c8a86a" font-size="9" font-weight="600">0.25%</text>
+                        <text x="260" y="105" fill="#c8a86a" font-size="9" font-weight="600">0.10%</text>
+                        <text x="340" y="125" fill="#c8a86a" font-size="9" font-weight="600">0.05%</text>
+                    </svg>
+                </div>
+
+                <div class="chart-footer-axis">
+                    <span>$50K<br><small>Account</small></span>
+                    <span>$100K<br><small>Account</small></span>
+                    <span>$250K<br><small>Account</small></span>
+                    <span>$500K<br><small>Account</small></span>
+                </div>
+
+                <div class="premium-legend-bar">
+                    <div class="legend-item"><span class="indicator-line white-line"></span> Strategies management fee</div>
+                    <div class="legend-item"><span class="indicator-line gold-line"></span> Strategies management fee with Gold</div>
+                </div>
+            </div>
+
+            <div class="closing-action-void">
+                <h2 class="closing-headline">The algorithms got you covered</h2>
+                <a href="register.html" class="lime-action-btn unique-padding">Get started</a>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="global-footer">
+        &copy; 2026 SharkTrade. All proprietary engineering rights reserved.
+    </footer>
+
+</body>
+</html>
