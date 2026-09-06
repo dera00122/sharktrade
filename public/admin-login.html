@@ -6,6 +6,7 @@
     <title>Admin Portal | SharkTrade Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="api.js"></script>
+    <script src="toast.js"></script>
     <style>
         * { box-sizing: border-box; }
         body {
@@ -75,7 +76,7 @@
             });
 
             if (data.user.role !== 'admin') {
-                alert('This account is not an admin account. Please use the regular sign-in page.');
+                showToast('This account is not an admin account. Please use the regular sign-in page.', 'error');
                 btn.disabled = false;
                 btn.textContent = 'Sign In';
                 return;
@@ -84,7 +85,7 @@
             setSession(data.token, data.user);
             window.location.href = 'admin.html';
         } catch (err) {
-            alert(err.message || 'Sign in failed. Please check your credentials.');
+            showToast(err.message || 'Sign in failed. Please check your credentials.', 'error');
             btn.disabled = false;
             btn.textContent = 'Sign In';
         }

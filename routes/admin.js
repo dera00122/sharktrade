@@ -1,11 +1,34 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 const db = require("../db");
 const { requireAuth, requireAdmin } = require("../middleware/auth");
 const { runRoiCycle } = require("../services/roiEngine");
 
 const router = express.Router();
 router.use(requireAuth, requireAdmin);
+
+// Storage for testimonial avatars / backer logos uploaded from the admin panel
+const CONTENT_DIR = path.join(__dirname, "..", "public", "uploads", "content");
+fs.mkdirSync(CONTENT_DIR, { recursive: true });
+
+const contentStorage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, CONTENT_DIR),
+    filename: (req, file, cb) => {
+        const ext = path.extname(file.originalname) || ".jpg";
+        cb(null, `content-${Date.now()}${ext}`);
+    }
+});
+const uploadContentImage = multer({
+    storage: contentStorage,
+    limits: { fileSize: 3 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+        const ok = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml"].includes(file.mimetype);
+        cb(ok ? null : new Error("Only image files are allowed"), ok);
+    }
+});
 
 function publicUser(u) {
     return {
@@ -33,6 +56,7 @@ router.get("/overview", (req, res) => {
     const totalWithdrawn = db.prepare("SELECT COALESCE(SUM(amount),0) AS t FROM transactions WHERE type='withdraw' AND status='approved'").get().t;
     const pendingDeposits = db.prepare("SELECT COUNT(*) AS c FROM transactions WHERE type='deposit' AND status='pending'").get().c;
     const pendingWithdrawals = db.prepare("SELECT COUNT(*) AS c FROM transactions WHERE type='withdraw' AND status='pending'").get().c;
+    const pendingKyc = db.prepare("SELECT COUNT(*) AS c FROM users WHERE role='user' AND kyc_status='pending'").get().c;
     const activeInvestments = db.prepare("SELECT COUNT(*) AS c, COALESCE(SUM(amount),0) AS t FROM investments WHERE status='active'").get();
 
     res.json({
@@ -41,6 +65,7 @@ router.get("/overview", (req, res) => {
         totalWithdrawn,
         pendingDeposits,
         pendingWithdrawals,
+        pendingKyc,
         activeInvestmentsCount: activeInvestments.c,
         activeInvestmentsTotal: activeInvestments.t
     });
@@ -309,6 +334,88 @@ router.post("/chat/:userId", (req, res) => {
     ).run(user.id, message.trim());
 
     res.status(201).json({ message: "Sent", messageId: info.lastInsertRowid });
+});
+
+// ---------- TESTIMONIALS ----------
+router.get("/testimonials", (req, res) => {
+    const testimonials = db.prepare("SELECT * FROM testimonials ORDER BY sort_order ASC, id ASC").all();
+    res.json({ testimonials });
+});
+
+router.post("/testimonials", (req, res) => {
+    const { name, roleLabel, quote, rating, avatarUrl } = req.body;
+    if (!name || !quote) return res.status(400).json({ error: "name and quote are required" });
+    const maxOrder = db.prepare("SELECT COALESCE(MAX(sort_order), 0) AS m FROM testimonials").get().m;
+    const info = db.prepare(
+        "INSERT INTO testimonials (name, role_label, quote, rating, avatar_url, active, sort_order) VALUES (?, ?, ?, ?, ?, 1, ?)"
+    ).run(name, roleLabel || null, quote, rating || 5, avatarUrl || null, maxOrder + 1);
+    res.status(201).json({ message: "Testimonial added", testimonialId: info.lastInsertRowid });
+});
+
+router.patch("/testimonials/:id", (req, res) => {
+    const t = db.prepare("SELECT * FROM testimonials WHERE id = ?").get(req.params.id);
+    if (!t) return res.status(404).json({ error: "Testimonial not found" });
+    const { name, roleLabel, quote, rating, avatarUrl, active } = req.body;
+    db.prepare(
+        "UPDATE testimonials SET name=?, role_label=?, quote=?, rating=?, avatar_url=?, active=? WHERE id=?"
+    ).run(
+        name ?? t.name,
+        roleLabel !== undefined ? roleLabel : t.role_label,
+        quote ?? t.quote,
+        rating ?? t.rating,
+        avatarUrl !== undefined ? avatarUrl : t.avatar_url,
+        active !== undefined ? (active ? 1 : 0) : t.active,
+        t.id
+    );
+    res.json({ message: "Testimonial updated" });
+});
+
+router.delete("/testimonials/:id", (req, res) => {
+    db.prepare("DELETE FROM testimonials WHERE id = ?").run(req.params.id);
+    res.json({ message: "Testimonial deleted" });
+});
+
+// ---------- BACKERS ----------
+router.get("/backers", (req, res) => {
+    const backers = db.prepare("SELECT * FROM backers ORDER BY sort_order ASC, id ASC").all();
+    res.json({ backers });
+});
+
+router.post("/backers", (req, res) => {
+    const { name, logoUrl } = req.body;
+    if (!name) return res.status(400).json({ error: "name is required" });
+    const maxOrder = db.prepare("SELECT COALESCE(MAX(sort_order), 0) AS m FROM backers").get().m;
+    const info = db.prepare(
+        "INSERT INTO backers (name, logo_url, active, sort_order) VALUES (?, ?, 1, ?)"
+    ).run(name, logoUrl || null, maxOrder + 1);
+    res.status(201).json({ message: "Backer added", backerId: info.lastInsertRowid });
+});
+
+router.patch("/backers/:id", (req, res) => {
+    const b = db.prepare("SELECT * FROM backers WHERE id = ?").get(req.params.id);
+    if (!b) return res.status(404).json({ error: "Backer not found" });
+    const { name, logoUrl, active } = req.body;
+    db.prepare("UPDATE backers SET name=?, logo_url=?, active=? WHERE id=?").run(
+        name ?? b.name,
+        logoUrl !== undefined ? logoUrl : b.logo_url,
+        active !== undefined ? (active ? 1 : 0) : b.active,
+        b.id
+    );
+    res.json({ message: "Backer updated" });
+});
+
+router.delete("/backers/:id", (req, res) => {
+    db.prepare("DELETE FROM backers WHERE id = ?").run(req.params.id);
+    res.json({ message: "Backer deleted" });
+});
+
+// ---------- IMAGE UPLOADS (testimonial avatars, backer logos) ----------
+router.post("/upload-image", (req, res) => {
+    uploadContentImage.single("image")(req, res, (err) => {
+        if (err) return res.status(400).json({ error: err.message });
+        if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+        res.json({ url: `/uploads/content/${req.file.filename}` });
+    });
 });
 
 // ---------- ADMIN ACCOUNT MANAGEMENT ----------

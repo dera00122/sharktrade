@@ -3,131 +3,194 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deposit | SharkTrade Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="api.js"></script>
+    <script src="toast.js"></script>
+    <script src="chat-widget.js"></script>
     <style>
-        body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; padding: 20px; }
-        .container { max-width: 500px; margin: 0 auto; }
-        .card { background: #050709; border: 1px solid #c8a86a; padding: 25px; border-radius: 12px; }
-        h2 { color: #c8a86a; margin-bottom: 20px; }
-        .input-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; color: #888; font-size: 0.85rem; }
-        input, select { width: 100%; background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; box-sizing: border-box; }
-        .deposit-btn { width: 100%; background: #c8a86a; color: #000; padding: 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .deposit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        .summary-box { background: #1a1a1a; padding: 15px; border-radius: 8px; margin-top: 20px; font-size: 0.9rem; }
+        * { box-sizing: border-box; }
+        body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
+        .container { max-width: 460px; margin: 0 auto; }
 
-        .account-box {
-            background: #0d0f12; border: 1px dashed #c8a86a; border-radius: 10px;
-            padding: 16px; margin-top: 10px; font-size: 0.85rem; line-height: 1.5; color: #ddd;
-            word-break: break-word;
-        }
-        .account-box .copy-btn {
-            display: inline-block; margin-top: 10px; background: rgba(200,168,106,0.12);
-            color: #c8a86a; border: 1px solid rgba(200,168,106,0.3); padding: 6px 12px;
-            border-radius: 6px; font-size: 0.75rem; cursor: pointer;
-        }
+        .card { background: #0d0f12; border: 1px solid #2a2a2a; border-radius: 16px; padding: 24px; }
+        h2 { color: #c8a86a; margin: 0 0 4px; font-size: 1.3rem; }
+        .demo-note { color: #888; font-size: 0.78rem; margin: 0 0 22px; line-height: 1.5; }
+
+        .input-group { margin-bottom: 18px; }
+        label { display: block; margin-bottom: 8px; color: #888; font-size: 0.82rem; }
+        input, select { width: 100%; background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; box-sizing: border-box; font-size: 0.9rem; }
+
+        .action-btn { width: 100%; background: #c8a86a; color: #000; padding: 14px; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; font-size: 0.9rem; }
+        .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .action-btn.outline { background: transparent; border: 1px solid #444; color: #ccc; margin-top: 10px; }
+
+        /* --- Payment screen (step 2) --- */
+        .pay-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .pay-amount-label { color: #888; font-size: 0.8rem; }
+        .pay-amount-value { font-size: 1.6rem; font-weight: 800; color: #fff; }
+
+        .qr-box { background: #fff; padding: 16px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; width: 200px; height: 200px; }
+        .qr-box img, .qr-box canvas { width: 100% !important; height: 100% !important; }
+
+        .detail-box { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+        .detail-label { color: #888; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .detail-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+        .detail-value { font-size: 0.85rem; font-weight: 600; word-break: break-all; }
+        .copy-icon { color: #c8a86a; cursor: pointer; flex-shrink: 0; font-size: 0.9rem; }
+
+        .timer-box { text-align: center; margin: 20px 0; }
+        .timer-label { color: #888; font-size: 0.78rem; margin-bottom: 6px; }
+        .timer-value { font-size: 1.3rem; font-weight: 800; color: #00e676; }
+        .timer-value.expiring { color: #ff5252; }
+
+        .network-badge { display: inline-block; background: rgba(200,168,106,0.12); color: #c8a86a; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; margin-bottom: 16px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <a href="dashboard.html" style="color:#c8a86a; text-decoration:none; font-size: 0.85rem;">&larr; BACK</a>
-    <div class="card" style="margin-top: 15px;">
+
+    <!-- STEP 1: Amount + Method -->
+    <div class="card" id="step1" style="margin-top: 15px;">
         <h2>Deposit Funds</h2>
-        <p style="color:#888; font-size:0.8rem; margin-top:-14px; margin-bottom:18px;">Demo mode — no real payment is processed. Send funds to the account shown below, then submit — an admin will approve it in the dashboard.</p>
+        <p class="demo-note">Demo mode — no real payment is processed. Choose a method, send funds to the address shown, then submit for review.</p>
 
-        <form id="depositForm">
-            <div class="input-group">
-                <label>Payment Method</label>
-                <select id="method" required>
-                    <option value="">Loading methods...</option>
-                </select>
+        <div class="input-group">
+            <label>Amount (USD)</label>
+            <input type="number" id="amount" placeholder="Min 50 USD">
+        </div>
+
+        <div class="input-group">
+            <label>Payment Method</label>
+            <select id="method">
+                <option value="">Loading methods...</option>
+            </select>
+        </div>
+
+        <button type="button" class="action-btn" onclick="proceedToPayment()">Continue</button>
+    </div>
+
+    <!-- STEP 2: Pay screen with QR + address + timer -->
+    <div class="card" id="step2" style="display:none;">
+        <div class="pay-header">
+            <div>
+                <div class="pay-amount-label">Amount to send</div>
+                <div class="pay-amount-value" id="payAmountDisplay">$0.00</div>
             </div>
+            <span class="network-badge" id="methodBadge">—</span>
+        </div>
 
-            <div class="account-box" id="accountBox" style="display:none;">
-                <strong style="color:#c8a86a;">Send funds to:</strong>
-                <div id="accountDetailsText" style="margin-top: 8px;"></div>
-                <div class="copy-btn" onclick="copyAccountDetails()">Copy Details</div>
+        <div class="qr-box" id="qrBox"></div>
+
+        <div class="detail-box">
+            <div class="detail-label">Send to</div>
+            <div class="detail-row">
+                <span class="detail-value" id="addressValue">—</span>
+                <i class="fa-solid fa-copy copy-icon" onclick="copyText('addressValue')"></i>
             </div>
+        </div>
 
-            <div class="input-group" style="margin-top:20px;">
-                <label>Amount (USD)</label>
-                <input type="number" id="amount" placeholder="Min 50 USD" required oninput="calculateFee()">
-            </div>
+        <div class="timer-box">
+            <div class="timer-label">Time remaining to complete payment</div>
+            <div class="timer-value" id="timerDisplay">60:00</div>
+        </div>
 
-            <div class="summary-box" id="reviewSection" style="display: none;">
-                <p><strong>Review Details:</strong></p>
-                <p>Charge (1%): <span id="feeDisplay">0</span> USD</p>
-                <p>Total to Pay: <span id="totalDisplay">0</span> USD</p>
-                <label style="margin-top:14px;">Upload Payment Slip (demo — not stored)</label>
-                <input type="file">
-            </div>
-
-            <button type="button" class="deposit-btn" id="proceedBtn" onclick="showReview()">PROCEED TO PAYMENT</button>
-        </form>
+        <button type="button" class="action-btn" id="confirmBtn" onclick="submitDeposit()">I've Sent the Payment</button>
+        <button type="button" class="action-btn outline" onclick="backToStep1()">Cancel</button>
     </div>
 </div>
 
 <script>
     let paymentMethods = [];
+    let countdownInterval = null;
+    let selectedMethod = null;
 
-    function calculateFee() {
-        const amount = document.getElementById('amount').value;
-        const fee = amount * 0.01;
-        document.getElementById('feeDisplay').innerText = fee.toFixed(2);
-        document.getElementById('totalDisplay').innerText = (parseFloat(amount) + fee).toFixed(2);
-    }
-
-    function showAccountDetails() {
-        const methodId = document.getElementById('method').value;
-        const method = paymentMethods.find(m => String(m.id) === String(methodId));
-        const box = document.getElementById('accountBox');
-        if (!method) { box.style.display = 'none'; return; }
-        document.getElementById('accountDetailsText').textContent = method.account_details;
-        box.style.display = 'block';
-    }
-
-    function copyAccountDetails() {
-        const text = document.getElementById('accountDetailsText').textContent;
-        navigator.clipboard.writeText(text);
-        const btn = document.querySelector('.copy-btn');
-        const original = btn.textContent;
-        btn.textContent = 'Copied!';
-        setTimeout(() => btn.textContent = original, 1500);
-    }
-
-    function showReview() {
+    function proceedToPayment() {
         const amount = parseFloat(document.getElementById('amount').value);
         const methodId = document.getElementById('method').value;
-        if (!methodId) { alert("Please select a payment method."); return; }
-        if (!amount || amount <= 0) {
-            alert("Please enter a valid amount.");
-            return;
+
+        if (!amount || amount <= 0) { showToast('Please enter a valid amount.', 'warning'); return; }
+        if (!methodId) { showToast('Please select a payment method.', 'warning'); return; }
+
+        selectedMethod = paymentMethods.find(m => String(m.id) === String(methodId));
+        if (!selectedMethod) return;
+
+        document.getElementById('payAmountDisplay').textContent = `$${formatMoney(amount)}`;
+        document.getElementById('methodBadge').textContent = selectedMethod.name;
+        document.getElementById('addressValue').textContent = selectedMethod.account_details;
+
+        // Generate QR code from the account details (wallet address / bank info)
+        document.getElementById('qrBox').innerHTML = '';
+        new QRCode(document.getElementById('qrBox'), {
+            text: selectedMethod.account_details,
+            width: 170,
+            height: 170,
+            colorDark: '#000000',
+            colorLight: '#ffffff'
+        });
+
+        document.getElementById('step1').style.display = 'none';
+        document.getElementById('step2').style.display = 'block';
+
+        startCountdown(60 * 60); // 60 minutes
+    }
+
+    function backToStep1() {
+        clearInterval(countdownInterval);
+        document.getElementById('step2').style.display = 'none';
+        document.getElementById('step1').style.display = 'block';
+    }
+
+    function startCountdown(seconds) {
+        clearInterval(countdownInterval);
+        let remaining = seconds;
+        const display = document.getElementById('timerDisplay');
+
+        function tick() {
+            const mins = Math.floor(remaining / 60);
+            const secs = remaining % 60;
+            display.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            display.classList.toggle('expiring', remaining <= 300);
+            if (remaining <= 0) {
+                clearInterval(countdownInterval);
+                display.textContent = 'Expired';
+                showToast('Payment window expired. Please start over.', 'warning');
+                backToStep1();
+                return;
+            }
+            remaining--;
         }
-        document.getElementById('reviewSection').style.display = 'block';
-        document.getElementById('proceedBtn').innerText = 'CONFIRM DEPOSIT';
-        document.getElementById('proceedBtn').setAttribute('onclick', 'submitDeposit()');
+        tick();
+        countdownInterval = setInterval(tick, 1000);
+    }
+
+    function copyText(elId) {
+        const text = document.getElementById(elId).textContent;
+        navigator.clipboard.writeText(text);
+        showToast('Copied to clipboard!', 'success', 1500);
     }
 
     async function submitDeposit() {
-        const methodId = document.getElementById('method').value;
-        const method = paymentMethods.find(m => String(m.id) === String(methodId));
         const amount = parseFloat(document.getElementById('amount').value);
-        const btn = document.getElementById('proceedBtn');
+        const btn = document.getElementById('confirmBtn');
         btn.disabled = true;
-        btn.textContent = "Submitting...";
+        btn.textContent = 'Submitting...';
 
         try {
             await apiRequest('/api/user/deposits', {
                 method: 'POST',
-                body: { method: method ? method.name : 'Unknown', amount }
+                body: { method: selectedMethod.name, amount }
             });
-            alert('Deposit request sent! Please await admin approval.');
-            window.location.href = 'deposit-log.html';
+            clearInterval(countdownInterval);
+            showToast('Deposit submitted! Awaiting approval.', 'success');
+            setTimeout(() => window.location.href = 'deposit-log.html', 1200);
         } catch (err) {
-            alert(err.message || 'Failed to submit deposit request.');
+            showToast(err.message || 'Failed to submit deposit request.', 'error');
             btn.disabled = false;
-            btn.textContent = 'CONFIRM DEPOSIT';
+            btn.textContent = "I've Sent the Payment";
         }
     }
 
@@ -138,20 +201,14 @@
         try {
             const { methods } = await apiRequest('/api/user/payment-methods');
             paymentMethods = methods;
-            if (methods.length === 0) {
-                select.innerHTML = '<option value="">No payment methods available</option>';
-            } else {
-                select.innerHTML = methods.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
-                showAccountDetails();
-            }
+            select.innerHTML = methods.length
+                ? methods.map(m => `<option value="${m.id}">${m.name}</option>`).join('')
+                : '<option value="">No payment methods available</option>';
         } catch (err) {
             select.innerHTML = '<option value="">Failed to load methods</option>';
         }
-
-        select.addEventListener('change', showAccountDetails);
     });
 </script>
 
-    <script src="chat-widget.js"></script>
 </body>
 </html>

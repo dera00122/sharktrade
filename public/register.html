@@ -371,6 +371,7 @@
         }
     </style>
     <script src="api.js"></script>
+    <script src="toast.js"></script>
 </head>
 <body>
 
@@ -423,6 +424,15 @@
                     </div>
                 </div>
 
+                <!-- ROW 2b: Phone Number -->
+                <div class="input-wrapper">
+                    <label for="phoneNumber">Phone Number</label>
+                    <div class="input-field-container">
+                        <input type="tel" id="phoneNumber" placeholder="+234 800 000 0000" required autocomplete="tel">
+                        <i class="fa-solid fa-phone"></i>
+                    </div>
+                </div>
+
                 <!-- ROW 3: Country Jurisdiction Selector -->
                 <div class="input-wrapper">
                     <label for="countrySelect">Select Country</label>
@@ -450,6 +460,13 @@
                         <input type="password" id="password" placeholder="Enter security keys" minlength="8" required autocomplete="new-password">
                         <i class="fa-solid fa-lock"></i>
                     </div>
+                    <ul id="passwordRules" style="list-style:none; padding:0; margin:8px 0 0; font-size:0.72rem; display:flex; flex-wrap:wrap; gap:8px;">
+                        <li data-rule="length" style="color:#666;"><i class="fa-solid fa-circle-xmark"></i> 8+ characters</li>
+                        <li data-rule="upper" style="color:#666;"><i class="fa-solid fa-circle-xmark"></i> Uppercase</li>
+                        <li data-rule="lower" style="color:#666;"><i class="fa-solid fa-circle-xmark"></i> Lowercase</li>
+                        <li data-rule="number" style="color:#666;"><i class="fa-solid fa-circle-xmark"></i> Number</li>
+                        <li data-rule="special" style="color:#666;"><i class="fa-solid fa-circle-xmark"></i> Special character</li>
+                    </ul>
                 </div>
 
                 <div class="input-wrapper">
@@ -549,6 +566,33 @@
             });
         }
 
+        // --- 2b. LIVE PASSWORD STRENGTH CHECKLIST ---
+        const passwordField = document.getElementById('password');
+        if (passwordField) {
+            passwordField.addEventListener('input', function() {
+                const val = this.value;
+                const checks = {
+                    length: val.length >= 8,
+                    upper: /[A-Z]/.test(val),
+                    lower: /[a-z]/.test(val),
+                    number: /\d/.test(val),
+                    special: /[^A-Za-z0-9]/.test(val)
+                };
+                Object.keys(checks).forEach(rule => {
+                    const li = document.querySelector(`#passwordRules li[data-rule="${rule}"]`);
+                    if (!li) return;
+                    const icon = li.querySelector('i');
+                    if (checks[rule]) {
+                        li.style.color = '#00e676';
+                        icon.className = 'fa-solid fa-circle-check';
+                    } else {
+                        li.style.color = '#666';
+                        icon.className = 'fa-solid fa-circle-xmark';
+                    }
+                });
+            });
+        }
+
         // --- 3. FORM VALIDATION & INTERCEPTION FLOW ---
         const regForm = document.querySelector('.registration-form');
         if (regForm) {
@@ -562,19 +606,27 @@
                 // A. Strict Email Pattern Validation Layer (.com, .net, .org, etc required)
                 const emailStrictPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
                 if (!emailStrictPattern.test(emailInput)) {
-                    alert("Invalid Email Structure: Please include a complete domain extension (e.g., '.com', '.net').");
+                    showToast('Please enter a valid email address.', 'warning');
                     return;
                 }
 
                 // B. Password Matching Check
                 if (passwordInput !== confirmPasswordInput) {
-                    alert("Security Check Failed: Passwords do not match. Please verify parameters.");
+                    showToast('Passwords do not match.', 'warning');
+                    return;
+                }
+
+                // B2. Password Strength Check — at least 8 chars, one uppercase, one lowercase,
+                // one number, and one special character. Rejects weak passwords like "12345678".
+                const strongPasswordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+                if (!strongPasswordPattern.test(passwordInput)) {
+                    showToast('Use at least 8 characters, including uppercase, lowercase, a number, and a special character.', 'warning');
                     return;
                 }
 
                 // C. Verification Verification Check
                 if (!isCaptchaVerified) {
-                    alert("Security Integrity Rule: Please complete the reCAPTCHA confirmation matrix.");
+                    showToast('Please complete the CAPTCHA verification.', 'warning');
                     return;
                 }
 
@@ -586,6 +638,7 @@
                 try {
                     const firstName = document.getElementById('firstName').value.trim();
                     const lastName = document.getElementById('lastName').value.trim();
+                    const phone = document.getElementById('phoneNumber').value.trim();
                     const country = document.getElementById('countrySelect').value;
                     const referralCode = document.getElementById('referralCode').value.trim();
 
@@ -593,7 +646,7 @@
                         method: 'POST',
                         auth: false,
                         body: {
-                            firstName, lastName, email: emailInput,
+                            firstName, lastName, email: emailInput, phone,
                             password: passwordInput, country, referralCode
                         }
                     });
@@ -601,7 +654,7 @@
                     setSession(data.token, data.user);
                     window.location.href = "dashboard.html";
                 } catch (err) {
-                    alert(err.message || "Registration failed. Please try again.");
+                    showToast(err.message || 'Registration failed. Please try again.', 'error');
                     submitBtn.disabled = false;
                     submitBtn.textContent = "Create Account";
                 }

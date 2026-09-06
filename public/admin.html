@@ -6,6 +6,7 @@
 <title>Admin Panel — SharkTrade Pro (Demo)</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="api.js"></script>
+    <script src="toast.js"></script>
 <style>
     * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
     body { background:#000; color:#fff; min-height:100vh; }
@@ -106,6 +107,8 @@
     <button class="tab-btn" data-panel="referrals">Referrals</button>
     <button class="tab-btn" data-panel="payment-methods">Payment Methods</button>
     <button class="tab-btn" data-panel="chat">Support Chat</button>
+    <button class="tab-btn" data-panel="testimonials">Testimonials</button>
+    <button class="tab-btn" data-panel="backers">Backers</button>
 </div>
 
 <div class="content">
@@ -257,6 +260,64 @@
         </div>
     </div>
 
+    <!-- TESTIMONIALS -->
+    <div class="panel" id="panel-testimonials">
+        <div class="section-title">
+            Testimonials
+            <button class="btn btn-gold" onclick="toggleTestimonialForm()">+ New Testimonial</button>
+        </div>
+        <div class="card" id="testimonialFormCard" style="display:none;">
+            <input type="hidden" id="testimonialEditId">
+            <div class="form-row">
+                <div><label>Name</label><input type="text" id="testimonialName" placeholder="e.g. Chidera A."></div>
+                <div><label>Role / Label</label><input type="text" id="testimonialRole" placeholder="e.g. Verified User"></div>
+                <div>
+                    <label>Rating</label>
+                    <select id="testimonialRating">
+                        <option value="5">5 stars</option>
+                        <option value="4">4 stars</option>
+                        <option value="3">3 stars</option>
+                    </select>
+                </div>
+            </div>
+            <div style="margin-bottom:12px;">
+                <label style="font-size:0.7rem; color:#888; display:block; margin-bottom:4px;">Quote</label>
+                <textarea id="testimonialQuote" placeholder="What they said..." style="width:100%; background:#1a1a1a; border:1px solid #333; color:#fff; padding:10px; border-radius:8px; font-size:0.85rem; min-height:70px;"></textarea>
+            </div>
+            <div style="margin-bottom:12px;">
+                <label style="font-size:0.7rem; color:#888; display:block; margin-bottom:4px;">Photo (optional)</label>
+                <input type="file" id="testimonialPhotoFile" accept="image/*">
+                <input type="hidden" id="testimonialAvatarUrl">
+            </div>
+            <button class="btn btn-gold" onclick="saveTestimonial()">Save</button>
+            <button class="btn btn-outline" onclick="toggleTestimonialForm()">Cancel</button>
+        </div>
+        <div id="testimonialsTableWrap"><div class="loading">Loading testimonials...</div></div>
+    </div>
+
+    <!-- BACKERS -->
+    <div class="panel" id="panel-backers">
+        <div class="section-title">
+            Backed-By Logos
+            <button class="btn btn-gold" onclick="toggleBackerForm()">+ New Backer</button>
+        </div>
+        <p style="color:#888; font-size:0.8rem; margin-bottom:14px;">These appear in the scrolling strip on the homepage. Only add real backers you actually have — don't use recognizable investor/company names without their actual involvement.</p>
+        <div class="card" id="backerFormCard" style="display:none;">
+            <input type="hidden" id="backerEditId">
+            <div class="form-row">
+                <div><label>Name</label><input type="text" id="backerName" placeholder="e.g. Acme Capital"></div>
+            </div>
+            <div style="margin-bottom:12px;">
+                <label style="font-size:0.7rem; color:#888; display:block; margin-bottom:4px;">Logo (optional)</label>
+                <input type="file" id="backerLogoFile" accept="image/*">
+                <input type="hidden" id="backerLogoUrl">
+            </div>
+            <button class="btn btn-gold" onclick="saveBacker()">Save</button>
+            <button class="btn btn-outline" onclick="toggleBackerForm()">Cancel</button>
+        </div>
+        <div id="backersTableWrap"><div class="loading">Loading backers...</div></div>
+    </div>
+
 </div>
 
 <script>
@@ -287,6 +348,8 @@
         if (name === 'referrals') loadReferrals();
         if (name === 'payment-methods') loadPaymentMethods();
         if (name === 'chat') loadChatConversations();
+        if (name === 'testimonials') loadTestimonials();
+        if (name === 'backers') loadBackers();
     }
 
     // ---------- OVERVIEW ----------
@@ -300,6 +363,7 @@
                 <div class="stat-card"><div class="label">Total Withdrawn</div><div class="value gold">$${formatMoney(s.totalWithdrawn)}</div></div>
                 <div class="stat-card"><div class="label">Pending Deposits</div><div class="value">${s.pendingDeposits}</div></div>
                 <div class="stat-card"><div class="label">Pending Withdrawals</div><div class="value">${s.pendingWithdrawals}</div></div>
+                <div class="stat-card"><div class="label">Pending KYC</div><div class="value">${s.pendingKyc}</div></div>
                 <div class="stat-card"><div class="label">Active Investments</div><div class="value">${s.activeInvestmentsCount} <span style="font-size:0.75rem; color:#888;">($${formatMoney(s.activeInvestmentsTotal)})</span></div></div>
             `;
         } catch (err) {
@@ -370,7 +434,7 @@
             });
             loadUsers();
         } catch (err) {
-            alert(err.message || 'Failed to update balance');
+            showToast(err.message || 'Failed to update balance', 'error');
         }
     }
 
@@ -379,21 +443,21 @@
             await apiRequest(`/api/admin/users/${id}/freeze`, { method: 'PATCH', body: { frozen: frozen === 'true' } });
             loadUsers();
         } catch (err) {
-            alert(err.message || 'Failed to update status');
+            showToast(err.message || 'Failed to update status', 'error');
         }
     }
 
     async function setKyc(id) {
         const status = prompt('KYC status: unverified, pending, or verified');
         if (!status || !['unverified', 'pending', 'verified'].includes(status)) {
-            if (status !== null) alert('Invalid status. Use: unverified, pending, or verified.');
+            if (status !== null) showToast('Invalid status. Use: unverified, pending, or verified.', 'warning');
             return;
         }
         try {
             await apiRequest(`/api/admin/users/${id}/kyc`, { method: 'PATCH', body: { status } });
             loadUsers();
         } catch (err) {
-            alert(err.message || 'Failed to update KYC');
+            showToast(err.message || 'Failed to update KYC', 'error');
         }
     }
 
@@ -467,7 +531,7 @@
             await apiRequest(`/api/admin/transactions/${id}`, { method: 'PATCH', body: { action } });
             loadTransactions();
         } catch (err) {
-            alert(err.message || 'Failed to update transaction');
+            showToast(err.message || 'Failed to update transaction', 'error');
         }
     }
 
@@ -519,7 +583,7 @@
             await apiRequest(`/api/admin/plans/${id}`, { method: 'PATCH', body: { active: true } });
             loadPlans();
         } catch (err) {
-            alert(err.message || 'Failed to activate plan');
+            showToast(err.message || 'Failed to activate plan', 'error');
         }
     }
 
@@ -533,7 +597,7 @@
         const lockDays = parseInt(document.getElementById('planLock').value) || 0;
 
         if (!name || !minAmount || !dailyRoi) {
-            alert('Name, min amount, and daily ROI are required.');
+            showToast('Name, min amount, and daily ROI are required.', 'warning');
             return;
         }
 
@@ -551,7 +615,7 @@
             document.getElementById('planLock').value = '';
             loadPlans();
         } catch (err) {
-            alert(err.message || 'Failed to create plan');
+            showToast(err.message || 'Failed to create plan', 'error');
         }
     }
 
@@ -561,7 +625,7 @@
             await apiRequest(`/api/admin/plans/${id}`, { method: 'DELETE' });
             loadPlans();
         } catch (err) {
-            alert(err.message || 'Failed to deactivate plan');
+            showToast(err.message || 'Failed to deactivate plan', 'error');
         }
     }
 
@@ -672,7 +736,7 @@
         const name = document.getElementById('pmName').value.trim();
         const accountDetails = document.getElementById('pmDetails').value.trim();
         if (!name || !accountDetails) {
-            alert('Please fill in both the method name and account details.');
+            showToast('Please fill in both the method name and account details.', 'warning');
             return;
         }
         try {
@@ -682,7 +746,7 @@
             togglePmForm();
             loadPaymentMethods();
         } catch (err) {
-            alert(err.message || 'Failed to add payment method');
+            showToast(err.message || 'Failed to add payment method', 'error');
         }
     }
 
@@ -692,7 +756,7 @@
             await apiRequest(`/api/admin/payment-methods/${id}`, { method: 'DELETE' });
             loadPaymentMethods();
         } catch (err) {
-            alert(err.message || 'Failed to deactivate');
+            showToast(err.message || 'Failed to deactivate', 'error');
         }
     }
 
@@ -701,7 +765,7 @@
             await apiRequest(`/api/admin/payment-methods/${id}`, { method: 'PATCH', body: { active: true } });
             loadPaymentMethods();
         } catch (err) {
-            alert(err.message || 'Failed to activate');
+            showToast(err.message || 'Failed to activate', 'error');
         }
     }
 
@@ -777,7 +841,7 @@
             await apiRequest(`/api/admin/chat/${activeChatUserId}`, { method: 'POST', body: { message: text } });
             loadChatThread();
         } catch (err) {
-            alert('Failed to send reply.');
+            showToast('Failed to send reply.', 'error');
         }
     }
 
@@ -811,7 +875,222 @@
     function copyAdminRefLink() {
         if (!adminRefLinkValue) return;
         navigator.clipboard.writeText(adminRefLinkValue);
-        alert('Referral link copied!');
+        showToast('Referral link copied!', 'success');
+    }
+
+    // ---------- IMAGE UPLOAD HELPER ----------
+    async function uploadContentImage(fileInputEl) {
+        const file = fileInputEl.files[0];
+        if (!file) return null;
+        const formData = new FormData();
+        formData.append('image', file);
+        const result = await apiUpload('/api/admin/upload-image', formData);
+        return result.url;
+    }
+
+    // ---------- TESTIMONIALS ----------
+    function toggleTestimonialForm(reset = true) {
+        const card = document.getElementById('testimonialFormCard');
+        card.style.display = card.style.display === 'none' ? 'block' : 'none';
+        if (reset && card.style.display === 'none') {
+            document.getElementById('testimonialEditId').value = '';
+            document.getElementById('testimonialName').value = '';
+            document.getElementById('testimonialRole').value = '';
+            document.getElementById('testimonialQuote').value = '';
+            document.getElementById('testimonialAvatarUrl').value = '';
+            document.getElementById('testimonialPhotoFile').value = '';
+        }
+    }
+
+    async function loadTestimonials() {
+        const wrap = document.getElementById('testimonialsTableWrap');
+        wrap.innerHTML = `<div class="loading">Loading testimonials...</div>`;
+        try {
+            const { testimonials } = await apiRequest('/api/admin/testimonials');
+            if (testimonials.length === 0) {
+                wrap.innerHTML = `<div class="empty-state">No testimonials yet.</div>`;
+                return;
+            }
+            wrap.innerHTML = `
+                <table>
+                    <thead><tr><th>Photo</th><th>Name</th><th>Role</th><th>Quote</th><th>Rating</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody>
+                        ${testimonials.map(t => `
+                            <tr>
+                                <td data-label="Photo">${t.avatar_url ? `<img src="${t.avatar_url}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">` : '—'}</td>
+                                <td data-label="Name">${t.name}</td>
+                                <td data-label="Role">${t.role_label || '—'}</td>
+                                <td data-label="Quote" style="max-width:260px;">${t.quote}</td>
+                                <td data-label="Rating">${'★'.repeat(t.rating)}</td>
+                                <td data-label="Status"><span class="badge ${t.active ? 'active' : 'rejected'}">${t.active ? 'Active' : 'Hidden'}</span></td>
+                                <td data-label="Actions">
+                                    <button class="btn btn-outline" onclick='editTestimonial(${JSON.stringify(t).replace(/'/g, "&apos;")})'>Edit</button>
+                                    <button class="btn ${t.active ? 'btn-reject' : 'btn-approve'}" onclick="toggleTestimonialActive(${t.id}, ${t.active ? 'false' : 'true'})">${t.active ? 'Hide' : 'Show'}</button>
+                                    <button class="btn btn-reject" onclick="deleteTestimonial(${t.id})">Delete</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        } catch (err) {
+            wrap.innerHTML = `<div class="empty-state">Failed to load testimonials.</div>`;
+        }
+    }
+
+    function editTestimonial(t) {
+        document.getElementById('testimonialFormCard').style.display = 'block';
+        document.getElementById('testimonialEditId').value = t.id;
+        document.getElementById('testimonialName').value = t.name;
+        document.getElementById('testimonialRole').value = t.role_label || '';
+        document.getElementById('testimonialQuote').value = t.quote;
+        document.getElementById('testimonialRating').value = t.rating;
+        document.getElementById('testimonialAvatarUrl').value = t.avatar_url || '';
+    }
+
+    async function saveTestimonial() {
+        const id = document.getElementById('testimonialEditId').value;
+        const name = document.getElementById('testimonialName').value.trim();
+        const roleLabel = document.getElementById('testimonialRole').value.trim();
+        const quote = document.getElementById('testimonialQuote').value.trim();
+        const rating = parseInt(document.getElementById('testimonialRating').value);
+        const photoFile = document.getElementById('testimonialPhotoFile');
+
+        if (!name || !quote) { showToast('Name and quote are required.', 'warning'); return; }
+
+        try {
+            let avatarUrl = document.getElementById('testimonialAvatarUrl').value;
+            if (photoFile.files[0]) {
+                avatarUrl = await uploadContentImage(photoFile);
+            }
+
+            const body = { name, roleLabel, quote, rating, avatarUrl };
+            if (id) {
+                await apiRequest(`/api/admin/testimonials/${id}`, { method: 'PATCH', body });
+            } else {
+                await apiRequest('/api/admin/testimonials', { method: 'POST', body });
+            }
+            toggleTestimonialForm();
+            loadTestimonials();
+        } catch (err) {
+            showToast(err.message || 'Failed to save testimonial', 'error');
+        }
+    }
+
+    async function toggleTestimonialActive(id, active) {
+        try {
+            await apiRequest(`/api/admin/testimonials/${id}`, { method: 'PATCH', body: { active: active === 'true' } });
+            loadTestimonials();
+        } catch (err) {
+            showToast(err.message || 'Failed to update testimonial', 'error');
+        }
+    }
+
+    async function deleteTestimonial(id) {
+        if (!confirm('Delete this testimonial permanently?')) return;
+        try {
+            await apiRequest(`/api/admin/testimonials/${id}`, { method: 'DELETE' });
+            loadTestimonials();
+        } catch (err) {
+            showToast(err.message || 'Failed to delete testimonial', 'error');
+        }
+    }
+
+    // ---------- BACKERS ----------
+    function toggleBackerForm(reset = true) {
+        const card = document.getElementById('backerFormCard');
+        card.style.display = card.style.display === 'none' ? 'block' : 'none';
+        if (reset && card.style.display === 'none') {
+            document.getElementById('backerEditId').value = '';
+            document.getElementById('backerName').value = '';
+            document.getElementById('backerLogoUrl').value = '';
+            document.getElementById('backerLogoFile').value = '';
+        }
+    }
+
+    async function loadBackers() {
+        const wrap = document.getElementById('backersTableWrap');
+        wrap.innerHTML = `<div class="loading">Loading backers...</div>`;
+        try {
+            const { backers } = await apiRequest('/api/admin/backers');
+            if (backers.length === 0) {
+                wrap.innerHTML = `<div class="empty-state">No backers yet.</div>`;
+                return;
+            }
+            wrap.innerHTML = `
+                <table>
+                    <thead><tr><th>Logo</th><th>Name</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody>
+                        ${backers.map(b => `
+                            <tr>
+                                <td data-label="Logo">${b.logo_url ? `<img src="${b.logo_url}" style="height:28px;">` : '—'}</td>
+                                <td data-label="Name">${b.name}</td>
+                                <td data-label="Status"><span class="badge ${b.active ? 'active' : 'rejected'}">${b.active ? 'Active' : 'Hidden'}</span></td>
+                                <td data-label="Actions">
+                                    <button class="btn btn-outline" onclick='editBacker(${JSON.stringify(b).replace(/'/g, "&apos;")})'>Edit</button>
+                                    <button class="btn ${b.active ? 'btn-reject' : 'btn-approve'}" onclick="toggleBackerActive(${b.id}, ${b.active ? 'false' : 'true'})">${b.active ? 'Hide' : 'Show'}</button>
+                                    <button class="btn btn-reject" onclick="deleteBacker(${b.id})">Delete</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        } catch (err) {
+            wrap.innerHTML = `<div class="empty-state">Failed to load backers.</div>`;
+        }
+    }
+
+    function editBacker(b) {
+        document.getElementById('backerFormCard').style.display = 'block';
+        document.getElementById('backerEditId').value = b.id;
+        document.getElementById('backerName').value = b.name;
+        document.getElementById('backerLogoUrl').value = b.logo_url || '';
+    }
+
+    async function saveBacker() {
+        const id = document.getElementById('backerEditId').value;
+        const name = document.getElementById('backerName').value.trim();
+        const logoFile = document.getElementById('backerLogoFile');
+
+        if (!name) { showToast('Name is required.', 'warning'); return; }
+
+        try {
+            let logoUrl = document.getElementById('backerLogoUrl').value;
+            if (logoFile.files[0]) {
+                logoUrl = await uploadContentImage(logoFile);
+            }
+
+            const body = { name, logoUrl };
+            if (id) {
+                await apiRequest(`/api/admin/backers/${id}`, { method: 'PATCH', body });
+            } else {
+                await apiRequest('/api/admin/backers', { method: 'POST', body });
+            }
+            toggleBackerForm();
+            loadBackers();
+        } catch (err) {
+            showToast(err.message || 'Failed to save backer', 'error');
+        }
+    }
+
+    async function toggleBackerActive(id, active) {
+        try {
+            await apiRequest(`/api/admin/backers/${id}`, { method: 'PATCH', body: { active: active === 'true' } });
+            loadBackers();
+        } catch (err) {
+            showToast(err.message || 'Failed to update backer', 'error');
+        }
+    }
+
+    async function deleteBacker(id) {
+        if (!confirm('Delete this backer permanently?')) return;
+        try {
+            await apiRequest(`/api/admin/backers/${id}`, { method: 'DELETE' });
+            loadBackers();
+        } catch (err) {
+            showToast(err.message || 'Failed to delete backer', 'error');
+        }
     }
 
     // ---------- INIT ----------

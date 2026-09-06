@@ -9,6 +9,7 @@ const { runRoiCycle } = require("./services/roiEngine");
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/user");
 const adminRoutes = require("./routes/admin");
+const publicRoutes = require("./routes/public");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,6 +26,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/public", publicRoutes);
 
 // Single-origin static frontend (matches the Kinbotos deployment pattern)
 app.use(express.static(path.join(__dirname, "public")));

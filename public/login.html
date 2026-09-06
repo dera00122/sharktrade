@@ -285,6 +285,7 @@
         }
     </style>
     <script src="api.js"></script>
+    <script src="toast.js"></script>
 </head>
 <body>
 
@@ -329,7 +330,7 @@
                         <input type="checkbox" id="rememberMe">
                         <span>Remember access node</span>
                     </label>
-                    <a href="#" class="forgot-pass-link">Forgot Key?</a>
+                    <a href="forgot-password.html" class="forgot-pass-link">Forgot Key?</a>
                 </div>
 
                 <button type="submit" class="submit-execution-btn">Authorize Session</button>
@@ -387,7 +388,7 @@
                     });
 
                     if (data.user.role === 'admin') {
-                        alert('Admin accounts must sign in through the admin portal, not this page.');
+                        showToast('Please use the admin sign-in page for this account.', 'warning');
                         submitBtn.disabled = false;
                         submitBtn.textContent = "Authorize Session";
                         return;
@@ -398,7 +399,7 @@
 
                     window.location.href = 'dashboard.html';
                 } catch (err) {
-                    alert(err.message || "Login failed. Please check your credentials.");
+                    showToast(err.message || 'Login failed. Please check your credentials.', 'error');
                     submitBtn.disabled = false;
                     submitBtn.textContent = "Authorize Session";
                 }

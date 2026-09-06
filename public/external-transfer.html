@@ -6,6 +6,7 @@
     <title>Transfer | SharkTrade Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="api.js"></script>
+    <script src="toast.js"></script>
     <style>
         body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; }
         .container { max-width: 450px; margin: 0 auto; padding: 20px; }
@@ -103,7 +104,7 @@
     <div class="card" id="step3" style="display:none;">
         <h3 style="margin-bottom: 6px; font-size: 1rem;">Review Your Transfer</h3>
         <div id="reviewRows"></div>
-        <p class="info-note">This amount stays in your wallet until an admin approves the transfer — nothing is deducted while it's pending.</p>
+        <p class="info-note">This amount stays in your wallet until the request is approved — nothing is deducted while it's pending.</p>
         <button class="action-btn" id="confirmBtn" onclick="submitTransfer()">CONFIRM TRANSFER</button>
         <button class="action-btn outline" onclick="goToStep(2)">Edit Details</button>
     </div>
@@ -127,8 +128,8 @@
             const amount = parseFloat(document.getElementById('amount').value);
             const source = document.getElementById('sourceWallet').value;
             const available = source === 'main' ? mainBalance : profitBalance;
-            if (!amount || amount <= 0) { alert('Please enter a valid amount.'); goToStep(1); return; }
-            if (amount > available) { alert(`Insufficient ${source} wallet balance. Available: $${formatMoney(available)}`); goToStep(1); return; }
+            if (!amount || amount <= 0) { showToast('Please enter a valid amount.', 'warning'); goToStep(1); return; }
+            if (amount > available) { showToast(`Insufficient ${source} wallet balance. Available: $${formatMoney(available)}`, 'warning'); goToStep(1); return; }
         }
     }
 
@@ -158,11 +159,11 @@
     function goToReview() {
         const details = getDetails();
         if (destType === 'bank' && (!details.bankName || !details.accountName || !details.accountNumber)) {
-            alert('Please fill in bank name, account name, and account number.');
+            showToast('Please fill in bank name, account name, and account number.', 'warning');
             return;
         }
         if (destType === 'crypto' && !details.walletAddress) {
-            alert('Please enter a wallet address.');
+            showToast('Please enter a wallet address.', 'warning');
             return;
         }
 
@@ -202,10 +203,10 @@
                 method: 'POST',
                 body: { source, amount, destinationType: destType, details }
             });
-            alert('Transfer request submitted. It will show as Pending until an admin reviews it.');
+            showToast('Transfer request submitted. It will show as Pending until it\'s reviewed.', 'success');
             window.location.href = 'dashboard.html';
         } catch (err) {
-            alert(err.message || 'Failed to submit transfer.');
+            showToast(err.message || 'Failed to submit transfer.', 'error');
             btn.disabled = false;
             btn.textContent = 'CONFIRM TRANSFER';
         }

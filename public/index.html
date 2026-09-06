@@ -127,6 +127,16 @@
     </div>
 </section>
 
+<!-- BACKED BY (auto-scrolling logo strip) -->
+<section class="backers-section">
+    <p class="backers-label">Backed by leading crypto investors and founders</p>
+    <div class="backers-track-wrap">
+        <div class="backers-track" id="backersTrack">
+            <span style="color:#666; font-size:0.8rem;">Loading...</span>
+        </div>
+    </div>
+</section>
+
 <!-- INVESTMENT PROTECTION GUARANTEE CAROUSEL -->
 <section class="protection-section" id="strategies">
     <div class="section-header">
@@ -304,6 +314,24 @@
     </div>
 </section>
 
+<!-- LIVE MARKET CAP -->
+<section class="market-cap-section">
+    <div class="market-cap-card">
+        <span class="market-cap-label">Global Crypto Market Cap</span>
+        <span class="market-cap-value" id="marketCapValue">Loading...</span>
+        <span class="market-cap-change" id="marketCapChange"></span>
+    </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials-section">
+    <p class="testimonials-tag">What Our Clients Say</p>
+    <h2 class="testimonials-title">Trusted by investors on the platform</h2>
+    <div class="testimonials-grid" id="testimonialsGrid">
+        <p style="color:#666; text-align:center; grid-column: 1/-1;">Loading testimonials...</p>
+    </div>
+</section>
+
 <!-- INSTITUTIONAL COMPLIANT FOOTER -->
 <footer class="premium-footer">
     <div class="footer-container">
@@ -359,5 +387,119 @@
 <script src="script.js"></script>
     <script src="api.js"></script>
     <script src="chat-widget.js"></script>
+    <script src="toast.js"></script>
+    <script>
+        // ---------- BACKERS SLIDER ----------
+        async function loadBackersSlider() {
+            const track = document.getElementById('backersTrack');
+            try {
+                const { backers } = await apiRequest('/api/public/backers');
+                if (!backers || backers.length === 0) {
+                    track.parentElement.parentElement.style.display = 'none';
+                    return;
+                }
+                const itemsHtml = backers.map(b => `
+                    <div class="backer-item">
+                        ${b.logo_url ? `<img src="${b.logo_url}" alt="${b.name}">` : `<i class="fa-solid fa-building" style="font-size:1.1rem;"></i> ${b.name}`}
+                    </div>
+                `).join('');
+                // Duplicate the list so the CSS scroll animation loops seamlessly
+                track.innerHTML = itemsHtml + itemsHtml;
+            } catch (err) {
+                track.parentElement.parentElement.style.display = 'none';
+            }
+        }
+
+        // ---------- TESTIMONIALS ----------
+        async function loadTestimonials() {
+            const grid = document.getElementById('testimonialsGrid');
+            try {
+                const { testimonials } = await apiRequest('/api/public/testimonials');
+                if (!testimonials || testimonials.length === 0) {
+                    grid.closest('.testimonials-section').style.display = 'none';
+                    return;
+                }
+                grid.innerHTML = testimonials.map(t => `
+                    <div class="testimonial-card">
+                        <div class="testimonial-stars">${'★'.repeat(t.rating)}${'☆'.repeat(5 - t.rating)}</div>
+                        <p class="testimonial-quote">"${t.quote}"</p>
+                        <div class="testimonial-author">
+                            ${t.avatar_url
+                                ? `<img src="${t.avatar_url}" class="testimonial-avatar">`
+                                : `<div class="testimonial-avatar">${t.name.charAt(0)}</div>`}
+                            <div>
+                                <span class="testimonial-name">${t.name}</span>
+                                ${t.role_label ? `<span class="testimonial-role">${t.role_label}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                grid.innerHTML = `<p style="color:#666; text-align:center; grid-column: 1/-1;">Unable to load testimonials.</p>`;
+            }
+        }
+
+        // ---------- LIVE MARKET CAP (CoinGecko public API) ----------
+        async function loadMarketCap() {
+            const valueEl = document.getElementById('marketCapValue');
+            const changeEl = document.getElementById('marketCapChange');
+            try {
+                const res = await fetch('https://api.coingecko.com/api/v3/global');
+                const data = await res.json();
+                const cap = data.data.total_market_cap.usd;
+                const change = data.data.market_cap_change_percentage_24h_usd;
+
+                valueEl.textContent = `$${(cap / 1e12).toFixed(2)}T`;
+                changeEl.textContent = `${change >= 0 ? '▲' : '▼'} ${Math.abs(change).toFixed(2)}% (24h)`;
+                changeEl.className = `market-cap-change ${change >= 0 ? 'up' : 'down'}`;
+            } catch (err) {
+                valueEl.textContent = 'Unavailable';
+            }
+        }
+
+        // ---------- SOCIAL PROOF POPUP ----------
+        const proofNames = ['Chidera', 'Michael', 'Amaka', 'Tunde', 'Ngozi', 'Emeka', 'Fatima', 'David', 'Blessing', 'Ibrahim'];
+        const proofCities = ['Lagos', 'Abuja', 'Port Harcourt', 'Ibadan', 'Kano', 'Enugu', 'Accra', 'Nairobi'];
+        const proofActions = [
+            (a) => `just deposited $${a}`,
+            (a) => `just invested $${a}`,
+            (a) => `just withdrew $${a} in profit`
+        ];
+
+        function showSocialProof() {
+            const name = proofNames[Math.floor(Math.random() * proofNames.length)];
+            const city = proofCities[Math.floor(Math.random() * proofCities.length)];
+            const amount = [50, 100, 250, 500, 1000, 2500][Math.floor(Math.random() * 6)];
+            const action = proofActions[Math.floor(Math.random() * proofActions.length)](amount.toLocaleString());
+
+            const popup = document.createElement('div');
+            popup.className = 'social-proof-popup';
+            popup.innerHTML = `
+                <i class="fa-solid fa-circle-check" style="color:#00e676;"></i>
+                <div><strong>${name}</strong> from ${city} ${action}</div>
+            `;
+            document.body.appendChild(popup);
+
+            setTimeout(() => popup.classList.add('show'), 50);
+            setTimeout(() => {
+                popup.classList.remove('show');
+                setTimeout(() => popup.remove(), 400);
+            }, 4500);
+        }
+
+        function startSocialProofLoop() {
+            setTimeout(function loop() {
+                showSocialProof();
+                setTimeout(loop, 15000 + Math.random() * 15000); // every 15-30s
+            }, 6000); // first one after 6s
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadBackersSlider();
+            loadTestimonials();
+            loadMarketCap();
+            startSocialProofLoop();
+        });
+    </script>
 </body>
 </html>

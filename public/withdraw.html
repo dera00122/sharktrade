@@ -6,6 +6,7 @@
     <title>Withdraw Profit | SharkTrade Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="api.js"></script>
+    <script src="toast.js"></script>
     <style>
         body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; }
         .container { max-width: 450px; margin: 0 auto; padding: 20px; }
@@ -55,7 +56,7 @@
         <label>Destination Wallet Address</label>
         <input type="text" id="destination" placeholder="e.g. TXxxxxxxxxxxxxxxxxxx">
 
-        <p class="info-note">This amount stays in your Profit Wallet until an admin approves the request — nothing is deducted while it's pending.</p>
+        <p class="info-note">This amount stays in your Profit Wallet until the request is approved — nothing is deducted while it's pending.</p>
 
         <button class="withdraw-btn" id="reviewBtn" onclick="showReview()">REVIEW WITHDRAWAL</button>
     </div>
@@ -68,7 +69,7 @@
             <div class="review-row"><span>Amount</span><span id="reviewAmount">$0.00</span></div>
             <div class="review-row"><span>Destination</span><span id="reviewDestination" style="word-break: break-all; text-align:right; max-width: 220px;">—</span></div>
         </div>
-        <p class="info-note">Double check the destination address — once approved by an admin, this can't be reversed.</p>
+        <p class="info-note">Double check the destination address — once approved, this can't be reversed.</p>
         <button class="withdraw-btn" id="confirmBtn" onclick="submitWithdrawal()">CONFIRM WITHDRAWAL</button>
         <button class="withdraw-btn" style="background:transparent; border:1px solid #444; color:#ccc; margin-top:10px;" onclick="backToForm()">Edit Request</button>
     </div>
@@ -94,8 +95,8 @@
         const amount = parseFloat(document.getElementById('amount').value);
         const destination = document.getElementById('destination').value.trim();
 
-        if (!amount || amount <= 0) { alert('Please enter a valid amount.'); return; }
-        if (!destination) { alert('Please enter a destination wallet address.'); return; }
+        if (!amount || amount <= 0) { showToast('Please enter a valid amount.', 'warning'); return; }
+        if (!destination) { showToast('Please enter a destination wallet address.', 'warning'); return; }
 
         document.getElementById('reviewAmount').textContent = `$${formatMoney(amount)}`;
         document.getElementById('reviewDestination').textContent = destination;
@@ -164,13 +165,13 @@
                 method: 'POST',
                 body: { amount, destination }
             });
-            alert('Withdrawal request submitted. It will show as Pending until an admin reviews it.');
+            showToast('Withdrawal request submitted. It will show as Pending until it\'s reviewed.', 'success');
             document.getElementById('amount').value = '';
             document.getElementById('destination').value = '';
             backToForm();
             await loadWithdrawals();
         } catch (err) {
-            alert(err.message || 'Failed to submit withdrawal.');
+            showToast(err.message || 'Failed to submit withdrawal.', 'error');
         } finally {
             btn.disabled = false;
             btn.textContent = 'CONFIRM WITHDRAWAL';

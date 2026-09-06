@@ -6,6 +6,7 @@
     <title>Wallet Exchange | SharkTrade Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="api.js"></script>
+    <script src="toast.js"></script>
     <style>
         body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; }
         .container { max-width: 450px; margin: 20px auto; padding: 20px; }
@@ -90,11 +91,11 @@
         const btn = document.getElementById('transferBtn');
 
         if (!amount || amount <= 0) {
-            alert('Please enter a valid amount.');
+            showToast('Please enter a valid amount.', 'warning');
             return;
         }
         if (from === to) {
-            alert('Source and destination wallets must be different.');
+            showToast('Source and destination wallets must be different.', 'warning');
             return;
         }
 
@@ -103,10 +104,10 @@
 
         try {
             await apiRequest('/api/user/transfer', { method: 'POST', body: { from, to, amount } });
-            alert('Transfer completed.');
+            showToast('Transfer completed.', 'success');
             window.location.href = 'dashboard.html';
         } catch (err) {
-            alert(err.message || 'Transfer failed.');
+            showToast(err.message || 'Transfer failed.', 'error');
             btn.disabled = false;
             btn.textContent = 'CONFIRM TRANSFER';
         }

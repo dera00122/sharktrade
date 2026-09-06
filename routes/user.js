@@ -44,6 +44,28 @@ function getUser(id) {
     return db.prepare("SELECT * FROM users WHERE id = ?").get(id);
 }
 
+// ---------- KYC ----------
+// POST /api/user/kyc-submit — flips status to pending and notifies admin via the chat inbox
+router.post("/kyc-submit", (req, res) => {
+    const user = getUser(req.user.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    if (user.kyc_status === "verified") {
+        return res.status(400).json({ error: "Your account is already verified" });
+    }
+
+    db.prepare("UPDATE users SET kyc_status = 'pending' WHERE id = ?").run(user.id);
+
+    // Drop a system-style message into this user's support chat thread so it shows up
+    // as unread in the admin's Support Chat inbox — reusing the existing notification surface.
+    db.prepare(
+        `INSERT INTO chat_messages (user_id, sender, message, read_by_admin, read_by_user)
+         VALUES (?, 'user', ?, 0, 1)`
+    ).run(user.id, `📋 KYC verification requested by ${user.first_name} ${user.last_name}. Please review and update their status in Users.`);
+
+    res.json({ message: "KYC request submitted. An admin will review your verification shortly." });
+});
+
 // ---------- DASHBOARD SUMMARY ----------
 router.get("/summary", (req, res) => {
     const user = getUser(req.user.id);

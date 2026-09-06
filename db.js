@@ -94,6 +94,37 @@ CREATE TABLE IF NOT EXISTS chat_messages (
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
+
+CREATE TABLE IF NOT EXISTS password_resets (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    code TEXT NOT NULL,                       -- 6-digit reset code
+    expires_at TEXT NOT NULL,
+    used INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS testimonials (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    role_label TEXT,                          -- e.g. "Retail Investor", "Verified User"
+    quote TEXT NOT NULL,
+    avatar_url TEXT,                          -- optional uploaded photo
+    rating INTEGER NOT NULL DEFAULT 5,        -- 1-5 stars
+    active INTEGER NOT NULL DEFAULT 1,
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS backers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    logo_url TEXT,                            -- optional uploaded logo image
+    active INTEGER NOT NULL DEFAULT 1,
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 `);
 
 // ---- Lightweight migrations for columns added after initial release ----
@@ -109,6 +140,7 @@ function ensureColumn(table, column, definition) {
     }
 }
 ensureColumn("users", "avatar_url", "TEXT");
+ensureColumn("users", "phone", "TEXT");
 ensureColumn("investment_plans", "fee_percent", "REAL DEFAULT 0");
 ensureColumn("investment_plans", "lock_days", "INTEGER DEFAULT 0");
 
@@ -122,6 +154,29 @@ if (planCount === 0) {
     insertPlan.run("Minimum Tier", 1000, 40000, 1.5, "48hr", 1.0, 7);
     insertPlan.run("Maximum Tier", 40000, 80000, 2.5, "daily", 1.0, 14);
     insertPlan.run("Premium Tier", 100000, null, 4.0, "daily", 0.5, 30);
+}
+
+// Seed placeholder testimonials if empty (editable from admin panel)
+const testimonialCount = db.prepare("SELECT COUNT(*) AS c FROM testimonials").get().c;
+if (testimonialCount === 0) {
+    const insertTestimonial = db.prepare(
+        "INSERT INTO testimonials (name, role_label, quote, rating, active, sort_order) VALUES (?, ?, ?, ?, 1, ?)"
+    );
+    insertTestimonial.run("Chidera A.", "Verified User", "The dashboard makes it easy to track everything in one place. Deposits and withdrawals are straightforward.", 5, 1);
+    insertTestimonial.run("Michael O.", "Retail Investor", "I like how transparent the investment plans are — you know exactly what you're signing up for.", 5, 2);
+    insertTestimonial.run("Sarah K.", "Verified User", "Support responded quickly when I had a question about my deposit status.", 4, 3);
+}
+
+// Seed placeholder backer entries if empty (editable from admin panel — replace with real names/logos)
+const backerCount = db.prepare("SELECT COUNT(*) AS c FROM backers").get().c;
+if (backerCount === 0) {
+    const insertBacker = db.prepare(
+        "INSERT INTO backers (name, active, sort_order) VALUES (?, 1, ?)"
+    );
+    insertBacker.run("[Add Backer Name]", 1);
+    insertBacker.run("[Add Backer Name]", 2);
+    insertBacker.run("[Add Backer Name]", 3);
+    insertBacker.run("[Add Backer Name]", 4);
 }
 
 // Seed default payment methods (deposit destination details shown to users) if empty

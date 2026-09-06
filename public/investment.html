@@ -6,6 +6,7 @@
     <title>Investment Strategy | SharkTrade Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="api.js"></script>
+    <script src="toast.js"></script>
     <style>
         body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; }
         .container { max-width: 450px; margin: 0 auto; padding: 20px; }
@@ -90,20 +91,20 @@
         const amount = parseFloat(input.value);
 
         if (!amount || amount <= 0) {
-            alert('Please enter an amount.');
+            showToast('Please enter an amount.', 'warning');
             return;
         }
         if (amount > mainBalance) {
-            alert(`Insufficient main wallet balance. You have $${formatMoney(mainBalance)} available. Deposit funds first.`);
+            showToast(`Insufficient main wallet balance. You have $${formatMoney(mainBalance)} available. Deposit funds first.`, 'warning');
             return;
         }
 
         try {
             await apiRequest('/api/user/invest', { method: 'POST', body: { planId, amount } });
-            alert('Investment created successfully!');
+            showToast('Investment created successfully!', 'success');
             window.location.href = 'invest-log.html';
         } catch (err) {
-            alert(err.message || 'Failed to create investment.');
+            showToast(err.message || 'Failed to create investment.', 'error');
         }
     }
 

@@ -235,6 +235,7 @@
         .file-name-feedback { color: #c8a86a; font-weight: 700; font-size: 0.85rem; margin-top: 4px; }
     </style>
     <script src="api.js"></script>
+    <script src="toast.js"></script>
 </head>
 <body>
 
@@ -369,7 +370,7 @@
                 }
                 applyAvatar(result.avatarUrl);
             } catch (err) {
-                alert(err.message || "Failed to upload photo. Please try again.");
+                showToast(err.message || 'Failed to upload photo. Please try again.', 'error');
             }
         });
 
@@ -381,18 +382,15 @@
             }
         });
 
-        // SUBMIT KYC ROUTINE — in a real system this queues for manual admin review.
-        // This demo doesn't store the document itself, just flips status to "pending"
-        // so an admin can mark it verified from the admin panel.
+        // SUBMIT KYC ROUTINE — flips status to pending and notifies admin via the chat inbox
         document.getElementById("kycForm").addEventListener("submit", async function(e) {
             e.preventDefault();
             try {
-                // Users can't self-verify — this just notifies that a document was submitted.
-                // An admin manually sets KYC status to "verified" from the admin panel.
-                alert("Document submitted for review. An admin will verify your identity shortly.");
+                await apiRequest("/api/user/kyc-submit", { method: "POST" });
+                showToast('Document submitted for review. We will verify your identity shortly.', 'success');
                 window.location.href = "dashboard.html";
             } catch (err) {
-                alert(err.message || "Failed to submit document.");
+                showToast(err.message || 'Failed to submit document.', 'error');
             }
         });
 
@@ -400,7 +398,7 @@
         // endpoint yet; this just updates what's cached locally for this session)
         document.getElementById("profileSettingsForm").addEventListener("submit", function(e) {
             e.preventDefault();
-            alert("Changes saved.");
+            showToast('Changes saved.', 'success');
         });
     });
 </script>

@@ -397,6 +397,133 @@ body.modal-open {
     .dual-phone-container { width: 300px; height: 470px; transform: scale(0.85); transform-origin: top center; }
 }
 
+/* ---------- BACKERS SLIDER ---------- */
+.backers-section {
+    padding: 40px 24px;
+    text-align: center;
+    background: #000;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.backers-label {
+    font-size: 0.78rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 24px;
+}
+.backers-track-wrap {
+    overflow: hidden;
+    width: 100%;
+    mask-image: linear-gradient(to right, transparent, #000 10%, #000 90%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 10%, #000 90%, transparent);
+}
+.backers-track {
+    display: flex;
+    align-items: center;
+    gap: 60px;
+    width: max-content;
+    animation: backersScroll 25s linear infinite;
+}
+.backers-track:hover { animation-play-state: paused; }
+.backer-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #888;
+    font-size: 1rem;
+    font-weight: 700;
+    white-space: nowrap;
+    opacity: 0.7;
+}
+.backer-item img { height: 28px; width: auto; filter: grayscale(1) brightness(1.8); }
+
+@keyframes backersScroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+
+/* ---------- LIVE MARKET CAP ---------- */
+.market-cap-section {
+    padding: 50px 24px;
+    display: flex;
+    justify-content: center;
+    background: #000;
+}
+.market-cap-card {
+    background: linear-gradient(145deg, #0d0f12, #050608);
+    border: 1px solid rgba(200,168,106,0.25);
+    border-radius: 16px;
+    padding: 26px 40px;
+    text-align: center;
+    max-width: 400px;
+}
+.market-cap-label {
+    display: block;
+    font-size: 0.75rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+}
+.market-cap-value {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #fff;
+}
+.market-cap-change {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-top: 6px;
+}
+.market-cap-change.up { color: #00e676; }
+.market-cap-change.down { color: #ff5252; }
+
+/* ---------- TESTIMONIALS ---------- */
+.testimonials-section {
+    padding: 70px 8% 90px;
+    background: radial-gradient(circle at top, #111418 0%, #000000 80%);
+    text-align: center;
+}
+.testimonials-tag {
+    color: #c8a86a;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+}
+.testimonials-title {
+    font-size: clamp(24px, 3vw, 34px);
+    color: #fff;
+    margin-bottom: 40px;
+}
+.testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+.testimonial-card {
+    background: #0d0f12;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 24px;
+    text-align: left;
+}
+.testimonial-stars { color: #c8a86a; font-size: 0.85rem; margin-bottom: 12px; }
+.testimonial-quote { color: #ccc; font-size: 0.88rem; line-height: 1.6; margin-bottom: 18px; }
+.testimonial-author { display: flex; align-items: center; gap: 10px; }
+.testimonial-avatar {
+    width: 38px; height: 38px; border-radius: 50%; background: rgba(200,168,106,0.15);
+    color: #c8a86a; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem;
+    object-fit: cover; flex-shrink: 0;
+}
+.testimonial-name { font-size: 0.85rem; font-weight: 700; color: #fff; display: block; }
+.testimonial-role { font-size: 0.72rem; color: #888; display: block; }
+
 
 .protection-section {
     padding: 100px 8%;
@@ -1061,10 +1188,12 @@ body {
    3. SHARKTRADE LEARN INTERFACE RULES
    ========================================================================== */
 .learn-banner {
-    background-color: #CCFF00;
-    color: #000000;
+    background: linear-gradient(160deg, #14161a 0%, #0a0a0a 100%);
+    color: #ffffff;
     padding: 80px 24px 140px 24px;
     text-align: center;
+    border-top: 1px solid rgba(200,168,106,0.15);
+    border-bottom: 1px solid rgba(200,168,106,0.15);
 }
 
 .learn-banner-wrapper {
@@ -1078,6 +1207,7 @@ body {
     line-height: 1.15;
     letter-spacing: -1px;
     margin-bottom: 20px;
+    color: #ffffff;
 }
 
 .learn-subtitle {
@@ -1085,17 +1215,17 @@ body {
     line-height: 1.6;
     font-weight: 500;
     margin-bottom: 36px;
-    opacity: 0.85;
+    color: #aaaaaa;
 }
 
 .pill-btn-dark {
     display: inline-block;
-    background-color: #0A0A0A;
-    color: #FFFFFF;
+    background: linear-gradient(145deg, #c8a86a, #8a713f);
+    color: #0a0a0a;
     padding: 16px 36px;
     border-radius: 100px;
     font-size: 15px;
-    font-weight: 600;
+    font-weight: 700;
     text-decoration: none;
     transition: opacity 0.2s, transform 0.2s;
 }

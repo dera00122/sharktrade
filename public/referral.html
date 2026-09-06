@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="api.js"></script>
+    <script src="toast.js"></script>
     <style>
         body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
         .container { max-width: 450px; margin: 0 auto; }
@@ -62,7 +63,7 @@
     function copyLink() {
         if (!refLink) return;
         navigator.clipboard.writeText(refLink);
-        alert("Referral link copied to clipboard!");
+        showToast('Referral link copied to clipboard!', 'success');
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
