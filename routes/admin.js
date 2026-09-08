@@ -241,6 +241,32 @@ router.get("/investments", (req, res) => {
     res.json({ investments: rows });
 });
 
+// PATCH /api/admin/investments/:id/profit { totalProfit }
+// Manually sets an investment's total profit. The difference from the old value is applied
+// to the user's Profit Wallet too, so the dashboard, withdrawals, etc. all stay consistent.
+router.patch("/investments/:id/profit", (req, res) => {
+    const investment = db.prepare("SELECT * FROM investments WHERE id = ?").get(req.params.id);
+    if (!investment) return res.status(404).json({ error: "Investment not found" });
+
+    const newTotalProfit = parseFloat(req.body.totalProfit);
+    if (isNaN(newTotalProfit) || newTotalProfit < 0) {
+        return res.status(400).json({ error: "totalProfit must be a valid non-negative number" });
+    }
+
+    const delta = +(newTotalProfit - investment.total_profit).toFixed(2);
+
+    db.prepare("UPDATE investments SET total_profit = ? WHERE id = ?").run(newTotalProfit, investment.id);
+    db.prepare("UPDATE users SET profit_balance = profit_balance + ? WHERE id = ?").run(delta, investment.user_id);
+
+    if (delta !== 0) {
+        db.prepare(
+            `INSERT INTO transactions (user_id, type, method, amount, status, note) VALUES (?, 'roi_credit', ?, ?, 'completed', ?)`
+        ).run(investment.user_id, investment.plan_name, Math.abs(delta), `Manual profit adjustment for ${investment.plan_name} (admin edit)`);
+    }
+
+    res.json({ message: "Investment profit updated", newTotalProfit, delta });
+});
+
 // Simulate a daily ROI credit run across all active investments (manual full-day trigger).
 // Automatic partial credits also run every 30 minutes via the interval in server.js.
 router.post("/investments/run-daily-roi", (req, res) => {

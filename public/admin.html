@@ -641,7 +641,7 @@
             }
             wrap.innerHTML = `
                 <table>
-                    <thead><tr><th>User</th><th>Plan</th><th>Amount</th><th>Daily ROI</th><th>Total Profit</th><th>Status</th><th>Started</th></tr></thead>
+                    <thead><tr><th>User</th><th>Plan</th><th>Amount</th><th>Daily ROI</th><th>Total Profit</th><th>Status</th><th>Started</th><th>Actions</th></tr></thead>
                     <tbody>
                         ${investments.map(i => `
                             <tr>
@@ -652,6 +652,9 @@
                                 <td data-label="Total Profit">$${formatMoney(i.total_profit)}</td>
                                 <td data-label="Status"><span class="badge ${i.status}">${i.status}</span></td>
                                 <td data-label="Started">${formatDate(i.created_at)}</td>
+                                <td data-label="Actions">
+                                    <button class="btn btn-outline" onclick="editInvestmentProfit(${i.id}, ${i.total_profit})">Edit Profit</button>
+                                </td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -659,6 +662,23 @@
             `;
         } catch (err) {
             wrap.innerHTML = `<div class="empty-state">Failed to load investments.</div>`;
+        }
+    }
+
+    async function editInvestmentProfit(id, currentProfit) {
+        const input = prompt(`Set total profit for this investment (current: $${formatMoney(currentProfit)}):`, currentProfit);
+        if (input === null) return;
+        const totalProfit = parseFloat(input);
+        if (isNaN(totalProfit) || totalProfit < 0) {
+            showToast('Please enter a valid non-negative number.', 'warning');
+            return;
+        }
+        try {
+            await apiRequest(`/api/admin/investments/${id}/profit`, { method: 'PATCH', body: { totalProfit } });
+            showToast('Investment profit updated.', 'success');
+            loadInvestments();
+        } catch (err) {
+            showToast(err.message || 'Failed to update profit.', 'error');
         }
     }
 

@@ -176,6 +176,36 @@ body.modal-open {
     font-size: 1.6rem;
 }
 
+.overlay-auth-row {
+    display: flex;
+    gap: 14px;
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid rgba(255,255,255,0.12);
+}
+.overlay-auth-btn {
+    flex: 1;
+    text-align: center;
+    padding: 14px;
+    border-radius: 100px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+.overlay-auth-btn.outline {
+    border: 1px solid #c8a86a;
+    color: #c8a86a;
+    background: transparent;
+}
+.overlay-auth-btn.filled {
+    background: linear-gradient(145deg, #c8a86a, #8a713f);
+    color: #000;
+}
+.overlay-auth-btn:active {
+    opacity: 0.85;
+}
+
 
 .hero {
     display: flex;

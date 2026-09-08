@@ -21,28 +21,13 @@
         .plan-name { font-size: 1.15rem; font-weight: 800; color: #c8a86a; }
         .plan-roi-badge { background: rgba(0,230,118,0.12); color: #00e676; font-size: 0.8rem; font-weight: 700; padding: 5px 12px; border-radius: 20px; }
 
-        .plan-detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 14px; margin-bottom: 18px; }
+        .plan-detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 14px; margin-bottom: 6px; }
         .plan-detail-item .label { font-size: 0.68rem; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
         .plan-detail-item .value { font-size: 0.95rem; font-weight: 700; color: #fff; margin-top: 3px; }
 
-        .projection-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-top: 6px; }
-        .projection-table th { text-align: left; color: #888; font-weight: 600; padding: 8px 6px; border-bottom: 1px solid #222; }
-        .projection-table td { padding: 8px 6px; border-bottom: 1px solid #16191d; color: #ddd; }
-        .projection-table td.profit { color: #00e676; font-weight: 700; }
-
         .invest-btn {
-            width: 100%; padding: 12px; margin-top: 16px; background: #c8a86a;
+            width: 100%; padding: 12px; margin-top: 18px; background: #c8a86a;
             border: none; border-radius: 8px; color: #000; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 0.8rem;
-        }
-
-        .calc-bar {
-            display: flex; align-items: center; gap: 10px; margin-bottom: 26px; flex-wrap: wrap;
-            background: #0d0f12; border: 1px solid #333; border-radius: 12px; padding: 14px 18px;
-        }
-        .calc-bar label { font-size: 0.8rem; color: #888; }
-        .calc-bar input {
-            background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 8px 12px;
-            border-radius: 8px; width: 140px; font-size: 0.9rem;
         }
     </style>
 </head>
@@ -51,13 +36,7 @@
 <div class="container">
     <a href="dashboard.html" style="color:#c8a86a; text-decoration:none; font-size: 0.85rem;">&larr; BACK TO DASHBOARD</a>
     <h2 style="margin: 20px 0 4px;">Investment Plans Overview</h2>
-    <p style="color:#888; font-size:0.85rem; margin-top:0; margin-bottom:22px;">Full breakdown of every plan — daily ROI, platform fees, lock-in periods, and projected returns.</p>
-
-    <div class="calc-bar">
-        <label>Calculate projected returns for:</label>
-        <input type="number" id="calcAmount" value="1000" min="0">
-        <span style="color:#888; font-size:0.8rem;">USD hypothetical deposit</span>
-    </div>
+    <p style="color:#888; font-size:0.85rem; margin-top:0; margin-bottom:26px;">Full details for every plan — investment range, daily ROI, platform fee, lock-in period, and withdrawal frequency.</p>
 
     <div id="plansContainer">
         <p style="text-align:center; color:#666;">Loading plans...</p>
@@ -65,14 +44,7 @@
 </div>
 
 <script>
-    let plans = [];
-
-    function projectedProfit(plan, amount, days) {
-        return amount * (plan.daily_roi / 100) * days;
-    }
-
-    function renderPlans() {
-        const amount = parseFloat(document.getElementById('calcAmount').value) || 0;
+    function renderPlans(plans) {
         const container = document.getElementById('plansContainer');
 
         if (plans.length === 0) {
@@ -81,9 +53,6 @@
         }
 
         container.innerHTML = plans.map(plan => {
-            const day7 = projectedProfit(plan, amount, 7);
-            const day30 = projectedProfit(plan, amount, 30);
-            const day90 = projectedProfit(plan, amount, 90);
             const fee = plan.fee_percent || 0;
             const lockDays = plan.lock_days || 0;
 
@@ -113,33 +82,6 @@
                         </div>
                     </div>
 
-                    <table class="projection-table">
-                        <thead>
-                            <tr><th>Period</th><th>Projected Profit</th><th>After Fee</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>7 days</td>
-                                <td class="profit">+$${formatMoney(day7)}</td>
-                                <td>+$${formatMoney(day7 * (1 - fee / 100))}</td>
-                            </tr>
-                            <tr>
-                                <td>30 days</td>
-                                <td class="profit">+$${formatMoney(day30)}</td>
-                                <td>+$${formatMoney(day30 * (1 - fee / 100))}</td>
-                            </tr>
-                            <tr>
-                                <td>90 days</td>
-                                <td class="profit">+$${formatMoney(day90)}</td>
-                                <td>+$${formatMoney(day90 * (1 - fee / 100))}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <p style="font-size:0.7rem; color:#666; margin-top:10px;">
-                        Projections assume a constant daily rate and are for illustration only — actual results depend on account activity. Platform fee shown is deducted from profit, not principal.
-                    </p>
-
                     <a href="investment.html"><button class="invest-btn">Invest in ${plan.name}</button></a>
                 </div>
             `;
@@ -149,14 +91,11 @@
     document.addEventListener('DOMContentLoaded', async () => {
         if (!requireLogin()) return;
         try {
-            const data = await apiRequest('/api/user/plans');
-            plans = data.plans;
-            renderPlans();
+            const { plans } = await apiRequest('/api/user/plans');
+            renderPlans(plans);
         } catch (err) {
             document.getElementById('plansContainer').innerHTML = `<p style="text-align:center; color:#ff5252;">Failed to load investment plans.</p>`;
         }
-
-        document.getElementById('calcAmount').addEventListener('input', renderPlans);
     });
 </script>
 
