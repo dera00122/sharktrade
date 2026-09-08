@@ -122,15 +122,27 @@
         document.getElementById('methodBadge').textContent = selectedMethod.name;
         document.getElementById('addressValue').textContent = selectedMethod.account_details;
 
-        // Generate QR code from the account details (wallet address / bank info)
-        document.getElementById('qrBox').innerHTML = '';
-        new QRCode(document.getElementById('qrBox'), {
-            text: selectedMethod.account_details,
-            width: 170,
-            height: 170,
-            colorDark: '#000000',
-            colorLight: '#ffffff'
-        });
+        // Generate QR code from the account details (wallet address / bank info).
+        // Wrapped defensively — if the QR library fails to load for any reason,
+        // the rest of the payment screen (address, timer, submit) still works.
+        const qrBox = document.getElementById('qrBox');
+        qrBox.innerHTML = '';
+        try {
+            if (typeof QRCode !== 'undefined') {
+                new QRCode(qrBox, {
+                    text: selectedMethod.account_details,
+                    width: 170,
+                    height: 170,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff'
+                });
+            } else {
+                qrBox.innerHTML = '<span style="color:#888; font-size:0.75rem; text-align:center; padding:10px;">QR code unavailable — use the address below</span>';
+            }
+        } catch (qrErr) {
+            console.error('QR generation failed:', qrErr);
+            qrBox.innerHTML = '<span style="color:#888; font-size:0.75rem; text-align:center; padding:10px;">QR code unavailable — use the address below</span>';
+        }
 
         document.getElementById('step1').style.display = 'none';
         document.getElementById('step2').style.display = 'block';

@@ -397,19 +397,26 @@ body.modal-open {
     .dual-phone-container { width: 300px; height: 470px; transform: scale(0.85); transform-origin: top center; }
 }
 
+/* ---------- LIVE TICKER TAPE ---------- */
+.ticker-tape-section {
+    background: #0d0f12;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
 /* ---------- BACKERS SLIDER ---------- */
 .backers-section {
-    padding: 40px 24px;
+    padding: 60px 24px;
     text-align: center;
     background: #000;
     border-bottom: 1px solid rgba(255,255,255,0.06);
 }
-.backers-label {
-    font-size: 0.78rem;
-    color: #666;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 24px;
+.backers-title {
+    font-size: clamp(22px, 3vw, 30px);
+    font-weight: 800;
+    color: #29b6d8;
+    margin-bottom: 36px;
+    line-height: 1.3;
 }
 .backers-track-wrap {
     overflow: hidden;
@@ -420,7 +427,7 @@ body.modal-open {
 .backers-track {
     display: flex;
     align-items: center;
-    gap: 60px;
+    gap: 70px;
     width: max-content;
     animation: backersScroll 25s linear infinite;
 }
@@ -428,14 +435,13 @@ body.modal-open {
 .backer-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    color: #888;
-    font-size: 1rem;
-    font-weight: 700;
+    gap: 10px;
+    color: #ccc;
+    font-size: 1.5rem;
+    font-weight: 800;
     white-space: nowrap;
-    opacity: 0.7;
 }
-.backer-item img { height: 28px; width: auto; filter: grayscale(1) brightness(1.8); }
+.backer-item img { height: 40px; width: auto; }
 
 @keyframes backersScroll {
     0% { transform: translateX(0); }
@@ -480,6 +486,24 @@ body.modal-open {
 .market-cap-change.up { color: #00e676; }
 .market-cap-change.down { color: #ff5252; }
 
+.market-cap-table-wrap {
+    max-width: 700px;
+    margin: 0 auto;
+    background: #0d0f12;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    overflow: hidden;
+    overflow-x: auto;
+}
+.market-cap-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.market-cap-table thead tr { background: #14161a; }
+.market-cap-table th { text-align: left; padding: 12px 16px; color: #888; font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.market-cap-table td { padding: 12px 16px; color: #ddd; border-top: 1px solid rgba(255,255,255,0.06); text-align: left; }
+.market-cap-table .coin-name-cell { display: flex; align-items: center; gap: 10px; font-weight: 700; color: #fff; white-space: nowrap; }
+.market-cap-table .coin-name-cell img { width: 22px; height: 22px; border-radius: 50%; }
+.market-cap-table .change-up { color: #00e676; font-weight: 700; }
+.market-cap-table .change-down { color: #ff5252; font-weight: 700; }
+
 /* ---------- TESTIMONIALS ---------- */
 .testimonials-section {
     padding: 70px 8% 90px;
@@ -499,30 +523,77 @@ body.modal-open {
     color: #fff;
     margin-bottom: 40px;
 }
-.testimonials-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 20px;
-    max-width: 1100px;
+.testimonial-carousel {
+    max-width: 520px;
     margin: 0 auto;
-}
-.testimonial-card {
     background: #0d0f12;
     border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 14px;
-    padding: 24px;
-    text-align: left;
+    border-radius: 18px;
+    padding: 44px 32px 34px;
 }
-.testimonial-stars { color: #c8a86a; font-size: 0.85rem; margin-bottom: 12px; }
-.testimonial-quote { color: #ccc; font-size: 0.88rem; line-height: 1.6; margin-bottom: 18px; }
-.testimonial-author { display: flex; align-items: center; gap: 10px; }
-.testimonial-avatar {
-    width: 38px; height: 38px; border-radius: 50%; background: rgba(200,168,106,0.15);
-    color: #c8a86a; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem;
-    object-fit: cover; flex-shrink: 0;
+.testimonial-slide { display: none; }
+.testimonial-slide.active { display: block; animation: testimonialFade 0.4s ease; }
+@keyframes testimonialFade {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
 }
-.testimonial-name { font-size: 0.85rem; font-weight: 700; color: #fff; display: block; }
-.testimonial-role { font-size: 0.72rem; color: #888; display: block; }
+.testimonial-avatar-lg {
+    width: 96px; height: 96px; border-radius: 50%; object-fit: cover;
+    border: 3px solid #c8a86a; margin: 0 auto 22px; display: block;
+    background: rgba(200,168,106,0.15); color: #c8a86a;
+    align-items: center; justify-content: center; font-weight: 800; font-size: 2rem;
+}
+.testimonial-avatar-lg.fallback { display: flex; }
+.testimonial-stars-lg { color: #c8a86a; font-size: 1.1rem; margin-bottom: 18px; letter-spacing: 3px; }
+.testimonial-name-lg { font-size: 1.3rem; font-weight: 800; font-style: italic; color: #fff; margin-bottom: 4px; }
+.testimonial-role-lg { font-size: 0.85rem; font-style: italic; color: #888; margin-bottom: 22px; }
+.testimonial-quote-lg { font-size: 1rem; color: #ddd; line-height: 1.7; }
+.testimonial-dots { display: flex; justify-content: center; gap: 10px; margin-top: 32px; }
+.testimonial-dot { width: 9px; height: 9px; border-radius: 50%; background: #333; cursor: pointer; transition: background 0.2s, transform 0.2s; }
+.testimonial-dot.active { background: #c8a86a; transform: scale(1.2); }
+
+/* ---------- SOCIAL PROOF POPUP ---------- */
+.social-proof-popup {
+    position: fixed;
+    bottom: 20px;
+    left: 16px;
+    right: 90px;
+    max-width: 420px;
+    background: #ffffff;
+    color: #111;
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+    z-index: 9997;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 0.82rem;
+    line-height: 1.4;
+    transform: translateY(140%);
+    opacity: 0;
+    transition: transform 0.4s ease, opacity 0.4s ease;
+}
+.social-proof-popup.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+.social-proof-popup .sp-icon {
+    width: 34px; height: 34px; border-radius: 8px; background: rgba(0,230,118,0.12);
+    color: #00a352; display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; flex-shrink: 0;
+}
+.social-proof-popup .sp-text { flex: 1; }
+.social-proof-popup .sp-text strong { color: #000; }
+.social-proof-popup .sp-close {
+    color: #999; cursor: pointer; font-size: 1.1rem; line-height: 1; padding: 4px; flex-shrink: 0;
+}
+.social-proof-popup .sp-close:hover { color: #333; }
+
+@media (max-width: 480px) {
+    .social-proof-popup { left: 10px; right: 80px; padding: 12px 14px; font-size: 0.78rem; }
+}
 
 
 .protection-section {

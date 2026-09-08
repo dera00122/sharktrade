@@ -127,9 +127,33 @@
     </div>
 </section>
 
+<!-- LIVE TICKER TAPE (official free TradingView widget) -->
+<section class="ticker-tape-section">
+    <div class="tradingview-widget-container">
+        <div class="tradingview-widget-container__widget"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+        {
+          "symbols": [
+            { "proName": "BINANCE:BTCUSDT", "title": "Bitcoin" },
+            { "proName": "BINANCE:ETHUSDT", "title": "Ethereum" },
+            { "proName": "BINANCE:SOLUSDT", "title": "Solana" },
+            { "proName": "BINANCE:BNBUSDT", "title": "BNB" },
+            { "proName": "BINANCE:XRPUSDT", "title": "XRP" },
+            { "proName": "BINANCE:DOGEUSDT", "title": "Dogecoin" }
+          ],
+          "showSymbolLogo": true,
+          "colorTheme": "dark",
+          "isTransparent": false,
+          "displayMode": "adaptive",
+          "locale": "en"
+        }
+        </script>
+    </div>
+</section>
+
 <!-- BACKED BY (auto-scrolling logo strip) -->
 <section class="backers-section">
-    <p class="backers-label">Backed by leading crypto investors and founders</p>
+    <h2 class="backers-title">Backed By Leading Crypto Investors And Founders</h2>
     <div class="backers-track-wrap">
         <div class="backers-track" id="backersTrack">
             <span style="color:#666; font-size:0.8rem;">Loading...</span>
@@ -314,12 +338,19 @@
     </div>
 </section>
 
-<!-- LIVE MARKET CAP -->
+<!-- LIVE MARKET CAP TABLE -->
 <section class="market-cap-section">
-    <div class="market-cap-card">
-        <span class="market-cap-label">Global Crypto Market Cap</span>
-        <span class="market-cap-value" id="marketCapValue">Loading...</span>
-        <span class="market-cap-change" id="marketCapChange"></span>
+    <p class="testimonials-tag">Live Crypto Prices</p>
+    <h2 class="testimonials-title">Coins and Their Market Caps</h2>
+    <div class="market-cap-table-wrap">
+        <table class="market-cap-table">
+            <thead>
+                <tr><th>Name</th><th>Price</th><th>Market Cap</th><th>24h</th></tr>
+            </thead>
+            <tbody id="marketCapTableBody">
+                <tr><td colspan="4" style="text-align:center; color:#666; padding:24px;">Loading live prices...</td></tr>
+            </tbody>
+        </table>
     </div>
 </section>
 
@@ -327,8 +358,11 @@
 <section class="testimonials-section">
     <p class="testimonials-tag">What Our Clients Say</p>
     <h2 class="testimonials-title">Trusted by investors on the platform</h2>
-    <div class="testimonials-grid" id="testimonialsGrid">
-        <p style="color:#666; text-align:center; grid-column: 1/-1;">Loading testimonials...</p>
+    <div class="testimonial-carousel">
+        <div id="testimonialSlides">
+            <p style="color:#666;">Loading testimonials...</p>
+        </div>
+        <div class="testimonial-dots" id="testimonialDots"></div>
     </div>
 </section>
 
@@ -378,7 +412,7 @@
         <div class="footer-disclosures">
             <p class="disclosure-bold">All investing involves risk.</p>
             <p><strong>Brokerage services</strong> are offered through SharkTrade Financial LLC, a registered broker dealer and member SIPC.</p>
-            <p><strong>Cryptocurrency services</strong> are offered through an account with SharkTrade Crypto, LLC. Cryptocurrency held through SharkTrade Crypto is FDIC insured or SIPC protected.</p>
+            <p><strong>Cryptocurrency services</strong> are offered through an account with SharkTrade Crypto, LLC. Cryptocurrency held through SharkTrade Crypto is not FDIC insured or SIPC protected.</p>
         </div>
         <div class="footer-giant-brand">SharkTrade</div>
     </div>
@@ -410,51 +444,96 @@
             }
         }
 
-        // ---------- TESTIMONIALS ----------
+        // ---------- TESTIMONIALS (carousel) ----------
+        let testimonialTimer = null;
+        let currentTestimonialIndex = 0;
+        let loadedTestimonials = [];
+
+        function renderTestimonialSlide(index) {
+            const t = loadedTestimonials[index];
+            const container = document.getElementById('testimonialSlides');
+            container.innerHTML = `
+                <div class="testimonial-slide active">
+                    ${t.avatar_url
+                        ? `<img src="${t.avatar_url}" class="testimonial-avatar-lg">`
+                        : `<div class="testimonial-avatar-lg fallback">${t.name.charAt(0)}</div>`}
+                    <div class="testimonial-stars-lg">${'★'.repeat(t.rating)}${'☆'.repeat(5 - t.rating)}</div>
+                    <div class="testimonial-name-lg">${t.name}</div>
+                    ${t.role_label ? `<div class="testimonial-role-lg">${t.role_label}</div>` : ''}
+                    <p class="testimonial-quote-lg">"${t.quote}"</p>
+                </div>
+            `;
+            document.querySelectorAll('.testimonial-dot').forEach((d, i) => d.classList.toggle('active', i === index));
+        }
+
+        function goToTestimonial(index) {
+            currentTestimonialIndex = index;
+            renderTestimonialSlide(index);
+            resetTestimonialTimer();
+        }
+
+        function resetTestimonialTimer() {
+            clearInterval(testimonialTimer);
+            testimonialTimer = setInterval(() => {
+                currentTestimonialIndex = (currentTestimonialIndex + 1) % loadedTestimonials.length;
+                renderTestimonialSlide(currentTestimonialIndex);
+            }, 6000);
+        }
+
         async function loadTestimonials() {
-            const grid = document.getElementById('testimonialsGrid');
+            const slidesEl = document.getElementById('testimonialSlides');
+            const dotsEl = document.getElementById('testimonialDots');
             try {
                 const { testimonials } = await apiRequest('/api/public/testimonials');
                 if (!testimonials || testimonials.length === 0) {
-                    grid.closest('.testimonials-section').style.display = 'none';
+                    document.querySelector('.testimonials-section').style.display = 'none';
                     return;
                 }
-                grid.innerHTML = testimonials.map(t => `
-                    <div class="testimonial-card">
-                        <div class="testimonial-stars">${'★'.repeat(t.rating)}${'☆'.repeat(5 - t.rating)}</div>
-                        <p class="testimonial-quote">"${t.quote}"</p>
-                        <div class="testimonial-author">
-                            ${t.avatar_url
-                                ? `<img src="${t.avatar_url}" class="testimonial-avatar">`
-                                : `<div class="testimonial-avatar">${t.name.charAt(0)}</div>`}
-                            <div>
-                                <span class="testimonial-name">${t.name}</span>
-                                ${t.role_label ? `<span class="testimonial-role">${t.role_label}</span>` : ''}
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
+                loadedTestimonials = testimonials;
+
+                dotsEl.innerHTML = testimonials.map((_, i) =>
+                    `<div class="testimonial-dot ${i === 0 ? 'active' : ''}" onclick="goToTestimonial(${i})"></div>`
+                ).join('');
+
+                renderTestimonialSlide(0);
+                resetTestimonialTimer();
             } catch (err) {
-                grid.innerHTML = `<p style="color:#666; text-align:center; grid-column: 1/-1;">Unable to load testimonials.</p>`;
+                slidesEl.innerHTML = `<p style="color:#666;">Unable to load testimonials.</p>`;
             }
         }
 
-        // ---------- LIVE MARKET CAP (CoinGecko public API) ----------
-        async function loadMarketCap() {
-            const valueEl = document.getElementById('marketCapValue');
-            const changeEl = document.getElementById('marketCapChange');
+        // ---------- LIVE MARKET CAP TABLE (CoinGecko public API) ----------
+        async function loadMarketCapTable() {
+            const tbody = document.getElementById('marketCapTableBody');
             try {
-                const res = await fetch('https://api.coingecko.com/api/v3/global');
-                const data = await res.json();
-                const cap = data.data.total_market_cap.usd;
-                const change = data.data.market_cap_change_percentage_24h_usd;
+                const res = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=12&page=1&sparkline=false');
+                const coins = await res.json();
 
-                valueEl.textContent = `$${(cap / 1e12).toFixed(2)}T`;
-                changeEl.textContent = `${change >= 0 ? '▲' : '▼'} ${Math.abs(change).toFixed(2)}% (24h)`;
-                changeEl.className = `market-cap-change ${change >= 0 ? 'up' : 'down'}`;
+                tbody.innerHTML = coins.map(c => `
+                    <tr>
+                        <td>
+                            <div class="coin-name-cell">
+                                <img src="${c.image}" alt="${c.name}">
+                                ${c.name} <span style="color:#666; font-weight:400;">${c.symbol.toUpperCase()}</span>
+                            </div>
+                        </td>
+                        <td>$${c.current_price.toLocaleString(undefined, { maximumFractionDigits: c.current_price < 1 ? 4 : 2 })}</td>
+                        <td>${formatMarketCap(c.market_cap)}</td>
+                        <td class="${c.price_change_percentage_24h >= 0 ? 'change-up' : 'change-down'}">
+                            ${c.price_change_percentage_24h >= 0 ? '▲' : '▼'} ${Math.abs(c.price_change_percentage_24h || 0).toFixed(2)}%
+                        </td>
+                    </tr>
+                `).join('');
             } catch (err) {
-                valueEl.textContent = 'Unavailable';
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#ff5252; padding:20px;">Unable to load live prices.</td></tr>`;
             }
+        }
+
+        function formatMarketCap(n) {
+            if (n >= 1e12) return `$${(n / 1e12).toFixed(2)}T`;
+            if (n >= 1e9) return `$${(n / 1e9).toFixed(2)}B`;
+            if (n >= 1e6) return `$${(n / 1e6).toFixed(2)}M`;
+            return `$${n.toLocaleString()}`;
         }
 
         // ---------- SOCIAL PROOF POPUP ----------
@@ -475,16 +554,21 @@
             const popup = document.createElement('div');
             popup.className = 'social-proof-popup';
             popup.innerHTML = `
-                <i class="fa-solid fa-circle-check" style="color:#00e676;"></i>
-                <div><strong>${name}</strong> from ${city} ${action}</div>
+                <div class="sp-icon"><i class="fa-solid fa-chart-line"></i></div>
+                <div class="sp-text"><strong>${name}</strong> from ${city} ${action}</div>
+                <div class="sp-close">&times;</div>
             `;
             document.body.appendChild(popup);
 
-            setTimeout(() => popup.classList.add('show'), 50);
-            setTimeout(() => {
+            function dismiss() {
                 popup.classList.remove('show');
                 setTimeout(() => popup.remove(), 400);
-            }, 4500);
+            }
+
+            popup.querySelector('.sp-close').addEventListener('click', dismiss);
+
+            setTimeout(() => popup.classList.add('show'), 50);
+            setTimeout(dismiss, 5500);
         }
 
         function startSocialProofLoop() {
@@ -497,9 +581,10 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadBackersSlider();
             loadTestimonials();
-            loadMarketCap();
+            loadMarketCapTable();
             startSocialProofLoop();
         });
     </script>
+    <script src="language-switcher.js"></script>
 </body>
 </html>
