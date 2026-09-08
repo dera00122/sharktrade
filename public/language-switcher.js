@@ -1,6 +1,9 @@
 // language-switcher.js — full-site translation using Google's free Website Translator widget.
 // Include this on any page with: <script src="language-switcher.js"></script>
-// It injects a small flag/language dropdown, matching the EN dropdown style used as reference.
+//
+// Placement: if the page has an element with id="langMenuSlot" (the hamburger/overlay
+// menu on index.html has one), the switcher renders as a menu item there. Otherwise it
+// falls back to a small floating pill in the top-left corner.
 
 (function () {
     function injectStyles() {
@@ -15,41 +18,58 @@
                 box-shadow: 0 4px 16px rgba(0,0,0,0.25); font-family: 'Segoe UI', sans-serif;
                 font-weight: 700; font-size: 0.9rem; color: #111;
             }
-            #stLangSwitcher i { font-size: 0.75rem; transition: transform 0.2s; }
-            #stLangSwitcher.open i { transform: rotate(180deg); }
+            #stLangMenuItem {
+                display: flex; align-items: center; gap: 8px; cursor: pointer;
+                color: inherit; font: inherit;
+            }
+            #stLangSwitcher i, #stLangMenuItem i { font-size: 0.75rem; }
             /* Hide Google's default banner/branding for a cleaner look */
             .goog-te-banner-frame, .skiptranslate > div:first-child { display: none !important; }
             body { top: 0 !important; }
-            #google_translate_element { display: none; }
+            /* Positioned off-screen rather than display:none — a fully hidden element
+               can't have its native dropdown opened programmatically, but an
+               off-screen one still can. */
+            #google_translate_element {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
             .goog-tooltip, .goog-tooltip:hover { display: none !important; }
             .goog-text-highlight { background: none !important; box-shadow: none !important; }
         `;
         document.head.appendChild(style);
     }
 
-    function buildSwitcher() {
-        if (document.getElementById('stLangSwitcher')) return;
-        injectStyles();
+    function openTranslateDropdown(container) {
+        const select = container.querySelector('select.goog-te-combo');
+        if (select) {
+            select.focus();
+            select.click();
+        }
+    }
 
-        const bar = document.createElement('div');
-        bar.id = 'stLangSwitcher';
-        bar.innerHTML = `<i class="fa-solid fa-globe"></i> <span>EN</span> <i class="fa-solid fa-chevron-down"></i>`;
-        document.body.appendChild(bar);
+    function buildSwitcher() {
+        injectStyles();
 
         // Hidden container Google Translate needs to attach its actual <select> to
         const container = document.createElement('div');
         container.id = 'google_translate_element';
         document.body.appendChild(container);
 
-        bar.addEventListener('click', () => {
-            // Once Google's widget has loaded, it renders a real <select> inside
-            // #google_translate_element — clicking our button opens/focuses it.
-            const select = container.querySelector('select.goog-te-combo');
-            if (select) {
-                select.focus();
-                select.click();
-            }
-        });
+        const menuSlot = document.getElementById('langMenuSlot');
+        if (menuSlot) {
+            // Render as a menu item inside the existing hamburger/overlay menu
+            menuSlot.innerHTML = `<i class="fa-solid fa-globe"></i> <span id="stLangMenuItem">Language: EN</span>`;
+            menuSlot.style.cursor = 'pointer';
+            menuSlot.addEventListener('click', () => openTranslateDropdown(container));
+        } else {
+            // Fallback: floating pill, top-left (only used on pages without a hamburger menu)
+            const bar = document.createElement('div');
+            bar.id = 'stLangSwitcher';
+            bar.innerHTML = `<i class="fa-solid fa-globe"></i> <span>EN</span> <i class="fa-solid fa-chevron-down"></i>`;
+            document.body.appendChild(bar);
+            bar.addEventListener('click', () => openTranslateDropdown(container));
+        }
 
         // Load the Google Translate script
         window.googleTranslateElementInit = function () {
