@@ -67,26 +67,40 @@
 <script>
     let mainBalance = 0;
 
+    function formatLockPeriod(hours) {
+        if (hours >= 168 && hours % 168 === 0) return `${hours / 168} week${hours / 168 > 1 ? 's' : ''}`;
+        if (hours >= 24 && hours % 24 === 0) return `${hours / 24} day${hours / 24 > 1 ? 's' : ''}`;
+        return `${hours} hours`;
+    }
+
     function renderPlans(plans) {
         const grid = document.getElementById('plansGrid');
         if (plans.length === 0) {
             grid.innerHTML = `<p style="text-align:center; color:#666;">No investment plans are currently available.</p>`;
             return;
         }
-        grid.innerHTML = plans.map(plan => `
-            <div class="plan-card">
-                <div class="plan-name">${plan.name}</div>
-                <div class="row"><span>Investment</span> <strong>$${formatMoney(plan.min_amount)} ${plan.max_amount ? '- $' + formatMoney(plan.max_amount) : '+'}</strong></div>
-                <div class="row"><span>Daily ROI</span> <strong>${plan.daily_roi}%</strong></div>
-                <div class="row"><span>Withdrawal</span> <strong>${plan.withdrawal_type === 'daily' ? 'Daily' : '48hr'}</strong></div>
-                <div class="row"><span>Support</span> <strong>24/7</strong></div>
-                <input type="number" class="amount-input" id="amount-${plan.id}" placeholder="Enter amount (min $${formatMoney(plan.min_amount)})">
-                <button class="invest-btn" onclick="invest(${plan.id})">Invest Now</button>
-            </div>
-        `).join('');
+        grid.innerHTML = plans.map(plan => {
+            const isBtc = plan.currency === 'BTC';
+            const rangeText = isBtc
+                ? `${plan.min_amount_btc} BTC ${plan.max_amount_btc ? '- ' + plan.max_amount_btc + ' BTC' : '+'}`
+                : `$${formatMoney(plan.min_amount)} ${plan.max_amount ? '- $' + formatMoney(plan.max_amount) : '+'}`;
+            const placeholder = isBtc ? `Enter BTC amount (min ${plan.min_amount_btc})` : `Enter amount (min $${formatMoney(plan.min_amount)})`;
+
+            return `
+                <div class="plan-card">
+                    <div class="plan-name">${plan.name}</div>
+                    <div class="row"><span>Investment</span> <strong>${rangeText}</strong></div>
+                    <div class="row"><span>Hourly ROI</span> <strong>${plan.hourly_roi}%/hr</strong></div>
+                    <div class="row"><span>Lock-in Period</span> <strong>${formatLockPeriod(plan.lock_hours)}</strong></div>
+                    <div class="row"><span>Support</span> <strong>24/7</strong></div>
+                    <input type="number" step="any" class="amount-input" id="amount-${plan.id}" placeholder="${placeholder}">
+                    <button class="invest-btn" onclick="invest(${plan.id}, ${isBtc})">Invest Now</button>
+                </div>
+            `;
+        }).join('');
     }
 
-    async function invest(planId) {
+    async function invest(planId, isBtc) {
         const input = document.getElementById(`amount-${planId}`);
         const amount = parseFloat(input.value);
 
@@ -94,7 +108,7 @@
             showToast('Please enter an amount.', 'warning');
             return;
         }
-        if (amount > mainBalance) {
+        if (!isBtc && amount > mainBalance) {
             showToast(`Insufficient main wallet balance. You have $${formatMoney(mainBalance)} available. Deposit funds first.`, 'warning');
             return;
         }

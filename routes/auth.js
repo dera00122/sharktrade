@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const db = require("../db");
 const { requireAuth, JWT_SECRET } = require("../middleware/auth");
+const { sendPasswordResetEmail, sendWelcomeEmail } = require("../services/emailService");
 
 const router = express.Router();
 
@@ -73,6 +74,9 @@ router.post("/register", (req, res) => {
     const user = db.prepare("SELECT * FROM users WHERE id = ?").get(info.lastInsertRowid);
     const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: "7d" });
 
+    // Fire-and-forget: don't let a slow/failed email delay or break registration itself.
+    sendWelcomeEmail(publicUser(user)).catch((err) => console.error("Failed to send welcome email:", err.message));
+
     res.status(201).json({ token, user: publicUser(user) });
 });
 
@@ -104,34 +108,6 @@ router.get("/me", requireAuth, (req, res) => {
 
 // ---------- PASSWORD RECOVERY ----------
 
-async function sendResetEmail(toEmail, code) {
-    const apiKey = process.env.RESEND_API_KEY;
-    if (!apiKey) {
-        console.log(`[password-reset] RESEND_API_KEY not set — reset code for ${toEmail}: ${code}`);
-        return { simulated: true };
-    }
-
-    const response = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-            "Authorization": `Bearer ${apiKey}`,
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            from: process.env.RESEND_FROM_EMAIL || "SharkTrade Pro <onboarding@resend.dev>",
-            to: [toEmail],
-            subject: "Your SharkTrade Pro password reset code",
-            html: `<p>Your password reset code is:</p><h2 style="letter-spacing:4px;">${code}</h2><p>This code expires in 15 minutes. If you didn't request this, you can ignore this email.</p>`
-        })
-    });
-
-    if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Resend API error: ${errText}`);
-    }
-    return { simulated: false };
-}
-
 // POST /api/auth/forgot-password { email }
 router.post("/forgot-password", async (req, res) => {
     const { email } = req.body;
@@ -153,7 +129,7 @@ router.post("/forgot-password", async (req, res) => {
     ).run(user.id, code, expiresAt);
 
     try {
-        const result = await sendResetEmail(user.email, code);
+        const result = await sendPasswordResetEmail(user.email, code);
         res.json({
             message: "If an account exists for that email, a reset code has been sent.",
             // Only included when no real email service is configured, so the demo remains usable end-to-end.

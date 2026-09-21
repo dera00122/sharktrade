@@ -215,33 +215,68 @@ router.get("/plans", (req, res) => {
     res.json({ plans });
 });
 
+// Fetches the live BTC/USD price for converting BTC-denominated plan amounts. Falls back to
+// a conservative estimate if the price API is unreachable, so investing still works offline.
+async function getBtcPriceUsd() {
+    try {
+        const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd");
+        const data = await res.json();
+        return data.bitcoin.usd;
+    } catch (err) {
+        console.error("Failed to fetch live BTC price, using fallback:", err.message);
+        return 78000; // fallback estimate
+    }
+}
+
 // POST /api/user/invest { planId, amount }
-router.post("/invest", (req, res) => {
+// For BTC-currency plans, `amount` is a BTC quantity (e.g. 1.5), converted to its USD
+// equivalent at the live price for internal wallet accounting; the BTC quantity is also
+// stored separately so investment logs can display it accurately.
+router.post("/invest", async (req, res) => {
     const { planId, amount } = req.body;
     const amt = parseFloat(amount);
     const plan = db.prepare("SELECT * FROM investment_plans WHERE id = ? AND active = 1").get(planId);
 
     if (!plan) return res.status(404).json({ error: "Investment plan not found" });
-    if (!amt || amt < plan.min_amount || (plan.max_amount && amt > plan.max_amount)) {
-        return res.status(400).json({ error: `Amount must be between ${plan.min_amount} and ${plan.max_amount || "no limit"}` });
+    if (!amt || amt <= 0) return res.status(400).json({ error: "Enter a valid amount" });
+
+    let usdAmount = amt;
+    let btcAmount = null;
+
+    if (plan.currency === "BTC") {
+        if (amt < plan.min_amount_btc || (plan.max_amount_btc && amt > plan.max_amount_btc)) {
+            return res.status(400).json({ error: `Amount must be between ${plan.min_amount_btc} and ${plan.max_amount_btc || "no limit"} BTC` });
+        }
+        const btcPrice = await getBtcPriceUsd();
+        usdAmount = +(amt * btcPrice).toFixed(2);
+        btcAmount = amt;
+    } else {
+        if (usdAmount < plan.min_amount || (plan.max_amount && usdAmount > plan.max_amount)) {
+            return res.status(400).json({ error: `Amount must be between ${plan.min_amount} and ${plan.max_amount || "no limit"}` });
+        }
     }
 
     const user = getUser(req.user.id);
-    if (amt > user.main_balance) {
+    if (usdAmount > user.main_balance) {
         return res.status(400).json({ error: "Insufficient main wallet balance" });
     }
 
-    db.prepare("UPDATE users SET main_balance = main_balance - ? WHERE id = ?").run(amt, user.id);
+    db.prepare("UPDATE users SET main_balance = main_balance - ? WHERE id = ?").run(usdAmount, user.id);
+
+    const lockHours = plan.lock_hours || (plan.lock_days || 0) * 24;
+    const completesAt = lockHours > 0
+        ? new Date(Date.now() + lockHours * 60 * 60 * 1000).toISOString().slice(0, 19).replace("T", " ")
+        : null;
 
     const info = db.prepare(
-        `INSERT INTO investments (user_id, plan_id, plan_name, amount, daily_roi, status, last_credit_date)
-         VALUES (?, ?, ?, ?, ?, 'active', datetime('now'))`
-    ).run(user.id, plan.id, plan.name, amt, plan.daily_roi);
+        `INSERT INTO investments (user_id, plan_id, plan_name, amount, daily_roi, hourly_roi, lock_hours, completes_at, amount_btc, status, last_credit_date)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', datetime('now'))`
+    ).run(user.id, plan.id, plan.name, usdAmount, plan.daily_roi, plan.hourly_roi, lockHours, completesAt, btcAmount);
 
     db.prepare(
         `INSERT INTO transactions (user_id, type, method, amount, status, note)
          VALUES (?, 'investment', ?, ?, 'completed', ?)`
-    ).run(user.id, plan.name, amt, `Invested into ${plan.name}`);
+    ).run(user.id, plan.name, usdAmount, `Invested into ${plan.name}${btcAmount ? ` (${btcAmount} BTC)` : ""}`);
 
     res.status(201).json({ message: "Investment created", investmentId: info.lastInsertRowid });
 });

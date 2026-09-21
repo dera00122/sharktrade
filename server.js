@@ -14,10 +14,10 @@ const publicRoutes = require("./routes/public");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// How often profit ticks in automatically (minutes). Each tick credits a
-// proportional slice of the daily ROI, so a full day's rate accumulates
-// gradually across the day instead of needing a manual admin trigger.
-const ROI_INTERVAL_MINUTES = parseInt(process.env.ROI_INTERVAL_MINUTES || "30", 10);
+// How often profit ticks in automatically (minutes). The ROI engine tracks each
+// investment's real elapsed time itself, so this just controls how often it checks in —
+// set to hourly by default to match the hourly-rate investment plans.
+const ROI_INTERVAL_MINUTES = parseInt(process.env.ROI_INTERVAL_MINUTES || "60", 10);
 
 app.use(cors());
 app.use(express.json());
@@ -41,13 +41,12 @@ app.listen(PORT, () => {
     console.log(`Auto profit ticks every ${ROI_INTERVAL_MINUTES} minute(s) for active investments.`);
 });
 
-// Automatic profit ticking — simulates passive daily ROI accrual without needing
-// the admin to click "Run Daily ROI" manually. Purely a demo convenience; there's
-// no real market data behind it.
+// Automatic profit ticking — credits each active investment for its real elapsed time
+// since its last credit, so it stays accurate regardless of how often this runs. Purely a
+// demo convenience; there's no real market data behind it.
 setInterval(() => {
     try {
-        const fraction = ROI_INTERVAL_MINUTES / 1440; // 1440 minutes in a day
-        const credited = runRoiCycle(fraction);
+        const credited = runRoiCycle();
         if (credited > 0) {
             console.log(`[auto-roi] Credited profit to ${credited} active investment(s).`);
         }

@@ -139,7 +139,12 @@
                 <div class="status" style="background: ${statusColor[tx.status]}1A; color: ${statusColor[tx.status]};">
                     ${tx.status.toUpperCase()}
                 </div>
-                <div class="amount">$${formatMoney(tx.amount)} USD</div>
+                <div style="display:flex; align-items:center; gap:10px; margin: 8px 0;">
+                    <div style="width:34px; height:34px; border-radius:50%; background:rgba(200,168,106,0.12); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                        <i class="fa-solid fa-wallet" style="color:#c8a86a; font-size:0.95rem;"></i>
+                    </div>
+                    <div class="amount" style="margin:0;">$${formatMoney(tx.amount)} USD</div>
+                </div>
                 <div style="font-size: 0.85rem; color:#888;">From: <strong style="color:#fff;">Profit Wallet</strong></div>
                 <div style="font-size: 0.85rem; color:#888;">To: <strong style="color:#fff; word-break: break-all;">${tx.destination || '—'}</strong></div>
             </div>

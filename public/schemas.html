@@ -54,19 +54,22 @@
 
         container.innerHTML = plans.map(plan => {
             const fee = plan.fee_percent || 0;
-            const lockDays = plan.lock_days || 0;
+            const isBtc = plan.currency === 'BTC';
+            const rangeText = isBtc
+                ? `${plan.min_amount_btc} BTC ${plan.max_amount_btc ? '- ' + plan.max_amount_btc + ' BTC' : '+'}`
+                : `$${formatMoney(plan.min_amount)}${plan.max_amount ? ' - $' + formatMoney(plan.max_amount) : '+'}`;
 
             return `
                 <div class="plan-card">
                     <div class="plan-header">
                         <span class="plan-name">${plan.name}</span>
-                        <span class="plan-roi-badge">${plan.daily_roi}% / day</span>
+                        <span class="plan-roi-badge">${plan.hourly_roi}% / hr</span>
                     </div>
 
                     <div class="plan-detail-grid">
                         <div class="plan-detail-item">
                             <div class="label">Investment Range</div>
-                            <div class="value">$${formatMoney(plan.min_amount)}${plan.max_amount ? ' - $' + formatMoney(plan.max_amount) : '+'}</div>
+                            <div class="value">${rangeText}</div>
                         </div>
                         <div class="plan-detail-item">
                             <div class="label">Platform Fee</div>
@@ -74,7 +77,7 @@
                         </div>
                         <div class="plan-detail-item">
                             <div class="label">Lock-in Period</div>
-                            <div class="value">${lockDays > 0 ? lockDays + ' days' : 'None'}</div>
+                            <div class="value">${formatLockPeriod(plan.lock_hours)}</div>
                         </div>
                         <div class="plan-detail-item">
                             <div class="label">Profit Withdrawal</div>
@@ -86,6 +89,12 @@
                 </div>
             `;
         }).join('');
+    }
+
+    function formatLockPeriod(hours) {
+        if (hours >= 168 && hours % 168 === 0) return `${hours / 168} week${hours / 168 > 1 ? 's' : ''}`;
+        if (hours >= 24 && hours % 24 === 0) return `${hours / 24} day${hours / 24 > 1 ? 's' : ''}`;
+        return `${hours} hours`;
     }
 
     document.addEventListener('DOMContentLoaded', async () => {

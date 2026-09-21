@@ -6,6 +6,7 @@ const fs = require("fs");
 const db = require("../db");
 const { requireAuth, requireAdmin } = require("../middleware/auth");
 const { runRoiCycle } = require("../services/roiEngine");
+const { sendWithdrawalApprovedEmail } = require("../services/emailService");
 
 const router = express.Router();
 router.use(requireAuth, requireAdmin);
@@ -140,7 +141,7 @@ router.get("/transactions", (req, res) => {
 });
 
 // Approve/reject a deposit, withdrawal, or external payout
-router.patch("/transactions/:id", (req, res) => {
+router.patch("/transactions/:id", async (req, res) => {
     const { action } = req.body; // 'approve' | 'reject'
     const tx = db.prepare("SELECT * FROM transactions WHERE id = ?").get(req.params.id);
     if (!tx) return res.status(404).json({ error: "Transaction not found" });
@@ -180,6 +181,13 @@ router.patch("/transactions/:id", (req, res) => {
             }
 
             db.prepare(`UPDATE users SET ${wallet} = ${wallet} - ? WHERE id = ?`).run(tx.amount, tx.user_id);
+
+            if (tx.type === "withdraw") {
+                const publicUser = { firstName: user.first_name, email: user.email };
+                sendWithdrawalApprovedEmail(publicUser, tx).catch((err) =>
+                    console.error("Failed to send withdrawal-approved email:", err.message)
+                );
+            }
         }
         // On reject: nothing to undo, since funds were never deducted.
     }
@@ -195,24 +203,29 @@ router.get("/plans", (req, res) => {
 });
 
 router.post("/plans", (req, res) => {
-    const { name, minAmount, maxAmount, dailyRoi, withdrawalType, feePercent, lockDays } = req.body;
-    if (!name || !minAmount || !dailyRoi) {
-        return res.status(400).json({ error: "name, minAmount, and dailyRoi are required" });
+    const { name, minAmount, maxAmount, dailyRoi, hourlyRoi, withdrawalType, feePercent, lockDays, lockHours, currency, minAmountBtc, maxAmountBtc } = req.body;
+    if (!name || !minAmount || !(dailyRoi || hourlyRoi)) {
+        return res.status(400).json({ error: "name, minAmount, and dailyRoi or hourlyRoi are required" });
     }
+    const finalHourlyRoi = hourlyRoi || +(dailyRoi / 24).toFixed(4);
+    const finalDailyRoi = dailyRoi || +(hourlyRoi * 24).toFixed(3);
+    const finalLockHours = lockHours || (lockDays || 0) * 24;
+    const finalLockDays = lockDays || Math.round(finalLockHours / 24);
+
     const info = db.prepare(
-        `INSERT INTO investment_plans (name, min_amount, max_amount, daily_roi, withdrawal_type, fee_percent, lock_days, active)
-         VALUES (?, ?, ?, ?, ?, ?, ?, 1)`
-    ).run(name, minAmount, maxAmount || null, dailyRoi, withdrawalType || "daily", feePercent || 0, lockDays || 0);
+        `INSERT INTO investment_plans (name, min_amount, max_amount, daily_roi, withdrawal_type, fee_percent, lock_days, hourly_roi, lock_hours, currency, min_amount_btc, max_amount_btc, active)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`
+    ).run(name, minAmount, maxAmount || null, finalDailyRoi, withdrawalType || "daily", feePercent || 0, finalLockDays, finalHourlyRoi, finalLockHours, currency || "USD", minAmountBtc || null, maxAmountBtc || null);
     res.status(201).json({ message: "Plan created", planId: info.lastInsertRowid });
 });
 
 router.patch("/plans/:id", (req, res) => {
     const plan = db.prepare("SELECT * FROM investment_plans WHERE id = ?").get(req.params.id);
     if (!plan) return res.status(404).json({ error: "Plan not found" });
-    const { name, minAmount, maxAmount, dailyRoi, withdrawalType, feePercent, lockDays, active } = req.body;
+    const { name, minAmount, maxAmount, dailyRoi, hourlyRoi, withdrawalType, feePercent, lockDays, lockHours, currency, minAmountBtc, maxAmountBtc, active } = req.body;
 
     db.prepare(
-        `UPDATE investment_plans SET name=?, min_amount=?, max_amount=?, daily_roi=?, withdrawal_type=?, fee_percent=?, lock_days=?, active=? WHERE id=?`
+        `UPDATE investment_plans SET name=?, min_amount=?, max_amount=?, daily_roi=?, withdrawal_type=?, fee_percent=?, lock_days=?, hourly_roi=?, lock_hours=?, currency=?, min_amount_btc=?, max_amount_btc=?, active=? WHERE id=?`
     ).run(
         name ?? plan.name,
         minAmount ?? plan.min_amount,
@@ -221,6 +234,11 @@ router.patch("/plans/:id", (req, res) => {
         withdrawalType ?? plan.withdrawal_type,
         feePercent !== undefined ? feePercent : plan.fee_percent,
         lockDays !== undefined ? lockDays : plan.lock_days,
+        hourlyRoi ?? plan.hourly_roi,
+        lockHours !== undefined ? lockHours : plan.lock_hours,
+        currency ?? plan.currency,
+        minAmountBtc !== undefined ? minAmountBtc : plan.min_amount_btc,
+        maxAmountBtc !== undefined ? maxAmountBtc : plan.max_amount_btc,
         active !== undefined ? (active ? 1 : 0) : plan.active,
         plan.id
     );
@@ -267,11 +285,13 @@ router.patch("/investments/:id/profit", (req, res) => {
     res.json({ message: "Investment profit updated", newTotalProfit, delta });
 });
 
-// Simulate a daily ROI credit run across all active investments (manual full-day trigger).
-// Automatic partial credits also run every 30 minutes via the interval in server.js.
+// Manually forces a chosen number of hours' worth of profit credit across all active
+// investments right now, for demo purposes — real-time automatic credits also run via the
+// interval in server.js, this just lets the admin show growth without waiting.
 router.post("/investments/run-daily-roi", (req, res) => {
-    const credited = runRoiCycle(1);
-    res.json({ message: `Daily ROI simulated for ${credited} active investment(s)` });
+    const hours = parseFloat(req.body?.hours) || 24;
+    const credited = runRoiCycle({ forceHours: hours });
+    res.json({ message: `Simulated ${hours} hour(s) of profit for ${credited} active investment(s)` });
 });
 
 // ---------- REFERRALS ----------

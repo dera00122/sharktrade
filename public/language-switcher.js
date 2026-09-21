@@ -1,169 +1,82 @@
-// language-switcher.js — reliable full-site translation.
-// Instead of hijacking Google's hidden Translate widget (blocked by mobile browsers as an
-// anti-abuse measure), this shows a real dropdown of languages. Picking one opens the current
-// page through Google Translate's public proxy in a new tab — always works, no tricks.
+// language-switcher.js — real Google Translate widget, shown visibly (not hidden).
+//
+// Earlier attempts tried to hide Google's dropdown and open it programmatically from a
+// custom button — mobile browsers block that as an anti-abuse measure, which is why it
+// silently did nothing. The fix: let Google's own dropdown render for real and be tapped
+// directly. Once picked, Google stores the choice in a cookie and every page on this site
+// auto-applies it on load — no new tab, no lost login session, works everywhere.
+//
+// Placement: if the page has an element with id="langMenuSlot" (index.html's hamburger
+// menu), the real widget renders there. Otherwise it renders as a slim bar across the very
+// top of the page (content shifts down to make room) — this works on every inner page
+// regardless of what's already sitting in the top-left or top-right corner.
 
 (function () {
-    const LANGUAGES = [
-        { code: 'en', name: 'English', flag: '🇬🇧' },
-        { code: 'af', name: 'Afrikaans', flag: '🇿🇦' },
-        { code: 'sq', name: 'Albanian', flag: '🇦🇱' },
-        { code: 'am', name: 'Amharic', flag: '🇪🇹' },
-        { code: 'ar', name: 'Arabic', flag: '🇸🇦' },
-        { code: 'hy', name: 'Armenian', flag: '🇦🇲' },
-        { code: 'az', name: 'Azerbaijani', flag: '🇦🇿' },
-        { code: 'bn', name: 'Bengali', flag: '🇧🇩' },
-        { code: 'bg', name: 'Bulgarian', flag: '🇧🇬' },
-        { code: 'zh-CN', name: 'Chinese (Simplified)', flag: '🇨🇳' },
-        { code: 'hr', name: 'Croatian', flag: '🇭🇷' },
-        { code: 'cs', name: 'Czech', flag: '🇨🇿' },
-        { code: 'da', name: 'Danish', flag: '🇩🇰' },
-        { code: 'nl', name: 'Dutch', flag: '🇳🇱' },
-        { code: 'fi', name: 'Finnish', flag: '🇫🇮' },
-        { code: 'fr', name: 'French', flag: '🇫🇷' },
-        { code: 'de', name: 'German', flag: '🇩🇪' },
-        { code: 'el', name: 'Greek', flag: '🇬🇷' },
-        { code: 'ha', name: 'Hausa', flag: '🇳🇬' },
-        { code: 'he', name: 'Hebrew', flag: '🇮🇱' },
-        { code: 'hi', name: 'Hindi', flag: '🇮🇳' },
-        { code: 'hu', name: 'Hungarian', flag: '🇭🇺' },
-        { code: 'id', name: 'Indonesian', flag: '🇮🇩' },
-        { code: 'ig', name: 'Igbo', flag: '🇳🇬' },
-        { code: 'it', name: 'Italian', flag: '🇮🇹' },
-        { code: 'ja', name: 'Japanese', flag: '🇯🇵' },
-        { code: 'ko', name: 'Korean', flag: '🇰🇷' },
-        { code: 'ms', name: 'Malay', flag: '🇲🇾' },
-        { code: 'no', name: 'Norwegian', flag: '🇳🇴' },
-        { code: 'fa', name: 'Persian', flag: '🇮🇷' },
-        { code: 'pl', name: 'Polish', flag: '🇵🇱' },
-        { code: 'pt', name: 'Portuguese', flag: '🇵🇹' },
-        { code: 'pa', name: 'Punjabi', flag: '🇮🇳' },
-        { code: 'ro', name: 'Romanian', flag: '🇷🇴' },
-        { code: 'ru', name: 'Russian', flag: '🇷🇺' },
-        { code: 'sw', name: 'Swahili', flag: '🇰🇪' },
-        { code: 'es', name: 'Spanish', flag: '🇪🇸' },
-        { code: 'sv', name: 'Swedish', flag: '🇸🇪' },
-        { code: 'tl', name: 'Tagalog', flag: '🇵🇭' },
-        { code: 'th', name: 'Thai', flag: '🇹🇭' },
-        { code: 'tr', name: 'Turkish', flag: '🇹🇷' },
-        { code: 'uk', name: 'Ukrainian', flag: '🇺🇦' },
-        { code: 'ur', name: 'Urdu', flag: '🇵🇰' },
-        { code: 'vi', name: 'Vietnamese', flag: '🇻🇳' },
-        { code: 'yo', name: 'Yoruba', flag: '🇳🇬' },
-        { code: 'zu', name: 'Zulu', flag: '🇿🇦' }
-    ];
-
     function injectStyles() {
         if (document.getElementById('stLangStyles')) return;
         const style = document.createElement('style');
         style.id = 'stLangStyles';
         style.textContent = `
-            #stLangSwitcher {
-                position: fixed; top: 16px; left: 16px; z-index: 9996;
-                background: #fff; border-radius: 8px; padding: 10px 14px;
-                display: flex; align-items: center; gap: 8px; cursor: pointer;
-                box-shadow: 0 4px 16px rgba(0,0,0,0.25); font-family: 'Segoe UI', sans-serif;
-                font-weight: 700; font-size: 0.9rem; color: #111;
-            }
-            #stLangMenuItem {
-                display: flex; align-items: center; gap: 8px; cursor: pointer;
-                color: inherit; font: inherit;
-            }
-            #stLangSwitcher i, #stLangMenuItem i { font-size: 0.75rem; }
+            /* Hide Google's top banner iframe (the thing that pushes page content down)
+               and its branding link — keep only the actual language <select>. */
+            .goog-te-banner-frame { display: none !important; }
+            body { top: 0 !important; }
+            .goog-logo-link { display: none !important; }
 
-            #stLangOverlay {
-                display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
-                z-index: 99990; align-items: flex-start; justify-content: center; padding-top: 70px;
+            #stLangBox {
+                position: fixed; top: 0; left: 0; right: 0; z-index: 9996;
+                height: 34px; background: #0d0f12; border-bottom: 1px solid rgba(255,255,255,0.1);
+                display: flex; align-items: center; justify-content: flex-end;
+                padding: 0 16px; font-family: 'Segoe UI', sans-serif;
             }
-            #stLangOverlay.open { display: flex; }
-            #stLangPanel {
-                background: #fff; border-radius: 14px; width: 90%; max-width: 340px;
-                max-height: 70vh; overflow: hidden; display: flex; flex-direction: column;
-                box-shadow: 0 20px 60px rgba(0,0,0,0.5); font-family: 'Segoe UI', sans-serif;
+            body.st-lang-padded { padding-top: 34px; }
+            #stLangBox i { color: #c8a86a; font-size: 0.8rem; margin-right: 6px; }
+            #stLangBox .goog-te-combo {
+                border: none; outline: none; background: transparent;
+                font-family: 'Segoe UI', sans-serif; font-weight: 700; font-size: 0.8rem;
+                color: #ccc; cursor: pointer;
             }
-            #stLangPanelHeader {
-                padding: 14px 16px; border-bottom: 1px solid #eee; display: flex;
-                justify-content: space-between; align-items: center; font-weight: 700; color: #111;
+
+            #langMenuSlot .goog-te-combo {
+                background: transparent; color: #FFFFFF; border: none; outline: none;
+                font-family: 'Segoe UI', sans-serif; font-weight: 400; font-size: 2.2rem;
+                letter-spacing: -0.5px; cursor: pointer; width: 100%;
             }
-            #stLangPanelClose { cursor: pointer; color: #888; font-size: 1.2rem; }
-            #stLangSearch {
-                margin: 10px 14px; padding: 9px 12px; border: 1px solid #ddd; border-radius: 8px;
-                font-size: 0.85rem; outline: none;
-            }
-            #stLangList { overflow-y: auto; padding: 4px 0 10px; }
-            .st-lang-item {
-                display: flex; align-items: center; gap: 12px; padding: 11px 18px;
-                cursor: pointer; color: #222; font-size: 0.95rem; text-decoration: none;
-            }
-            .st-lang-item:hover { background: #f5f5f5; }
-            .st-lang-item .flag { font-size: 1.3rem; }
-            .st-lang-item.current { font-weight: 700; }
+            #langMenuSlot .goog-te-combo option { color: #000; font-size: 1rem; }
         `;
         document.head.appendChild(style);
     }
 
-    function buildPanel() {
-        const overlay = document.createElement('div');
-        overlay.id = 'stLangOverlay';
-        overlay.innerHTML = `
-            <div id="stLangPanel">
-                <div id="stLangPanelHeader">
-                    <span>Choose Language</span>
-                    <span id="stLangPanelClose">&times;</span>
-                </div>
-                <input type="text" id="stLangSearch" placeholder="Search languages...">
-                <div id="stLangList"></div>
-            </div>
-        `;
-        document.body.appendChild(overlay);
-
-        const listEl = overlay.querySelector('#stLangList');
-        function renderList(filter = '') {
-            const q = filter.toLowerCase();
-            const filtered = LANGUAGES.filter(l => l.name.toLowerCase().includes(q));
-            listEl.innerHTML = filtered.map(l => `
-                <a class="st-lang-item ${l.code === 'en' ? 'current' : ''}" data-code="${l.code}">
-                    <span class="flag">${l.flag}</span> ${l.name}
-                </a>
-            `).join('');
-        }
-        renderList();
-
-        overlay.querySelector('#stLangSearch').addEventListener('input', (e) => renderList(e.target.value));
-        overlay.querySelector('#stLangPanelClose').addEventListener('click', () => overlay.classList.remove('open'));
-        overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('open'); });
-
-        listEl.addEventListener('click', (e) => {
-            const item = e.target.closest('.st-lang-item');
-            if (!item) return;
-            const code = item.dataset.code;
-            overlay.classList.remove('open');
-            if (code === 'en') return; // already English, nothing to do
-
-            const pageUrl = window.location.href;
-            const translateUrl = `https://translate.google.com/translate?sl=en&tl=${code}&u=${encodeURIComponent(pageUrl)}`;
-            window.open(translateUrl, '_blank');
-        });
-
-        return overlay;
-    }
-
     function buildSwitcher() {
         injectStyles();
-        const overlay = buildPanel();
 
         const menuSlot = document.getElementById('langMenuSlot');
+        let hostEl;
+
         if (menuSlot) {
-            menuSlot.innerHTML = `<i class="fa-solid fa-globe"></i> <span id="stLangMenuItem">Language: EN</span>`;
-            menuSlot.style.cursor = 'pointer';
-            menuSlot.addEventListener('click', () => overlay.classList.add('open'));
+            hostEl = menuSlot;
+            hostEl.innerHTML = `<i class="fa-solid fa-globe"></i> `;
         } else {
-            const bar = document.createElement('div');
-            bar.id = 'stLangSwitcher';
-            bar.innerHTML = `<i class="fa-solid fa-globe"></i> <span>EN</span> <i class="fa-solid fa-chevron-down"></i>`;
-            document.body.appendChild(bar);
-            bar.addEventListener('click', () => overlay.classList.add('open'));
+            hostEl = document.createElement('div');
+            hostEl.id = 'stLangBox';
+            hostEl.innerHTML = `<i class="fa-solid fa-globe"></i>`;
+            document.body.appendChild(hostEl);
+            document.body.classList.add('st-lang-padded');
         }
+
+        const widgetContainer = document.createElement('div');
+        widgetContainer.id = 'google_translate_element';
+        hostEl.appendChild(widgetContainer);
+
+        window.googleTranslateElementInit = function () {
+            new google.translate.TranslateElement(
+                { pageLanguage: 'en', autoDisplay: false },
+                'google_translate_element'
+            );
+        };
+        const script = document.createElement('script');
+        script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+        document.body.appendChild(script);
     }
 
     if (document.readyState === 'loading') {

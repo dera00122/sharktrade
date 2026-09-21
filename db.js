@@ -143,17 +143,53 @@ ensureColumn("users", "avatar_url", "TEXT");
 ensureColumn("users", "phone", "TEXT");
 ensureColumn("investment_plans", "fee_percent", "REAL DEFAULT 0");
 ensureColumn("investment_plans", "lock_days", "INTEGER DEFAULT 0");
+ensureColumn("investment_plans", "hourly_roi", "REAL DEFAULT 0");
+ensureColumn("investment_plans", "lock_hours", "INTEGER DEFAULT 0");
+ensureColumn("investment_plans", "currency", "TEXT DEFAULT 'USD'");
+ensureColumn("investment_plans", "min_amount_btc", "REAL");
+ensureColumn("investment_plans", "max_amount_btc", "REAL");
+ensureColumn("investments", "hourly_roi", "REAL DEFAULT 0");
+ensureColumn("investments", "lock_hours", "INTEGER DEFAULT 0");
+ensureColumn("investments", "completes_at", "TEXT");
+ensureColumn("investments", "amount_btc", "REAL");
 
 
-// Seed default investment plans if empty
-const planCount = db.prepare("SELECT COUNT(*) AS c FROM investment_plans").get().c;
-if (planCount === 0) {
-    const insertPlan = db.prepare(
-        "INSERT INTO investment_plans (name, min_amount, max_amount, daily_roi, withdrawal_type, fee_percent, lock_days, active) VALUES (?, ?, ?, ?, ?, ?, ?, 1)"
-    );
-    insertPlan.run("Minimum Tier", 1000, 40000, 1.5, "48hr", 1.0, 7);
-    insertPlan.run("Maximum Tier", 40000, 80000, 2.5, "daily", 1.0, 14);
-    insertPlan.run("Premium Tier", 100000, null, 4.0, "daily", 0.5, 30);
+// Seed the current 5-tier investment plan structure. Deactivates the old 3-tier plans
+// (Minimum/Maximum/Premium) if present, and upserts the new tiers by name — safe to run on
+// both a fresh database and one that already has the old plans (e.g. the live deployment).
+db.prepare(
+    "UPDATE investment_plans SET active = 0 WHERE name IN ('Minimum Tier', 'Maximum Tier', 'Premium Tier')"
+).run();
+
+const newPlans = [
+    // name, min, max, hourlyRoi, lockHours, withdrawalType, feePercent, currency, minBtc, maxBtc
+    ["Starter Tier", 1000, 5000, 0.06, 72, "48hr", 1.0, "USD", null, null],
+    ["Growth Tier", 5000, 10000, 0.07, 75, "48hr", 1.0, "USD", null, null],
+    ["Advanced Tier", 10000, 50000, 0.09, 96, "daily", 1.0, "USD", null, null],
+    ["Elite Tier", 50000, null, 0.12, 168, "daily", 1.0, "USD", null, null],
+    ["BTC Tier", 78000, null, 0.068, 336, "daily", 0.5, "BTC", 1, null]
+];
+
+const findPlan = db.prepare("SELECT id FROM investment_plans WHERE name = ?");
+const insertNewPlan = db.prepare(
+    `INSERT INTO investment_plans
+     (name, min_amount, max_amount, daily_roi, withdrawal_type, fee_percent, lock_days, hourly_roi, lock_hours, currency, min_amount_btc, max_amount_btc, active)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`
+);
+const updateExistingPlan = db.prepare(
+    `UPDATE investment_plans SET min_amount=?, max_amount=?, daily_roi=?, withdrawal_type=?, fee_percent=?, lock_days=?, hourly_roi=?, lock_hours=?, currency=?, min_amount_btc=?, max_amount_btc=?, active=1
+     WHERE name = ?`
+);
+
+for (const [name, min, max, hourlyRoi, lockHours, withdrawalType, feePercent, currency, minBtc, maxBtc] of newPlans) {
+    const dailyRoi = +(hourlyRoi * 24).toFixed(3); // informational daily-equivalent, for display
+    const lockDays = Math.round(lockHours / 24);
+    const existing = findPlan.get(name);
+    if (existing) {
+        updateExistingPlan.run(min, max, dailyRoi, withdrawalType, feePercent, lockDays, hourlyRoi, lockHours, currency, minBtc, maxBtc, name);
+    } else {
+        insertNewPlan.run(name, min, max, dailyRoi, withdrawalType, feePercent, lockDays, hourlyRoi, lockHours, currency, minBtc, maxBtc);
+    }
 }
 
 // Seed placeholder testimonials if empty (editable from admin panel)
